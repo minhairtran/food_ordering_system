@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/minhair/Desktop/test_pytorch/food_ordering_system")
+sys.path.append("/home/minhair/Desktop/food_ordering_system")
 
 import librosa
 import torch

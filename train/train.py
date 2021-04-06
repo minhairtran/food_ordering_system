@@ -1,3 +1,6 @@
+import sys
+sys.path.append("/home/minhair/Desktop/food_ordering_system/")
+
 import os
 from comet_ml import Experiment
 import torch
@@ -9,11 +12,11 @@ import torchaudio
 import numpy as np
 from sklearn.model_selection import train_test_split
 import json
-from TextTransform import TextTransform
+from food_ordering_system.train.TextTransform import TextTransform
 
-DATA_PATH_TRAIN = "/home/minhair/Desktop/test_pytorch/data/data_train.json"
-DATA_PATH_TEST = "/home/minhair/Desktop/test_pytorch/data/data_test.json"
-SAVED_MODEL_PATH = "model_confirming.h5"
+DATA_PATH_TRAIN = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data_train.json"
+DATA_PATH_TEST = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data_test.json"
+SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming.h5"
 LEARNING_RATE = 5e-4
 BATCH_SIZE = 10
 EPOCHS = 1
@@ -406,15 +409,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             output = F.log_softmax(output, dim=2)
             output = output.transpose(0, 1) # (time, batch, n_class)
 
-            """
-            output: torch.Size([29, 10, 29])
-            labels: torch.Size([10, 3])
-            input_length: torch.Size([10])
-            label_length: torch.Size([10])
-
-            RuntimeError: Expected tensor to have size at least 29 at dimension 1, 
-            but got size 3 for argument #2 'targets' (while checking arguments for ctc_loss_gpu)
-            """
             loss = criterion(output, labels, input_lengths, label_lengths) 
             loss.backward()
 
