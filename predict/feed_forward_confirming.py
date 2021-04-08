@@ -2,16 +2,26 @@ import sys
 sys.path.append("/home/minhair/Desktop/food_ordering_system/")
 sys.path.append("/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-import librosa
-import torch
+from ctypes import *
+import time
 import numpy as np
+import torch
+import librosa
+import noisereduce as nr
+import os
+import pyaudio
 import torch.nn.functional as F
 import torch.nn as nn
-
 from food_ordering_system.train.TextTransform import TextTransform
+import matplotlib.pyplot as plt
 
 SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming.h5"
-TESTED_AUDIO_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/test/yes"
+CHUNKSIZE = 22050 # fixed chunk size
+RATE = 22050
+
+ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+def py_error_handler(filename, line, function, err, fmt):
+    pass
 
 class CNNLayerNorm(nn.Module):
     """Layer normalization built for cnns input"""
@@ -109,10 +119,8 @@ class SpeechRecognitionModel(nn.Module):
         x = self.classifier(x)
         return x
 
-def preprocess(file_path, n_fft=512, hop_length=384, n_mels=128,
+def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
                 fmax=8000):
-    # load audio file
-    signal, sample_rate = librosa.load(file_path)
 
     # extract MFCCs
     mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
@@ -125,8 +133,6 @@ def preprocess(file_path, n_fft=512, hop_length=384, n_mels=128,
     mel_spectrogram = nn.utils.rnn.pad_sequence(mel_spectrogram, batch_first=True).transpose(2, 3)
 
     return mel_spectrogram
-
-
 
 def decoder(output, blank_label=0, collapse_repeated=True):
     arg_maxes = torch.argmax(output, dim=2)
@@ -144,20 +150,22 @@ def decoder(output, blank_label=0, collapse_repeated=True):
         decodes.append(text_transform.int_to_text(decode))
     return text_transform.list_to_string(decodes)
 
+def predict(model, tested_audio):
+    mel_spectrogram = preprocess(tested_audio)
+    mel_spectrogram = mel_spectrogram.to(device)
 
-def Keyword_Spotting_Service():
+    # get the predicted label
+    output = model(mel_spectrogram)
 
-    # ensure an instance is created only the first time the factory function is called
-    if _Keyword_Spotting_Service._instance is None:
-        _Keyword_Spotting_Service._instance = _Keyword_Spotting_Service()
-        model = SpeechRecognitionModel()
-        checkpoint = torch.load(SAVED_MODEL_PATH)
-        _Keyword_Spotting_Service.model = model.load_state_dict(checkpoint)
+    output = F.log_softmax(output, dim=2)
+    predicted = decoder(output)
+    return predicted
 
-        _Keyword_Spotting_Service.model.eval()
-
-    return _Keyword_Spotting_Service._instance
-
+# def plotAudio2(output):
+#     fig, ax = plt.subplots(nrows=1,ncols=1, figsize=(20,4))
+#     plt.plot(output, color='blue')
+#     ax.set_xlim((0, len(output)))
+#     plt.show()
 
 if __name__ == "__main__":
 
@@ -165,20 +173,56 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    for i in range(25, 27):
-        tested_audio = TESTED_AUDIO_PATH + str(i) + ".wav"
-        mel_spectrogram = preprocess(tested_audio)
-        mel_spectrogram = mel_spectrogram.to(device)
+    model = SpeechRecognitionModel().to(device)
+    checkpoint = torch.load(SAVED_MODEL_PATH)
+    model.load_state_dict(checkpoint)
+    model.eval()
 
-        model = SpeechRecognitionModel().to(device)
-        checkpoint = torch.load(SAVED_MODEL_PATH)
-        model.load_state_dict(checkpoint)
-        model.eval()
+    c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+    asound = cdll.LoadLibrary('libasound.so')
+    # Set error handler
+    asound.snd_lib_error_set_handler(c_error_handler)
 
-        # get the predicted label
-        output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=2)
-        predicted = decoder(output)
+    # initialize portaudio
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=RATE, input=True, frames_per_buffer=CHUNKSIZE)
 
-        print(predicted)
+    #noise window
+    data = stream.read(10000)
+    noise_sample = np.frombuffer(data, dtype=np.float32)
+    loud_threshold = np.mean(np.abs(noise_sample)) * 10
+    print("Loud threshold", loud_threshold)
+    audio_buffer = []
+    near = 0
+
+    while(True):
+        # Read chunk and load it into numpy array.
+        data = stream.read(CHUNKSIZE)
+        current_window = np.frombuffer(data, dtype=np.float32)
+
+        #Reduce noise real-time
+        current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+
+        if (len(audio_buffer) == 0):
+            audio_buffer = current_window
+        else:
+            if(np.mean(np.abs(current_window))<loud_threshold):
+                # print("Inside silence reign")
+                if(near<3):
+                    audio_buffer = np.concatenate((audio_buffer,current_window))
+                    near += 1
+                else:
+                    predicted_audio = predict(model, np.array(audio_buffer))
+                    print(predicted_audio)
+                    audio_buffer = []
+                    near
+            else:
+                print("Inside loud reign")
+                near = 0
+                audio_buffer = np.concatenate((audio_buffer,current_window))
+
+    # close stream
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
