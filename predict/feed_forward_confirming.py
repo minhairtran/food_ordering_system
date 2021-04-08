@@ -1,5 +1,6 @@
 import sys
-sys.path.append("/home/minhair/Desktop/food_ordering_system")
+sys.path.append("/home/minhair/Desktop/food_ordering_system/")
+sys.path.append("/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
 import librosa
 import torch
@@ -7,10 +8,10 @@ import numpy as np
 import torch.nn.functional as F
 import torch.nn as nn
 
-from train.TextTransform import TextTransform
+from food_ordering_system.train.TextTransform import TextTransform
 
-SAVED_MODEL_PATH = "/home/minhair/Desktop/test_pytorch/food_ordering_system/train/model_confirming.h5"
-TESTED_AUDIO_PATH = "/home/minhair/Desktop/test_pytorch/food_ordering_system/predict/test/no8.wav"
+SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming.h5"
+TESTED_AUDIO_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/test/yes"
 
 class CNNLayerNorm(nn.Module):
     """Layer normalization built for cnns input"""
@@ -50,8 +51,6 @@ class ResidualCNN(nn.Module):
         x = F.gelu(x)
         x = self.dropout2(x)
         x = self.cnn2(x)
-        # if(x[0][0][0].shape!=torch.Size([64])):
-        #     x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
         x += residual
         return x # (batch, channel, feature, time)
 
@@ -143,7 +142,7 @@ def decoder(output, blank_label=0, collapse_repeated=True):
                 decode.append(index.item())
         text_transform = TextTransform()
         decodes.append(text_transform.int_to_text(decode))
-    return decodes
+    return text_transform.list_to_string(decodes)
 
 
 def Keyword_Spotting_Service():
@@ -162,17 +161,24 @@ def Keyword_Spotting_Service():
 
 if __name__ == "__main__":
 
-    mel_spectrogram = preprocess(TESTED_AUDIO_PATH)
+    use_cuda = torch.cuda.is_available()
+    torch.manual_seed(7)
+    device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel()
-    checkpoint = torch.load(SAVED_MODEL_PATH)
-    model.load_state_dict(checkpoint)
-    model.eval()
+    for i in range(25, 27):
+        tested_audio = TESTED_AUDIO_PATH + str(i) + ".wav"
+        mel_spectrogram = preprocess(tested_audio)
+        mel_spectrogram = mel_spectrogram.to(device)
 
-    # get the predicted label
-    output = model(mel_spectrogram)
+        model = SpeechRecognitionModel().to(device)
+        checkpoint = torch.load(SAVED_MODEL_PATH)
+        model.load_state_dict(checkpoint)
+        model.eval()
 
-    output = F.log_softmax(output, dim=2)
-    predicted = decoder(output)
+        # get the predicted label
+        output = model(mel_spectrogram)
 
-    print(predicted)
+        output = F.log_softmax(output, dim=2)
+        predicted = decoder(output)
+
+        print(predicted)

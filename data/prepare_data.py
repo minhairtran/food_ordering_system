@@ -7,8 +7,8 @@ import os
 import json
 from food_ordering_system.train.TextTransform import TextTransform
 
-DATASET_PATH = "/home/minhair/Desktop/food_ordering_system/confirming_dataset/test"
-JSON_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data_test.json"
+DATASET_PATH = "/home/minhair/Desktop/food_ordering_system/confirming_dataset"
+JSON_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data.json"
 
 
 def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_length=384):

@@ -1,8 +1,10 @@
 import sys
 sys.path.append("/home/minhair/Desktop/food_ordering_system/")
+sys.path.append(
+    "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-import os
 from comet_ml import Experiment
+from food_ordering_system.train.TextTransform import TextTransform
 import torch
 import torch.nn as nn
 import torch.utils.data as data
@@ -12,14 +14,14 @@ import torchaudio
 import numpy as np
 from sklearn.model_selection import train_test_split
 import json
-from food_ordering_system.train.TextTransform import TextTransform
+import os
 
-DATA_PATH_TRAIN = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data_train.json"
-DATA_PATH_TEST = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data_test.json"
-SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming.h5"
+
+DATA_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data.json"
+SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming2.h5"
 LEARNING_RATE = 5e-4
-BATCH_SIZE = 10
-EPOCHS = 1
+BATCH_SIZE = 5
+EPOCHS = 10
 N_CNN_LAYERS = 3
 N_RNN_LAYERS = 5
 RNN_DIM = 512
@@ -27,6 +29,7 @@ N_CLASS_CONFIRM_DATA = 6
 N_FEATS = 128
 STRIDE = 2
 DROPOUT = 0.1
+TEST_SIZE = 0.2
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -52,7 +55,7 @@ class Dataset(torch.utils.data.Dataset):
         input_length = self.input_lengths[index]
 
         return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels, input_length, label_length)
-#Remove
+# Remove
 # def avg_wer(wer_scores, combined_ref_len):
 #     return float(sum(wer_scores)) / float(combined_ref_len)
 
@@ -84,7 +87,7 @@ def _levenshtein_distance(ref, hyp):
     distance = np.zeros((2, n + 1), dtype=np.int32)
 
     # initialize distance matrix
-    for j in range(0,n + 1):
+    for j in range(0, n + 1):
         distance[0][j] = j
 
     # calculate levenshtein distance
@@ -234,23 +237,26 @@ text_transform = TextTransform()
 
 
 def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
-	arg_maxes = torch.argmax(output, dim=2)
-	decodes = []
-	targets = []
+    arg_maxes = torch.argmax(output, dim=2)
+    decodes = []
+    targets = []
 
-	for i, args in enumerate(arg_maxes):
-		decode = []
-		targets.append(text_transform.int_to_text(labels[i][:label_lengths[i]].tolist()))
-		for j, index in enumerate(args):
-			if index != blank_label:
-				if collapse_repeated and j != 0 and index == args[j -1]:
-					continue
-				decode.append(index.item())
-		decodes.append(text_transform.int_to_text(decode))
-	return decodes, targets
+    for i, args in enumerate(arg_maxes):
+        decode = []
+        targets.append(text_transform.int_to_text(
+            labels[i][:label_lengths[i]].tolist()))
+        for j, index in enumerate(args):
+            if index != blank_label:
+                if collapse_repeated and j != 0 and index == args[j - 1]:
+                    continue
+                decode.append(index.item())
+        decodes.append(text_transform.int_to_text(decode))
+    return decodes, targets
+
 
 class CNNLayerNorm(nn.Module):
     """Layer normalization built for cnns input"""
+
     def __init__(self, n_feats):
         super(CNNLayerNorm, self).__init__()
         self.layer_norm = nn.LayerNorm(n_feats)
@@ -258,20 +264,24 @@ class CNNLayerNorm(nn.Module):
     def forward(self, x):
         # x (batch, channel, feature, time)
         # if(x[0][0][0].shape!=torch.Size([64])):
-        x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
+        x = x.transpose(2, 3).contiguous()  # (batch, channel, time, feature)
         x = self.layer_norm(x)
-        return x.transpose(2, 3).contiguous() # (batch, channel, feature, time) 
+        # (batch, channel, feature, time)
+        return x.transpose(2, 3).contiguous()
 
 
 class ResidualCNN(nn.Module):
     """Residual CNN inspired by https://arxiv.org/pdf/1603.05027.pdf
         except with layer norm instead of batch norm
     """
+
     def __init__(self, in_channels, out_channels, kernel, stride, dropout, n_feats):
         super(ResidualCNN, self).__init__()
 
-        self.cnn1 = nn.Conv2d(in_channels, out_channels, kernel, stride, padding=kernel//2)
-        self.cnn2 = nn.Conv2d(out_channels, out_channels, kernel, stride, padding=kernel//2)
+        self.cnn1 = nn.Conv2d(in_channels, out_channels,
+                              kernel, stride, padding=kernel//2)
+        self.cnn2 = nn.Conv2d(out_channels, out_channels,
+                              kernel, stride, padding=kernel//2)
         self.dropout1 = nn.Dropout(dropout)
         self.dropout2 = nn.Dropout(dropout)
         self.layer_norm1 = CNNLayerNorm(n_feats)
@@ -290,7 +300,7 @@ class ResidualCNN(nn.Module):
         # if(x[0][0][0].shape!=torch.Size([64])):
         #     x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
         x += residual
-        return x # (batch, channel, feature, time)
+        return x  # (batch, channel, feature, time)
 
 
 class BidirectionalGRU(nn.Module):
@@ -313,21 +323,23 @@ class BidirectionalGRU(nn.Module):
 
 
 class SpeechRecognitionModel(nn.Module):
-    
+
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
         super(SpeechRecognitionModel, self).__init__()
         n_feats = n_feats//2
-        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
+        # cnn for extracting heirachal features
+        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)
 
         # n residual cnn layers with filter size of 32
         self.rescnn_layers = nn.Sequential(*[
-            ResidualCNN(32, 32, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
+            ResidualCNN(32, 32, kernel=3, stride=1,
+                        dropout=dropout, n_feats=n_feats)
             for _ in range(n_cnn_layers)
         ])
         self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
         self.birnn_layers = nn.Sequential(*[
-            BidirectionalGRU(rnn_dim=rnn_dim if i==0 else rnn_dim*2,
-                             hidden_size=rnn_dim, dropout=dropout, batch_first=i==0)
+            BidirectionalGRU(rnn_dim=rnn_dim if i == 0 else rnn_dim*2,
+                             hidden_size=rnn_dim, dropout=dropout, batch_first=i == 0)
             for i in range(n_rnn_layers)
         ])
         self.classifier = nn.Sequential(
@@ -342,8 +354,9 @@ class SpeechRecognitionModel(nn.Module):
         x = self.rescnn_layers(x)
         # x = x.transpose(2, 3).contiguous()
         sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
-        x = x.transpose(1, 2) # (batch, time, feature)
+        x = x.view(sizes[0], sizes[1] * sizes[2],
+                   sizes[3])  # (batch, feature, time)
+        x = x.transpose(1, 2)  # (batch, time, feature)
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
         x = self.classifier(x)
@@ -376,22 +389,13 @@ def load_data(data_path):
     with open(data_path, "r") as fp:
         data = json.load(fp)
 
-    mel_spectrogram_not_process = np.array(data["mel_spectrogram"], dtype=object)
-    labels_not_process = np.array(data["labels"], dtype=object)
+    mel_spectrogram = np.array(data["mel_spectrogram"], dtype=object)
+    labels = np.array(data["labels"], dtype=object)
     label_lengths = np.array(data["label_lengths"])
     input_lengths = np.array(data["input_lengths"])
 
-    for label in labels_not_process:
-        labels.append(torch.Tensor(label))
-
-    for spectrogram in mel_spectrogram_not_process:
-        mel_spectrogram.append(torch.Tensor(spectrogram))
-
-
-    mel_spectrogram = nn.utils.rnn.pad_sequence(mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
-    labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
-
     return mel_spectrogram, labels, input_lengths, label_lengths
+
 
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
     model.train()
@@ -399,7 +403,8 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
             spectrograms, labels, input_lengths, label_lengths = _data
-            spectrograms, labels = spectrograms.to(device), labels.to(device) # spectro (batch, cnn_feature, n_class, time)
+            spectrograms, labels = spectrograms.to(device), labels.to(
+                device)  # spectro (batch, cnn_feature, n_class, time)
 
             # spectrograms = spectrograms[:, np.newaxis, :, :]
 
@@ -407,9 +412,9 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
 
             output = model(spectrograms)  # (batch, time, n_class)
             output = F.log_softmax(output, dim=2)
-            output = output.transpose(0, 1) # (time, batch, n_class)
+            output = output.transpose(0, 1)  # (time, batch, n_class)
 
-            loss = criterion(output, labels, input_lengths, label_lengths) 
+            loss = criterion(output, labels, input_lengths, label_lengths)
             loss.backward()
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
@@ -424,6 +429,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item()))
 
+
 def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     print('\nevaluating...')
     model.eval()
@@ -434,21 +440,22 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     with experiment.test():
         with torch.no_grad():
             for i, _data in enumerate(test_loader):
-                spectrograms, labels, input_lengths, label_lengths = _data 
-                spectrograms, labels = spectrograms.to(device), labels.to(device)
+                spectrograms, labels, input_lengths, label_lengths = _data
+                spectrograms, labels = spectrograms.to(
+                    device), labels.to(device)
 
                 output = model(spectrograms)  # (batch, time, n_class)
                 output = F.log_softmax(output, dim=2)
-                output = output.transpose(0, 1) # (time, batch, n_class)
+                output = output.transpose(0, 1)  # (time, batch, n_class)
 
                 loss = criterion(output, labels, input_lengths, label_lengths)
                 test_loss += loss.item() / len(test_loader)
 
-                decoded_preds, decoded_targets = GreedyDecoder(output.transpose(0, 1), labels, label_lengths)
+                decoded_preds, decoded_targets = GreedyDecoder(
+                    output.transpose(0, 1), labels, label_lengths)
                 for j in range(len(decoded_preds)):
                     test_cer.append(cer(decoded_targets[j], decoded_preds[j]))
                     # test_wer.append(wer(decoded_targets[j], decoded_preds[j]))
-
 
     avg_cer = sum(test_cer)/len(test_cer)
     # avg_wer = sum(test_wer)/len(test_wer)
@@ -457,7 +464,24 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
     # experiment.log_metric('wer', avg_wer, step=iter_meter.get())
 
     # print('Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
-    print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(test_loss, avg_cer))
+    print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(
+        test_loss, avg_cer))
+
+
+def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
+    mel_spectrogram, labels = [], []
+
+    for spectrogram in mel_spectrogram_not_tensorized:
+        mel_spectrogram.append(torch.Tensor(spectrogram))
+
+    for label in labels_not_tensorized:
+        labels.append(torch.Tensor(label))
+
+    mel_spectrogram = nn.utils.rnn.pad_sequence(
+        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+    labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
+
+    return mel_spectrogram, labels
 
 
 if __name__ == "__main__":
@@ -492,28 +516,38 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # get train data
-    mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train = load_data(
-        DATA_PATH_TRAIN)
+    # Load all data
+    mel_spectrogram_not_tensorized, labels_not_tensorized, input_lengths, label_lengths = load_data(
+        DATA_PATH)
 
-    
+    # Tensorize data
+    mel_spectrogram, labels = tensorize(
+        mel_spectrogram_not_tensorized, labels_not_tensorized)
 
-    train_dataset = Dataset(mel_spectrogram_train,labels_train, input_lengths_train, label_lengths_train)
+    # Split into train and test
+    mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
+        input_lengths_test, label_lengths_train, label_lengths_test, = train_test_split(mel_spectrogram, labels,
+                                                                                        input_lengths, label_lengths, test_size=TEST_SIZE, shuffle=True)
+
+    # Create train dataset and Dataloader
+    train_dataset = Dataset(
+        mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
 
     train_loader = data.DataLoader(dataset=train_dataset,
                                    batch_size=BATCH_SIZE,
-                                   shuffle=True)
-    
-    #get test data
-    mel_spectrogram_test, labels_test, input_lengths_test, label_lengths_test = load_data(
-        DATA_PATH_TEST)
+                                   shuffle=False)
 
-    test_dataset = Dataset(mel_spectrogram_test,labels_test, input_lengths_test, label_lengths_test)
+    del input_lengths_train, label_lengths_train, mel_spectrogram_train, labels_train, train_dataset
+
+    # Create test dataset and Dataloader
+    test_dataset = Dataset(mel_spectrogram_test, labels_test,
+                           input_lengths_test, label_lengths_test)
 
     test_loader = data.DataLoader(dataset=test_dataset,
-                                   batch_size=BATCH_SIZE,
-                                   shuffle=True)
-    
+                                  batch_size=BATCH_SIZE,
+                                  shuffle=False)
+
+    del input_lengths_test, label_lengths_test, mel_spectrogram_test, labels_test, test_dataset
 
     model = SpeechRecognitionModel(
         N_CNN_LAYERS, N_RNN_LAYERS, RNN_DIM, N_CLASS_CONFIRM_DATA, N_FEATS, STRIDE, DROPOUT).to(device)
@@ -537,8 +571,42 @@ if __name__ == "__main__":
         train(model, device, train_loader, criterion, optimizer,
               scheduler, epoch, iter_meter, experiment)
 
+        del train_loader
+
         test(model, device, test_loader, criterion,
              epoch, iter_meter, experiment)
 
-    #Save model
+        del test_loader
+
+        if (epoch != EPOCHS):
+
+            # Shuffle test and train after each epoch
+            # Split into train and test
+            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
+                input_lengths_test, label_lengths_train, label_lengths_test, = train_test_split(mel_spectrogram, labels,
+                                                                                                input_lengths, label_lengths, test_size=TEST_SIZE, shuffle=True)
+        
+            # Create train dataset and Dataloader
+            train_dataset = Dataset(
+                mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
+
+            train_loader = data.DataLoader(dataset=train_dataset,
+                                           batch_size=BATCH_SIZE,
+                                           shuffle=False)
+
+            del input_lengths_train, label_lengths_train, mel_spectrogram_train, labels_train, train_dataset
+
+
+            # Create test dataset and Dataloader
+            test_dataset = Dataset(mel_spectrogram_test, labels_test,
+                                   input_lengths_test, label_lengths_test)
+
+            test_loader = data.DataLoader(dataset=test_dataset,
+                                          batch_size=BATCH_SIZE,
+                                          shuffle=False)
+
+            del input_lengths_test, label_lengths_test, mel_spectrogram_test, labels_test, test_dataset
+
+
+    # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)

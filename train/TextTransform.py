@@ -63,3 +63,6 @@ class TextTransform:
             string.append(self.index_map[i])
         # return ''.join(string).replace('<SPACE>', ' ')
         return ''.join(string)
+
+    def list_to_string(self, list):
+        return ''.join(list)
