@@ -55,10 +55,6 @@ class Dataset(torch.utils.data.Dataset):
         input_length = self.input_lengths[index]
 
         return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels, input_length, label_length)
-# Remove
-# def avg_wer(wer_scores, combined_ref_len):
-#     return float(sum(wer_scores)) / float(combined_ref_len)
-
 
 def _levenshtein_distance(ref, hyp):
     """Levenshtein distance is a string metric for measuring the difference
@@ -106,32 +102,6 @@ def _levenshtein_distance(ref, hyp):
 
     return distance[m % 2][n]
 
-
-# def word_errors(reference, hypothesis, ignore_case=False, delimiter=' '):
-#     """Compute the levenshtein distance between reference sequence and
-#     hypothesis sequence in word-level.
-#     :param reference: The reference sentence.
-#     :type reference: basestring
-#     :param hypothesis: The hypothesis sentence.
-#     :type hypothesis: basestring
-#     :param ignore_case: Whether case-sensitive or not.
-#     :type ignore_case: bool
-#     :param delimiter: Delimiter of input sentences.
-#     :type delimiter: char
-#     :return: Levenshtein distance and word number of reference sentence.
-#     :rtype: list
-#     """
-#     if ignore_case == True:
-#         reference = reference.lower()
-#         hypothesis = hypothesis.lower()
-
-#     ref_words = reference.split(delimiter)
-#     hyp_words = hypothesis.split(delimiter)
-
-#     edit_distance = _levenshtein_distance(ref_words, hyp_words)
-#     return float(edit_distance), len(ref_words)
-
-
 def char_errors(reference, hypothesis, ignore_case=False, remove_space=False):
     """Compute the levenshtein distance between reference sequence and
     hypothesis sequence in char-level.
@@ -159,42 +129,6 @@ def char_errors(reference, hypothesis, ignore_case=False, remove_space=False):
 
     edit_distance = _levenshtein_distance(reference, hypothesis)
     return float(edit_distance), len(reference)
-
-
-# def wer(reference, hypothesis, ignore_case=False, delimiter=' '):
-#     """Calculate word error rate (WER). WER compares reference text and
-#     hypothesis text in word-level. WER is defined as:
-#     .. math::
-#         WER = (Sw + Dw + Iw) / Nw
-#     where
-#     .. code-block:: text
-#         Sw is the number of words subsituted,
-#         Dw is the number of words deleted,
-#         Iw is the number of words inserted,
-#         Nw is the number of words in the reference
-#     We can use levenshtein distance to calculate WER. Please draw an attention
-#     that empty items will be removed when splitting sentences by delimiter.
-#     :param reference: The reference sentence.
-#     :type reference: basestring
-#     :param hypothesis: The hypothesis sentence.
-#     :type hypothesis: basestring
-#     :param ignore_case: Whether case-sensitive or not.
-#     :type ignore_case: bool
-#     :param delimiter: Delimiter of input sentences.
-#     :type delimiter: char
-#     :return: Word error rate.
-#     :rtype: float
-#     :raises ValueError: If word number of reference is zero.
-#     """
-#     edit_distance, ref_len = word_errors(reference, hypothesis, ignore_case,
-#                                          delimiter)
-
-#     if ref_len == 0:
-#         raise ValueError("Reference's word number should be greater than 0.")
-
-#     wer = float(edit_distance) / ref_len
-#     return wer
-
 
 def cer(reference, hypothesis, ignore_case=False, remove_space=False):
     """Calculate charactor error rate (CER). CER compares reference text and
@@ -262,12 +196,9 @@ class CNNLayerNorm(nn.Module):
         self.layer_norm = nn.LayerNorm(n_feats)
 
     def forward(self, x):
-        # x (batch, channel, feature, time)
-        # if(x[0][0][0].shape!=torch.Size([64])):
         x = x.transpose(2, 3).contiguous()  # (batch, channel, time, feature)
         x = self.layer_norm(x)
-        # (batch, channel, feature, time)
-        return x.transpose(2, 3).contiguous()
+        return x.transpose(2, 3).contiguous() # (batch, channel, feature, time)
 
 
 class ResidualCNN(nn.Module):
@@ -297,8 +228,6 @@ class ResidualCNN(nn.Module):
         x = F.gelu(x)
         x = self.dropout2(x)
         x = self.cnn2(x)
-        # if(x[0][0][0].shape!=torch.Size([64])):
-        #     x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
         x += residual
         return x  # (batch, channel, feature, time)
 
@@ -352,7 +281,6 @@ class SpeechRecognitionModel(nn.Module):
     def forward(self, x):
         x = self.cnn(x)
         x = self.rescnn_layers(x)
-        # x = x.transpose(2, 3).contiguous()
         sizes = x.size()
         x = x.view(sizes[0], sizes[1] * sizes[2],
                    sizes[3])  # (batch, feature, time)
@@ -406,8 +334,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             spectrograms, labels = spectrograms.to(device), labels.to(
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
-            # spectrograms = spectrograms[:, np.newaxis, :, :]
-
             optimizer.zero_grad()
 
             output = model(spectrograms)  # (batch, time, n_class)
@@ -455,15 +381,11 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
                     output.transpose(0, 1), labels, label_lengths)
                 for j in range(len(decoded_preds)):
                     test_cer.append(cer(decoded_targets[j], decoded_preds[j]))
-                    # test_wer.append(wer(decoded_targets[j], decoded_preds[j]))
 
     avg_cer = sum(test_cer)/len(test_cer)
-    # avg_wer = sum(test_wer)/len(test_wer)
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('cer', avg_cer, step=iter_meter.get())
-    # experiment.log_metric('wer', avg_wer, step=iter_meter.get())
-
-    # print('Test set: Average loss: {:.4f}, Average CER: {:4f} Average WER: {:.4f}\n'.format(test_loss, avg_cer, avg_wer))
+    
     print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(
         test_loss, avg_cer))
 

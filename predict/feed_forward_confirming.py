@@ -6,7 +6,6 @@ sys.path.append(
 import datetime
 import random
 import wave
-import matplotlib.pyplot as plt
 from food_ordering_system.train.TextTransform import TextTransform
 import torch.nn as nn
 import torch.nn.functional as F
@@ -192,12 +191,6 @@ def predict(model, tested_audio):
     output = F.log_softmax(output, dim=2)
     predicted = decoder(output)
     return predicted
-
-# def plotAudio2(output):
-#     fig, ax = plt.subplots(nrows=1,ncols=1, figsize=(20,4))
-#     plt.plot(output, color='blue')
-#     ax.set_xlim((0, len(output)))
-#     plt.show()
 
 
 if __name__ == "__main__":

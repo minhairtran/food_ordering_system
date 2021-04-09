@@ -36,6 +36,9 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
         if dirpath is not dataset_path:
 
             label = dirpath.split("/")[-1]
+
+            if(label=="noise"):
+                label = ""
             print("\nProcessing: '{}'".format(label))
 
             for f in filenames:
