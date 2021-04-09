@@ -25,8 +25,8 @@ def id_generator():
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
 
-FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming.h5"
+FILENAME = "/recorded_audios/" + id_generator() + ".wav"
+SAVED_MODEL_PATH = "../train/model_confirming.h5"
 CHUNKSIZE = 22050  # fixed chunk size
 RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32

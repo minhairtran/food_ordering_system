@@ -1,5 +1,5 @@
 import sys
-sys.path.append("/home/minhair/Desktop/food_ordering_system/")
+sys.path.append("../../food_ordering_system")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
@@ -17,8 +17,8 @@ import json
 import os
 
 
-DATA_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/confirming_data/data.json"
-SAVED_MODEL_PATH = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/train/model_confirming2.h5"
+DATASET_PATH = "../../food_ordering_system/confirming_dataset"
+JSON_PATH = "../../food_ordering_system/data/confirming_data/data.json"
 LEARNING_RATE = 5e-4
 BATCH_SIZE = 5
 EPOCHS = 10
