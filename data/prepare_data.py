@@ -8,7 +8,7 @@ import json
 from train.TextTransform import TextTransform
 
 DATASET_PATH = "../../confirming_dataset"
-JSON_PATH = "../confirming_data/data.json"
+JSON_PATH = "confirming_data/data.json"
 
 
 def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_length=384):
