@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../../food_ordering_system")
 sys.path.append(
-    "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
+    "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packagess/")
 
 from comet_ml import Experiment
 from food_ordering_system.train.TextTransform import TextTransform
@@ -17,8 +17,8 @@ import json
 import os
 
 
-DATASET_PATH = "../../food_ordering_system/confirming_dataset"
-JSON_PATH = "../../food_ordering_system/data/confirming_data/data.json"
+DATA_PATH = "../data/confirming_data/data.json"
+SAVED_MODEL_PATH = "model_confirming.h5"
 LEARNING_RATE = 5e-4
 BATCH_SIZE = 5
 EPOCHS = 10

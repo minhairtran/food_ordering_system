@@ -1,14 +1,14 @@
 import sys
-sys.path.append("../../food_ordering_system")
+sys.path.append("../")
 
 
 import librosa
 import os
 import json
-from food_ordering_system.train.TextTransform import TextTransform
+from train.TextTransform import TextTransform
 
-DATASET_PATH = "../../food_ordering_system/confirming_dataset"
-JSON_PATH = "../../food_ordering_system/data/confirming_data/data.json"
+DATASET_PATH = "../../confirming_dataset"
+JSON_PATH = "../data/confirming_data/data.json"
 
 
 def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_length=384):
