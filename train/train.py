@@ -4,7 +4,7 @@ sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packagess/")
 
 from comet_ml import Experiment
-from train.TextTransform import TextTransform
+from TextTransform import TextTransform
 import torch
 import torch.nn as nn
 import torch.utils.data as data
