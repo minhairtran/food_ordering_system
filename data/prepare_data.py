@@ -77,8 +77,7 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
 
-    # Tensorize data
-    data["mel_spectrogram"], data["labels"] = tensorize(data["mel_spectrogram"], data["labels"])
+        data["mel_spectrogram"], data["labels"] = tensorize(data["mel_spectrogram"], data["labels"])
 
     # save data in json file
     with open(json_path, "w") as fp:
