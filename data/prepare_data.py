@@ -5,11 +5,25 @@ sys.path.append("../")
 import librosa
 import os
 import json
-from train.TextTransform import TextTransform
+from train.text_transform import ConfirmTextTransform
 
 DATASET_PATH = "../../confirming_dataset"
 JSON_PATH = "confirming_data/data.json"
 
+def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
+    mel_spectrogram, labels = [], []
+
+    for spectrogram in mel_spectrogram_not_tensorized:
+        mel_spectrogram.append(torch.Tensor(spectrogram))
+
+    for label in labels_not_tensorized:
+        labels.append(torch.Tensor(label))
+
+    mel_spectrogram = nn.utils.rnn.pad_sequence(
+        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+    labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
+
+    return mel_spectrogram, labels
 
 def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_length=384):
     """Extracts MFCCs from music dataset and saves them into a json file.
@@ -51,7 +65,7 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
                                                 hop_length=hop_length)
                 
-                text_transform = TextTransform()
+                text_transform = ConfirmTextTransform()
 
                 added_label = text_transform.text_to_int(label)
 
@@ -61,6 +75,9 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
+
+    # Tensorize data
+    data["mel_spectrogram"], data["labels"] = tensorize(data["mel_spectrogram"], data["labels"])
 
     # save data in json file
     with open(json_path, "w") as fp:
