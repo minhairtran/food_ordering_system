@@ -1,7 +1,8 @@
 import sys
 sys.path.append("../")
 
-
+import torch.nn as nn
+import torch
 import librosa
 import os
 import json
