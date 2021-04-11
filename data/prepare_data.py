@@ -44,50 +44,47 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
     # loop through all sub-dirs
     for i, (dirpath, dirnames, filenames) in enumerate(os.walk(dataset_path)):
 
-        # ensure we're at sub-folder level
-        if dirpath is not dataset_path:
+        label = dirpath.split("/")[-1]
 
-            label = dirpath.split("/")[-1]
+        if(label=="noise"):
+            label = ""
+        print("\nProcessing: '{}'".format(label))
 
-            if(label=="noise"):
-                label = ""
-            print("\nProcessing: '{}'".format(label))
+        mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
 
-            mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
+        for f in filenames:
+            file_path = os.path.join(dirpath, f)
 
-            for f in filenames:
-                file_path = os.path.join(dirpath, f)
+            # load audio file and slice it to ensure length consistency among different files
+            signal, sample_rate = librosa.load(file_path)
 
-                # load audio file and slice it to ensure length consistency among different files
-                signal, sample_rate = librosa.load(file_path)
+            # extract MFCCs (#features, #time binz)
+            mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
+                                            hop_length=hop_length)
+            
+            text_transform = ConfirmTextTransform()
 
-                # extract MFCCs (#features, #time binz)
-                mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
-                                                hop_length=hop_length)
-                
-                text_transform = ConfirmTextTransform()
+            added_label = text_transform.text_to_int(label)
 
-                added_label = text_transform.text_to_int(label)
+            # store data for analysed track
+            mel_spectrogram_not_tensorized.append(mel_spectrogram.T.tolist())
+            labels_not_tensorized.append(added_label)
+            data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
+            data["label_lengths"].append(len(label))
+            print("{}: {}".format(file_path, i-1))
 
-                # store data for analysed track
-                mel_spectrogram_not_tensorized.append(mel_spectrogram.T.tolist())
-                labels_not_tensorized.append(added_label)
-                data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
-                data["label_lengths"].append(len(label))
-                print("{}: {}".format(file_path, i-1))
+        mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
 
-            mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
-
-            # if(len(data["mel_spectrogram"]) == 0):
-            data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).unsqueeze(1).transpose(2, 3)
-            data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
-            data["input_lengths"] = torch.Tensor(data["input_lengths"])
-            data["label_lengths"] = torch.Tensor(data["label_lengths"])
-            # else:
-            #     data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
-            #     data["labels"] = data["labels"].tolist().append(labels_tensorized)
-            #     data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
-            #     data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
+        # if(len(data["mel_spectrogram"]) == 0):
+        data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).unsqueeze(1).transpose(2, 3)
+        data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
+        data["input_lengths"] = torch.Tensor(data["input_lengths"])
+        data["label_lengths"] = torch.Tensor(data["label_lengths"])
+        # else:
+        #     data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
+        #     data["labels"] = data["labels"].tolist().append(labels_tensorized)
+        #     data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
+        #     data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
 
     print(np.array(data["mel_spectrogram"]).shape)
 
@@ -95,4 +92,4 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
 
 if __name__ == "__main__":
-    preprocess_dataset(DATASET_PATH, JSON_PATH)
+    preprocess_dataset(DATASET_PATH, SAVED_FILE)
