@@ -85,7 +85,8 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 data["mel_spectrogram"] = nn.utils.rnn.pad_sequence([mel_spectrogram, data["mel_spectrogram"]], batch_first=True)
                 data["labels"] = nn.utils.rnn.pad_sequence([labels, data["labels"]], batch_first=True)
 
-        data["mel_spectrogram"].unsqueeze(1).transpose(2, 3)
+    
+    data["mel_spectrogram"].unsqueeze(1).transpose(2, 3)
 
     print(np.array(data["mel_spectrogram"]).shape)
 
