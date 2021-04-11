@@ -82,8 +82,8 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True)
                 data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
             else:
-                data["mel_spectrogram"] = np.array(data["mel_spectrogram"]).append(mel_spectrogram_tensorized)
-                data["labels"] = np.array(data["labels"]).append(labels_tensorized)
+                data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
+                data["labels"] = data["labels"].tolist().append(labels_tensorized)
                 data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
                 data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
 
