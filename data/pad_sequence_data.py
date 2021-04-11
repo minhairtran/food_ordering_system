@@ -13,10 +13,13 @@ def pad_sequence(first_set, second_set):
     first_set["mel_spectrogram"].tolist().append(second_set["mel_spectrogram"].tolist())
     first_set["mel_spectrogram"] = nn.utils.rnn.pad_sequence(first_set["mel_spectrogram"].tolist(), batch_first=True)
 
-    first_set["labels"].tolist().append(second_set["labels"].tolist())
-    first_set["labels"] = nn.utils.rnn.pad_sequence(first_set["labels"].tolist(), batch_first=True)
+    print("OK")
 
-    return first_set["mel_spectrogram"], first_set["labels"]
+    # first_set["labels"].tolist().append(second_set["labels"].tolist())
+    # first_set["labels"] = nn.utils.rnn.pad_sequence(first_set["labels"].tolist(), batch_first=True)
+
+    # return first_set["mel_spectrogram"], first_set["labels"]
+    return first_set["mel_spectrogram"]
 
 if __name__ == "__main__":
     data = {
@@ -28,7 +31,12 @@ if __name__ == "__main__":
 
     yes_data = torch.load(YES_DATASET_PATH)
     no_data = torch.load(NO_DATASET_PATH)
-    data["mel_spectrogram"], data["labels"] = pad_sequence(yes_data, no_data)
+
+    # data["mel_spectrogram"], data["labels"] = pad_sequence(yes_data, no_data)
+
+    data["mel_spectrogram"] = pad_sequence(yes_data, no_data)
+
+    data["labels"] = torch.Tensor(yes_data["labels"].tolist().append(no_data["labels"].tolist()))
 
     data["label_lengths"] = torch.Tensor(yes_data["label_lengths"].tolist().append(no_data["label_lengths"].tolist()))
 
