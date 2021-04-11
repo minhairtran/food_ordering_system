@@ -9,8 +9,8 @@ import json
 from train.text_transform import ConfirmTextTransform
 import numpy as np
 
-DATASET_PATH = "../../confirming_dataset/no"
-SAVED_FILE = "confirming_data/data_no.pt"
+DATASET_PATH = "../../confirming_dataset/noise"
+SAVED_FILE = "confirming_data/data_noise.pt"
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
