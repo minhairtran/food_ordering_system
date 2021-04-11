@@ -82,8 +82,8 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 print("{}: {}".format(file_path, i-1))
 
             mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
-            data["mel_spectrogram"].cat((data["mel_spectrogram"], mel_spectrogram_tensorized), 0)
-            data["labels"].cat((data["labels"], labels_tensorized), 0)
+            data["mel_spectrogram"] = torch.cat((data["mel_spectrogram"], mel_spectrogram_tensorized), 0)
+            data["labels"] = torch.cat((data["labels"], labels_tensorized), 0)
 
     data["mel_spectrogram"] = data["mel_spectrogram"].nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
     data["labels"] = data["labels"].nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
