@@ -70,7 +70,7 @@ class ErrorCalculating:
         reference = join_char.join(filter(None, reference.split(' ')))
         hypothesis = join_char.join(filter(None, hypothesis.split(' ')))
 
-        edit_distance = _levenshtein_distance(reference, hypothesis)
+        edit_distance = self._levenshtein_distance(reference, hypothesis)
         return float(edit_distance), len(reference)
 
     def cer(reference, hypothesis, ignore_case=False, remove_space=False):
@@ -100,7 +100,7 @@ class ErrorCalculating:
         :rtype: float
         :raises ValueError: If the reference length is zero.
         """
-        edit_distance, ref_len = char_errors(reference, hypothesis, ignore_case,
+        edit_distance, ref_len = self.char_errors(reference, hypothesis, ignore_case,
                                             remove_space)
 
         if ref_len == 0:
