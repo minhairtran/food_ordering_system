@@ -20,6 +20,7 @@ from model import SpeechRecognitionModel
 DATA_PATH = "../data/confirming_data/data_yes.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
+error_calculating = ErrorCalculating()
 
 
 class Dataset(torch.utils.data.Dataset):
@@ -143,7 +144,7 @@ def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
                 decoded_preds, decoded_targets = GreedyDecoder(
                     output.transpose(0, 1), labels, label_lengths)
                 for j in range(len(decoded_preds)):
-                    test_cer.append(cer(decoded_targets[j], decoded_preds[j]))
+                    test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
 
     avg_cer = sum(test_cer)/len(test_cer)
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
@@ -221,6 +222,28 @@ if __name__ == "__main__":
 
         test(model, device, test_loader, criterion,
              epoch, iter_meter, experiment)
+
+        if (epoch != SpeechRecognitionModel.hparams["epochs"]):
+            # Split into train and test
+            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
+                input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
+                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=True)
+
+            # Create train dataset and Dataloader
+            train_dataset = Dataset(
+                mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
+
+            train_loader = data.DataLoader(dataset=train_dataset,
+                                        batch_size=SpeechRecognitionModel.hparams["batch_size"],
+                                        shuffle=False)
+
+            # Create test dataset and Dataloader
+            test_dataset = Dataset(mel_spectrogram_test, labels_test,
+                                input_lengths_test, label_lengths_test)
+
+            test_loader = data.DataLoader(dataset=test_dataset,
+                                        batch_size=SpeechRecognitionModel.hparams["batch_size"],
+                                        shuffle=False)
 
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
