@@ -82,8 +82,8 @@ def load_data(data_path):
     data = torch.load(DATA_PATH)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
-    label_lengths = np.array(data["label_lengths"]).tolist()
-    input_lengths = np.array(data["input_lengths"]).tolist()
+    label_lengths = list(map(int, data["label_lengths"].tolist())) 
+    input_lengths = list(map(int, data["input_lengths"].tolist())) 
 
     return mel_spectrogram, labels, input_lengths, label_lengths
 
