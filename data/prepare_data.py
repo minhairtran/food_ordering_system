@@ -35,9 +35,9 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
     # dictionary where we'll store mapping, labels, MFCCs and filenames
     data = {
+        "label_lengths": [],
         "mel_spectrogram": torch.Tensor([]),
         "labels": torch.Tensor([]),
-        "label_lengths": [],
         "input_lengths": []
     }
 
