@@ -5,7 +5,6 @@ sys.path.append(
 
 from comet_ml import Experiment
 import os
-import json
 from sklearn.model_selection import train_test_split
 import numpy as np
 import torchaudio
@@ -18,7 +17,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = "../data/confirming_data/data.json"
+DATA_PATH = "../data/confirming_data/data_yes.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 
@@ -80,22 +79,11 @@ class IterMeter(object):
 
 
 def load_data(data_path):
-    """Loads training dataset from json file.
-        :param data_path (str): Path to json file containing data
-        :return X (ndarray): Inputs
-        :return y (ndarray): Targets
-    """
-
-    mel_spectrogram = []
-    labels = []
-
-    with open(data_path, "r") as fp:
-        data = json.load(fp)
-
+    data = torch.load(DATA_PATH)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
-    label_lengths = np.array(data["label_lengths"])
-    input_lengths = np.array(data["input_lengths"])
+    label_lengths = np.array(data["label_lengths"]).tolist()
+    input_lengths = np.array(data["input_lengths"]).tolist()
 
     return mel_spectrogram, labels, input_lengths, label_lengths
 
