@@ -80,7 +80,7 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
             if(len(data["mel_spectrogram"]) == 0):
                 data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
-                data["labels"] = nn.utils.rnn.pad_sequence(labels,, batch_first=True)
+                data["labels"] = nn.utils.rnn.pad_sequence(labels, batch_first=True)
             else:
                 data["mel_spectrogram"] = nn.utils.rnn.pad_sequence([mel_spectrogram, data["mel_spectrogram"]], batch_first=True).unsqueeze(1).transpose(2, 3)
                 data["labels"] = nn.utils.rnn.pad_sequence([labels, data["labels"]], batch_first=True)
