@@ -9,8 +9,8 @@ import json
 from train.text_transform import ConfirmTextTransform
 import numpy as np
 
-DATASET_PATH = "../../confirming_dataset"
-JSON_PATH = "confirming_data/data.json"
+DATASET_PATH = "../../confirming_dataset/yes"
+SAVED_FILE = "confirming_data/data_yes.pt"
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
@@ -36,8 +36,8 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
     # dictionary where we'll store mapping, labels, MFCCs and filenames
     data = {
         "label_lengths": [],
-        "mel_spectrogram": torch.Tensor([]),
-        "labels": torch.Tensor([]),
+        "mel_spectrogram": [],
+        "labels": [],
         "input_lengths": []
     }
 
@@ -78,23 +78,20 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
             mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
 
-            if(len(data["mel_spectrogram"]) == 0):
-                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True)
-                data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
-            else:
-                data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
-                data["labels"] = data["labels"].tolist().append(labels_tensorized)
-                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
-                data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
-
-    
-    data["mel_spectrogram"].unsqueeze(1).transpose(2, 3)
+            # if(len(data["mel_spectrogram"]) == 0):
+            data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).unsqueeze(1).transpose(2, 3)
+            data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
+            data["input_lengths"] = torch.Tensor(data["input_lengths"])
+            data["label_lengths"] = torch.Tensor(data["label_lengths"])
+            # else:
+            #     data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
+            #     data["labels"] = data["labels"].tolist().append(labels_tensorized)
+            #     data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
+            #     data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
 
     print(np.array(data["mel_spectrogram"]).shape)
 
-    # save data in json file
-    with open(json_path, "w") as fp:
-        json.dump(data, fp, indent=4)
+    torch.save(data, SAVED_FILE)
 
 
 if __name__ == "__main__":
