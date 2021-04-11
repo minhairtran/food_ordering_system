@@ -186,7 +186,7 @@ if __name__ == "__main__":
         mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
 
     train_loader = data.DataLoader(dataset=train_dataset,
-                                   batch_size=BATCH_SIZE,
+                                   batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                    shuffle=False)
 
     # Create test dataset and Dataloader
@@ -194,7 +194,7 @@ if __name__ == "__main__":
                            input_lengths_test, label_lengths_test)
 
     test_loader = data.DataLoader(dataset=test_dataset,
-                                  batch_size=BATCH_SIZE,
+                                  batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                   shuffle=False)
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],

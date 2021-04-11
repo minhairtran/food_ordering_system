@@ -71,14 +71,14 @@ class BidirectionalGRU(nn.Module):
 class SpeechRecognitionModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "n_rnn_layers": 5,
+        "n_rnn_layers": 2,
         "rnn_dim": 512,
         "n_class": 6,
         "n_feats": 128,
         "stride": 2,
         "dropout": 0.1,
         "learning_rate": 5e-4,
-        "batch_size": 5,
+        "batch_size": 10,
         "epochs": 10, 
         "test_size": 0.2
     }
