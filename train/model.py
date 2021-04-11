@@ -70,7 +70,7 @@ class BidirectionalGRU(nn.Module):
 
 class SpeechRecognitionModel(nn.Module):
     hparams = {
-        "n_cnn_layers": 3,
+        "n_cnn_layers": 1,
         "n_rnn_layers": 2,
         "rnn_dim": 512,
         "n_class": 6,
@@ -90,11 +90,11 @@ class SpeechRecognitionModel(nn.Module):
         # self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)
 
         # # n residual cnn layers with filter size of 32
-        # self.rescnn_layers = nn.Sequential(*[
-        #     ResidualCNN(32, 32, kernel=3, stride=1,
-        #                 dropout=dropout, n_feats=n_feats)
-        #     for _ in range(n_cnn_layers)
-        # ])
+        self.rescnn_layers = nn.Sequential(*[
+            ResidualCNN(32, 32, kernel=3, stride=1,
+                        dropout=dropout, n_feats=n_feats)
+            for _ in range(n_cnn_layers)
+        ])
         self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
         self.birnn_layers = nn.Sequential(*[
             BidirectionalGRU(rnn_dim=rnn_dim if i == 0 else rnn_dim*2,
@@ -109,13 +109,13 @@ class SpeechRecognitionModel(nn.Module):
         )
 
     def forward(self, x):
-        print(x)
+        print(x.size())
         # x = self.cnn(x)
-        # x = self.rescnn_layers(x)
-        # sizes = x.size()
-        # x = x.view(sizes[0], sizes[1] * sizes[2],
-        #            sizes[3])  # (batch, feature, time)
-        # x = x.transpose(1, 2)  # (batch, time, feature)
+        x = self.rescnn_layers(x)
+        sizes = x.size()
+        x = x.view(sizes[0], sizes[1] * sizes[2],
+                   sizes[3])  # (batch, feature, time)
+        x = x.transpose(1, 2)  # (batch, time, feature)
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
         x = self.classifier(x)
