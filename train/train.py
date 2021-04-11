@@ -205,17 +205,17 @@ if __name__ == "__main__":
     print('Num Model Parameters', sum(
         [param.nelement() for param in model.parameters()]))
 
-    optimizer = optim.AdamW(model.parameters(), LEARNING_RATE)
+    optimizer = optim.AdamW(model.parameters(), SpeechRecognitionModel.hparams["learning_rate"])
     criterion = nn.CTCLoss(blank=0).to(device)
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=LEARNING_RATE,
+    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
                                               steps_per_epoch=int(
                                                   len(train_loader)),
-                                              epochs=EPOCHS,
+                                              epochs=SpeechRecognitionModel.hparams["epochs"],
                                               anneal_strategy='linear')
 
     iter_meter = IterMeter()
 
-    for epoch in range(1, EPOCHS + 1):
+    for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
         train(model, device, train_loader, criterion, optimizer,
               scheduler, epoch, iter_meter, experiment)
 
