@@ -7,6 +7,7 @@ import librosa
 import os
 import json
 from train.text_transform import ConfirmTextTransform
+import numpy as np
 
 DATASET_PATH = "../../confirming_dataset"
 JSON_PATH = "confirming_data/data.json"
@@ -20,6 +21,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     for label in labels_not_tensorized:
         labels.append(torch.Tensor(label))
 
+    #need reading nn.utils.rnn.pad_sequence
     mel_spectrogram = nn.utils.rnn.pad_sequence(
         mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
     labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
@@ -38,8 +40,8 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
     # dictionary where we'll store mapping, labels, MFCCs and filenames
     data = {
-        "mel_spectrogram": [],
-        "labels": [],
+        "mel_spectrogram": torch.Tensor([]),
+        "labels": torch.Tensor([]),
         "label_lengths": [],
         "input_lengths": []
     }
@@ -56,13 +58,15 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 label = ""
             print("\nProcessing: '{}'".format(label))
 
+            mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
+
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
 
                 # load audio file and slice it to ensure length consistency among different files
                 signal, sample_rate = librosa.load(file_path)
 
-                # extract MFCCs
+                # extract MFCCs (#features, #time binz)
                 mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
                                                 hop_length=hop_length)
                 
@@ -71,13 +75,20 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
                 added_label = text_transform.text_to_int(label)
 
                 # store data for analysed track
-                data["mel_spectrogram"].append(mel_spectrogram.T.tolist())
-                data["labels"].append(added_label)
+                mel_spectrogram_not_tensorized.append(mel_spectrogram.T.tolist())
+                labels_not_tensorized.append(added_label)
                 data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
 
-            data["mel_spectrogram"], data["labels"] = tensorize(data["mel_spectrogram"], data["labels"])
+            mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
+            data["mel_spectrogram"].cat((data["mel_spectrogram"], mel_spectrogram_tensorized), 0)
+            data["labels"].cat((data["labels"], labels_tensorized), 0)
+
+    data["mel_spectrogram"] = data["mel_spectrogram"].nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
+    data["labels"] = data["labels"].nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
+
+    print(np.array(data["mel_spectrogram"]).shape)
 
     # save data in json file
     with open(json_path, "w") as fp:
