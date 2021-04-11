@@ -1,5 +1,8 @@
 class ErrorCalculating:
-    def _levenshtein_distance(ref, hyp):
+    def __init__(self):
+        pass
+    
+    def _levenshtein_distance(self, ref, hyp):
         """Levenshtein distance is a string metric for measuring the difference
         between two sequences. Informally, the levenshtein disctance is defined as
         the minimum number of single-character edits (substitutions, insertions or
@@ -45,7 +48,7 @@ class ErrorCalculating:
 
         return distance[m % 2][n]
 
-    def char_errors(reference, hypothesis, ignore_case=False, remove_space=False):
+    def char_errors(self, reference, hypothesis, ignore_case=False, remove_space=False):
         """Compute the levenshtein distance between reference sequence and
         hypothesis sequence in char-level.
         :param reference: The reference sentence.
@@ -73,7 +76,7 @@ class ErrorCalculating:
         edit_distance = self._levenshtein_distance(reference, hypothesis)
         return float(edit_distance), len(reference)
 
-    def cer(reference, hypothesis, ignore_case=False, remove_space=False):
+    def cer(self, reference, hypothesis, ignore_case=False, remove_space=False):
         """Calculate charactor error rate (CER). CER compares reference text and
         hypothesis text in char-level. CER is defined as:
         .. math::
