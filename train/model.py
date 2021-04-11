@@ -87,7 +87,7 @@ class SpeechRecognitionModel(nn.Module):
         super(SpeechRecognitionModel, self).__init__()
         n_feats = n_feats//2
         # cnn for extracting heirachal features
-        # self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)
+        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)
 
         # # n residual cnn layers with filter size of 32
         self.rescnn_layers = nn.Sequential(*[
@@ -110,7 +110,7 @@ class SpeechRecognitionModel(nn.Module):
 
     def forward(self, x):
         print(x.size())
-        # x = self.cnn(x)
+        x = self.cnn(x)
         x = self.rescnn_layers(x)
         sizes = x.size()
         x = x.view(sizes[0], sizes[1] * sizes[2],
