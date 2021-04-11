@@ -5,7 +5,6 @@ import torch.nn as nn
 import torch
 import librosa
 import os
-import json
 from train.text_transform import ConfirmTextTransform
 import numpy as np
 
@@ -75,16 +74,10 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
         mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
 
-        # if(len(data["mel_spectrogram"]) == 0):
         data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).unsqueeze(1).transpose(2, 3)
         data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
         data["input_lengths"] = torch.Tensor(data["input_lengths"])
         data["label_lengths"] = torch.Tensor(data["label_lengths"])
-        # else:
-        #     data["mel_spectrogram"] = data["mel_spectrogram"].tolist().append(mel_spectrogram_tensorized)
-        #     data["labels"] = data["labels"].tolist().append(labels_tensorized)
-        #     data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
-        #     data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
 
     print(np.array(data["mel_spectrogram"]).shape)
 
