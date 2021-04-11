@@ -21,7 +21,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     for label in labels_not_tensorized:
         labels.append(torch.Tensor(label))
 
-    return torch.Tensor(mel_spectrogram), torch.Tensor(labels)
+    return mel_spectrogram, labels
 
 def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_length=384):
     """Extracts MFCCs from music dataset and saves them into a json file.
@@ -79,11 +79,13 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
             mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
 
             if(len(data["mel_spectrogram"]) == 0):
-                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence([mel_spectrogram_tensorized], batch_first=True)
-                data["labels"] = nn.utils.rnn.pad_sequence([labels_tensorized], batch_first=True)
+                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True)
+                data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
             else:
-                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence([mel_spectrogram_tensorized, data["mel_spectrogram"]], batch_first=True)
-                data["labels"] = nn.utils.rnn.pad_sequence([labels_tensorized, data["labels"]], batch_first=True)
+                data["mel_spectrogram"] = np.array(data["mel_spectrogram"]).append(mel_spectrogram_tensorized)
+                data["labels"] = np.array(data["labels"]).append(labels_tensorized)
+                data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(data["mel_spectrogram"], batch_first=True)
+                data["labels"] = nn.utils.rnn.pad_sequence(data["labels"], batch_first=True)
 
     
     data["mel_spectrogram"].unsqueeze(1).transpose(2, 3)
