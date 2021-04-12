@@ -90,12 +90,16 @@ def predict(model, tested_audio):
 
 if __name__ == "__main__":
 
-    use_cuda = torch.cuda.is_available()
-    torch.manual_seed(7)
-    device = torch.device("cuda" if use_cuda else "cpu")
+    # use_cuda = torch.cuda.is_available()
+    # torch.manual_seed(7)
+    # device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel().to(device)
-    checkpoint = torch.load(SAVED_MODEL_PATH)
+    device = torch.device("cpu")
+
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
+        SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
+
+    checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
     model.eval()
 

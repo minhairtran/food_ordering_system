@@ -8,8 +8,8 @@ import os
 from train.text_transform import ConfirmTextTransform
 import numpy as np
 
-DATASET_PATH = "../../confirming_dataset/noise"
-SAVED_FILE = "confirming_data/data_noise.pt"
+DATASET_PATH = "../../confirming_dataset/yes"
+SAVED_FILE = "confirming_data/data_yes.pt"
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
@@ -74,7 +74,7 @@ def preprocess_dataset(dataset_path, json_path, n_mels=128, n_fft=512, hop_lengt
 
         mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
 
-        data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).unsqueeze(1).transpose(2, 3)
+        data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).transpose(1, 2)
         data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
         data["input_lengths"] = torch.Tensor(data["input_lengths"])
         data["label_lengths"] = torch.Tensor(data["label_lengths"])
