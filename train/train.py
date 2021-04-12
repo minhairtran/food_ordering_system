@@ -15,7 +15,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = "../data/confirming_data/data_yes.pt"
+DATA_PATH = ["../data/confirming_data/data_no.pt", "../data/confirming_data/data_yes.pt"]
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -78,7 +78,7 @@ class IterMeter(object):
 
 
 def load_data(data_path):
-    data = torch.load(DATA_PATH)
+    data = torch.load(data_path)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist())) 
@@ -171,33 +171,8 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # Load all data
-    mel_spectrogram, labels, input_lengths, label_lengths = load_data(
-        DATA_PATH)
-
-    # Split into train and test
-    mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
-        input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                       input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=True)
-
-    # Create train dataset and Dataloader
-    train_dataset = Dataset(
-        mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
-
-    train_loader = data.DataLoader(dataset=train_dataset,
-                                   batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                   shuffle=False)
-
-    # Create test dataset and Dataloader
-    test_dataset = Dataset(mel_spectrogram_test, labels_test,
-                           input_lengths_test, label_lengths_test)
-
-    test_loader = data.DataLoader(dataset=test_dataset,
-                                  batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                  shuffle=False)
-
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],
-                                   SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
+        SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -212,21 +187,16 @@ if __name__ == "__main__":
 
     optimizer = optim.AdamW(model.parameters(), SpeechRecognitionModel.hparams["learning_rate"])
     criterion = nn.CTCLoss(blank=0).to(device)
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
-                                              steps_per_epoch=int(
-                                                  len(train_loader)),
-                                              epochs=SpeechRecognitionModel.hparams["epochs"],
-                                              anneal_strategy='linear')
 
     iter_meter = IterMeter()
 
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
-        train(model, device, train_loader, criterion, optimizer,
-              scheduler, epoch, iter_meter, experiment)
 
-        test(model, device, test_loader, criterion, iter_meter, experiment)
+        for data_path in DATA_PATH:
+            # Load all data
+            mel_spectrogram, labels, input_lengths, label_lengths = load_data(
+                data_path)
 
-        if (epoch != SpeechRecognitionModel.hparams["epochs"]):
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
                 input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
@@ -247,6 +217,17 @@ if __name__ == "__main__":
             test_loader = data.DataLoader(dataset=test_dataset,
                                         batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                         shuffle=False)
+
+            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
+                                                    steps_per_epoch=int(
+                                                        len(train_loader)),
+                                                    epochs=SpeechRecognitionModel.hparams["epochs"],
+                                                    anneal_strategy='linear')
+
+            train(model, device, train_loader, criterion, optimizer,
+                    scheduler, epoch, iter_meter, experiment)
+
+            test(model, device, test_loader, criterion, iter_meter, experiment)
 
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
