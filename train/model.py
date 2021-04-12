@@ -109,7 +109,6 @@ class SpeechRecognitionModel(nn.Module):
         )
 
     def forward(self, x):
-        print(x.size())
         x = self.cnn(x)
         x = self.rescnn_layers(x)
         sizes = x.size()

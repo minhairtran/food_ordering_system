@@ -17,7 +17,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = "../data/confirming_data/data_yes.pt"
+DATA_PATH = "../data/confirming_data/data_no.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -200,6 +200,12 @@ if __name__ == "__main__":
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],
                                    SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
+
+    try:
+        checkpoint = torch.load(SAVED_MODEL_PATH)
+        model.load_state_dict(checkpoint)
+    except:
+        pass
 
     # model summaries
     print(model)
