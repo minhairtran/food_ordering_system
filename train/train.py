@@ -118,8 +118,8 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     100. * batch_idx / len(train_loader), loss.item()))
 
 
-def test(model, device, test_loader, criterion, iter_meter, experiment):
-    print('\nevaluating...')
+def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
+    print('\nEvaluating ' + filename + "...")
     model.eval()
     test_loss = 0
     # test_cer, test_wer = [], []
@@ -193,6 +193,7 @@ if __name__ == "__main__":
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
 
         for data_path in DATA_PATH:
+            filename = data_path.split("/")[-1]
             # Load all data
             mel_spectrogram, labels, input_lengths, label_lengths = load_data(
                 data_path)
