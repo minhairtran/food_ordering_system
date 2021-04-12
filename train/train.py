@@ -4,10 +4,8 @@ sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
 from comet_ml import Experiment
-import os
 from sklearn.model_selection import train_test_split
 import numpy as np
-import torchaudio
 import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as data
