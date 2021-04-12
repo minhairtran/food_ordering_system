@@ -84,7 +84,7 @@ def load_data(data_path):
 
     return mel_spectrogram, labels, input_lengths, label_lengths
 
-def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
+def test(model, device, test_loader, criterion, iter_meter, experiment):
     print('\nevaluating...')
     model.eval()
     test_loss = 0
@@ -164,5 +164,4 @@ if __name__ == "__main__":
                                     batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                     shuffle=False)
 
-        test(model, device, test_loader, criterion,
-                epoch, iter_meter, experiment)
+        test(model, device, test_loader, criterion, iter_meter, experiment)

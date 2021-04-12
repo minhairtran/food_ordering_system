@@ -118,7 +118,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
                     100. * batch_idx / len(train_loader), loss.item()))
 
 
-def test(model, device, test_loader, criterion, epoch, iter_meter, experiment):
+def test(model, device, test_loader, criterion, iter_meter, experiment):
     print('\nevaluating...')
     model.eval()
     test_loss = 0
@@ -224,8 +224,7 @@ if __name__ == "__main__":
         train(model, device, train_loader, criterion, optimizer,
               scheduler, epoch, iter_meter, experiment)
 
-        test(model, device, test_loader, criterion,
-             epoch, iter_meter, experiment)
+        test(model, device, test_loader, criterion, iter_meter, experiment)
 
         if (epoch != SpeechRecognitionModel.hparams["epochs"]):
             # Split into train and test
