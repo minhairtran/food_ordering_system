@@ -34,7 +34,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
         }
 
         # loop through all sub-dirs
-        for i, (dirpath, dirnames, filenames) in enumerate(os.walk(dataset_path)):
+        for i, (dirpath, dirnames, filenames) in enumerate(os.walk(data_set)):
 
             label = dirpath.split("/")[-1]
 
