@@ -85,7 +85,7 @@ class SpeechRecognitionModel(nn.Module):
 
     def __init__(self, n_cnn_layers=3, n_rnn_layers=5, rnn_dim=512, n_class=6, n_feats=128, stride=2, dropout=0.1):
         super(SpeechRecognitionModel, self).__init__()
-        n_feats = n_feats//2
+        # n_feats = n_feats//2
         # # cnn for extracting heirachal features
         # self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)
 
@@ -115,6 +115,7 @@ class SpeechRecognitionModel(nn.Module):
         # x = x.view(sizes[0], sizes[1] * sizes[2],
         #            sizes[3])  # (batch, feature, time)
         x = x.transpose(1, 2)  # (batch, time, feature)
+        print(x.size())
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
         x = self.classifier(x)
