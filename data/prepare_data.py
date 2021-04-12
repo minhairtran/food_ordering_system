@@ -23,7 +23,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     return mel_spectrogram, labels
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
-    for index, data_set, save_file in enumerate(zip(dataset_path, saved_file_path)):
+    for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
         data = {
