@@ -117,6 +117,7 @@ class SpeechRecognitionModel(nn.Module):
         x = x.transpose(1, 2)  # (batch, time, feature)
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
+        print(x.size())
         x = self.classifier(x)
         return x
 
