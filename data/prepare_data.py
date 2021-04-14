@@ -39,7 +39,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
             label = dirpath.split("/")[-1]
 
             if(label=="noise"):
-                label = ""
+                label = "                                                           "
             print("\nProcessing: '{}'".format(label))
 
             mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
