@@ -229,6 +229,7 @@ if __name__ == "__main__":
                     scheduler, epoch, iter_meter, experiment)
 
             test(model, device, test_loader, criterion, iter_meter, experiment, filename)
+            
 
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
