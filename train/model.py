@@ -28,7 +28,7 @@ class SpeechRecognitionModel(nn.Module):
     hparams = {
         "n_rnn_layers": 2,
         "rnn_dim": 128,
-        "n_class": 7,
+        "n_class": 6,
         "n_feats": 128,
         "dropout": 0.1,
         "learning_rate": 5e-4,

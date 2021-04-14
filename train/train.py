@@ -15,7 +15,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = ["../data/confirming_data/data_yes.pt", "../data/confirming_data/data_no.pt","../data/confirming_data/data_noise.pt"]
+DATA_PATH = ["../data/confirming_data/data_yes.pt", "../data/confirming_data/data_no.pt"]
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()

@@ -7,7 +7,6 @@ class ConfirmTextTransform:
         o 3
         s 4
         y 5
-        <SPACE> 6
         """
         self.char_map = {}
         self.index_map = {}
@@ -20,11 +19,7 @@ class ConfirmTextTransform:
         """ Use a character map and convert text to an integer sequence """
         int_sequence = []
         for c in text:
-            if c == ' ':
-                ch = self.char_map['<SPACE>']
-            else:
-                ch = self.char_map[c]
-            int_sequence.append(ch)
+            int_sequence.append(self.char_map[c])
         return int_sequence
 
     def int_to_text(self, labels):
@@ -32,7 +27,7 @@ class ConfirmTextTransform:
         string = []
         for i in labels:
             string.append(self.index_map[i])
-        return ''.join(string).replace('<SPACE>', ' ')
+        return ''.join(string)
 
     def list_to_string(self, list):
         return ''.join(list)
@@ -56,7 +51,6 @@ class FoodNumberTextTransform:
         w 13
         x 14
         z 15
-        <SPACE> 16
         """
         self.char_map = {}
         self.index_map = {}
@@ -69,10 +63,6 @@ class FoodNumberTextTransform:
         """ Use a character map and convert text to an integer sequence """
         int_sequence = []
         for c in text:
-            if c == ' ':
-                ch = self.char_map['<SPACE>']
-            else:
-                ch = self.char_map[c]
             int_sequence.append(self.char_map[c])
         return int_sequence
 
@@ -81,8 +71,7 @@ class FoodNumberTextTransform:
         string = []
         for i in labels:
             string.append(self.index_map[i])
-        return ''.join(string).replace('<SPACE>', ' ')
-
+        return ''.join(string)
 
     def list_to_string(self, list):
         return ''.join(list)

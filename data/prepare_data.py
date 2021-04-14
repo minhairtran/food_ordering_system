@@ -8,8 +8,8 @@ import os
 from train.text_transform import ConfirmTextTransform
 import numpy as np
 
-DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no", "../../confirming_dataset/noise"]
-SAVED_FILE = ["confirming_data/data_yes.pt", "confirming_data/data_no.pt","confirming_data/data_noise.pt"]
+DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no"]
+SAVED_FILE = ["confirming_data/data_yes.pt", "confirming_data/data_no.pt"]
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
