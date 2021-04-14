@@ -24,7 +24,7 @@ class ConfirmTextTransform:
                 ch = self.char_map['<SPACE>']
             else:
                 ch = self.char_map[c]
-            int_sequence.append(self.char_map[c])
+            int_sequence.append(ch)
         return int_sequence
 
     def int_to_text(self, labels):
