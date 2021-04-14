@@ -71,8 +71,8 @@ class BidirectionalGRU(nn.Module):
 class SpeechRecognitionModel(nn.Module):
     hparams = {
         "n_cnn_layers": 1,
-        "n_rnn_layers": 2,
-        "rnn_dim": 512,
+        "n_rnn_layers": 1,
+        "rnn_dim": 128,
         "n_class": 6,
         "n_feats": 128,
         "stride": 2,
@@ -102,7 +102,7 @@ class SpeechRecognitionModel(nn.Module):
             for i in range(n_rnn_layers)
         ])
         self.classifier = nn.Sequential(
-            nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
+            # nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(rnn_dim, n_class)
