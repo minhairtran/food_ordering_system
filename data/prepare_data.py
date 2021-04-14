@@ -7,20 +7,10 @@ import librosa
 import os
 from train.text_transform import ConfirmTextTransform
 import numpy as np
+import json
 
 DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no"]
-SAVED_FILE = ["confirming_data/data_yes.pt", "confirming_data/data_no.pt"]
-
-def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
-    mel_spectrogram, labels = [], []
-
-    for spectrogram in mel_spectrogram_not_tensorized:
-        mel_spectrogram.append(torch.Tensor(spectrogram))
-
-    for label in labels_not_tensorized:
-        labels.append(torch.Tensor(label))
-
-    return mel_spectrogram, labels
+SAVED_FILE = ["confirming_data/data_yes.json", "confirming_data/data_no.json"]
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
@@ -38,8 +28,6 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
 
             label = dirpath.split("/")[-1]
 
-            if(label=="noise"):
-                label = "                                                           "
             print("\nProcessing: '{}'".format(label))
 
             mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
@@ -65,14 +53,9 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
 
-            mel_spectrogram_tensorized, labels_tensorized = tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized)
-
-            data["mel_spectrogram"] = nn.utils.rnn.pad_sequence(mel_spectrogram_tensorized, batch_first=True).transpose(1, 2)
-            data["labels"] = nn.utils.rnn.pad_sequence(labels_tensorized, batch_first=True)
-            data["input_lengths"] = torch.Tensor(data["input_lengths"])
-            data["label_lengths"] = torch.Tensor(data["label_lengths"])
-
-        torch.save(data, save_file)
+        # torch.save(data, save_file)
+        with open(save_file, 'w') as f:
+            json.dump(data, j, indent=4)
 
 
 if __name__ == "__main__":
