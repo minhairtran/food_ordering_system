@@ -37,7 +37,7 @@ if __name__ == "__main__":
         with open(data, "r") as fp:
             data_set.append(json.load(fp))
             all_data_length += len(data_set[i]['labels'])
-            print("Original data set", data_set[i], torch.Tensor(data_set[i]).size())
+            print("Original data set", torch.Tensor(data_set[i]['labels']).size())
 
     average_dataset_length = int(all_data_length/len(data_set))
 
