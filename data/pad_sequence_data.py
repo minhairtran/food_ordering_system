@@ -35,7 +35,9 @@ if __name__ == "__main__":
 
     for i, data in enumerate(DATA_FILE):
         with open(data, "r") as fp:
-            data_set.append(json.load(fp))
+            temp_data_set = json.load(fp)
+            print("Length", len(temp_data_set['labels']))
+            data_set.append(temp_data_set)
             all_data_length += len(data_set[i]['labels'])
             print("Original data set", torch.Tensor(data_set[i]['labels']).size())
 
