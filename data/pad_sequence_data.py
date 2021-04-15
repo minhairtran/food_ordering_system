@@ -36,10 +36,9 @@ if __name__ == "__main__":
     for i, data in enumerate(DATA_FILE):
         with open(data, "r") as fp:
             temp_data_set = json.load(fp)
-            
+
         data_set.append(temp_data_set)
         all_data_length += len(data_set[i]['labels'])
-        print("Original data set", torch.Tensor(data_set[i]['labels']).size())
 
     average_dataset_length = int(all_data_length/len(data_set))
 
@@ -56,13 +55,13 @@ if __name__ == "__main__":
             original_dataset_index = int(current_dataset_index/len(data_set))
             original_dataset_number = current_dataset_index % len(data_set)
 
-            if (original_dataset_index >= len(dataset[original_dataset_number]["label_lengths"])):
+            if (original_dataset_index >= len(data_set[original_dataset_number]["label_lengths"])):
                 break
             else:
-                saved_dataset["mel_spectrogram"].append(dataset[original_dataset_number]["mel_spectrogram"][original_dataset_index])
-                saved_dataset["label_lengths"].append(dataset[original_dataset_number]["label_lengths"][original_dataset_index])
-                saved_dataset["labels"].append(dataset[original_dataset_number]["labels"][original_dataset_index])
-                saved_dataset["input_lengths"].append(dataset[original_dataset_number]["input_lengths"][original_dataset_index])
+                saved_dataset["mel_spectrogram"].append(data_set[original_dataset_number]["mel_spectrogram"][original_dataset_index])
+                saved_dataset["label_lengths"].append(data_set[original_dataset_number]["label_lengths"][original_dataset_index])
+                saved_dataset["labels"].append(data_set[original_dataset_number]["labels"][original_dataset_index])
+                saved_dataset["input_lengths"].append(data_set[original_dataset_number]["input_lengths"][original_dataset_index])
 
 
         saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(saved_dataset["mel_spectrogram"], saved_dataset["labels"])
