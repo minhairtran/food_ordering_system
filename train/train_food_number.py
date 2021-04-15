@@ -162,7 +162,7 @@ if __name__ == "__main__":
     # Create an experiment with your api key
     experiment = Experiment(
         api_key="NXte5ivrmxMfwBeYjvahf97PC",
-        project_name="general",
+        project_name="food-number",
         workspace="hai321",
     )
 
