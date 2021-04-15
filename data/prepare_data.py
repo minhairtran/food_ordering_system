@@ -30,8 +30,6 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
 
             print("\nProcessing: '{}'".format(label))
 
-            mel_spectrogram_not_tensorized, labels_not_tensorized = [], []
-
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
 
@@ -47,8 +45,8 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 added_label = text_transform.text_to_int(label)
 
                 # store data for analysed track
-                mel_spectrogram_not_tensorized.append(mel_spectrogram.T.tolist())
-                labels_not_tensorized.append(added_label)
+                data["mel_spectrogram"].append(mel_spectrogram.T.tolist())
+                data["labels"].append(added_label)
                 data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
