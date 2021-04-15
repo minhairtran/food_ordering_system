@@ -15,7 +15,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = ["../data/confirming_data/data_yes.pt", "../data/confirming_data/data_no.pt"]
+DATA_PATH = ["../data/confirming_data/data_set_0.pt", "../data/confirming_data/data_set_1.pt"]
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
-    device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cuda:1" if use_cuda else "cpu")
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
         SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
