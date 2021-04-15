@@ -37,8 +37,11 @@ if __name__ == "__main__":
         with open(data, "r") as fp:
             data_set.append(json.load(fp))
             all_data_length += len(data_set[i]['labels'])
+            print("Original data set", data_set[i], torch.Tensor(data_set[i]).size())
 
     average_dataset_length = int(all_data_length/len(data_set))
+
+    print("average_dataset_length", average_dataset_length)
 
     for set_number in range(len(data_set)):
         saved_dataset = {
@@ -48,17 +51,17 @@ if __name__ == "__main__":
             "input_lengths": []
         }
         for current_dataset_index in range(average_dataset_length):
-            if (int(current_dataset_index/len(data_set)) >= len(dataset[current_dataset_index % len(data_set)["label_lengths"]])):
+            original_dataset_index = int(current_dataset_index/len(data_set))
+            original_dataset_number = current_dataset_index % len(data_set)
+
+            if (original_dataset_index >= len(dataset[original_dataset_number]["label_lengths"])):
                 break
             else:
-                saved_dataset["label_lengths"].append(dataset[current_dataset_index % len(
-                    data_set)["label_lengths"][int(current_dataset_index/len(data_set))]])
-                saved_dataset["mel_spectrogram"].append(dataset[current_dataset_index % len(
-                    data_set)["mel_spectrogram"][int(current_dataset_index/len(data_set))]])
-                saved_dataset["labels"].append(dataset[current_dataset_index % len(
-                    data_set)["labels"][int(current_dataset_index/len(data_set))]])
-                saved_dataset["input_lengths"].append(dataset[current_dataset_index % len(
-                    data_set)["input_lengths"][int(current_dataset_index/len(data_set))]])
+                saved_dataset["mel_spectrogram"].append(dataset[original_dataset_number]["mel_spectrogram"][original_dataset_index])
+                saved_dataset["label_lengths"].append(dataset[original_dataset_number]["label_lengths"][original_dataset_index])
+                saved_dataset["labels"].append(dataset[original_dataset_number]["labels"][original_dataset_index])
+                saved_dataset["input_lengths"].append(dataset[original_dataset_number]["input_lengths"][original_dataset_index])
+
 
         saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(saved_dataset["mel_spectrogram"], saved_dataset["labels"])
         saved_dataset["input_lengths"] = torch.Tensor(saved_dataset["input_lengths"])
@@ -67,5 +70,5 @@ if __name__ == "__main__":
         current_saved_file = SAVED_FILE + str(set_number) + ".pt"
         torch.save(saved_dataset, current_saved_file)
 
-        print("Padding set success " + str(set_number))
+        print("Padding set success", set_number)
 
