@@ -7,6 +7,7 @@ class ConfirmTextTransform:
         o 3
         s 4
         y 5
+        i 6
         """
         self.char_map = {}
         self.index_map = {}
