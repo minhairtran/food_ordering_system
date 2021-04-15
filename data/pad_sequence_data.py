@@ -36,42 +36,43 @@ if __name__ == "__main__":
     for i, data in enumerate(DATA_FILE):
         with open(data, "r") as fp:
             temp_data_set = json.load(fp)
-            
-        print("Length", len(temp_data_set['labels']))
-        data_set.append(temp_data_set)
-        all_data_length += len(data_set[i]['labels'])
-        print("Original data set", torch.Tensor(data_set[i]['labels']).size())
+            print(temp_data_set)
 
-    average_dataset_length = int(all_data_length/len(data_set))
+    #     print("Length", len(temp_data_set['labels']))
+    #     data_set.append(temp_data_set)
+    #     all_data_length += len(data_set[i]['labels'])
+    #     print("Original data set", torch.Tensor(data_set[i]['labels']).size())
 
-    print("average_dataset_length", average_dataset_length)
+    # average_dataset_length = int(all_data_length/len(data_set))
 
-    for set_number in range(len(data_set)):
-        saved_dataset = {
-            "label_lengths": [],
-            "mel_spectrogram": [],
-            "labels": [],
-            "input_lengths": []
-        }
-        for current_dataset_index in range(average_dataset_length):
-            original_dataset_index = int(current_dataset_index/len(data_set))
-            original_dataset_number = current_dataset_index % len(data_set)
+    # print("average_dataset_length", average_dataset_length)
 
-            if (original_dataset_index >= len(dataset[original_dataset_number]["label_lengths"])):
-                break
-            else:
-                saved_dataset["mel_spectrogram"].append(dataset[original_dataset_number]["mel_spectrogram"][original_dataset_index])
-                saved_dataset["label_lengths"].append(dataset[original_dataset_number]["label_lengths"][original_dataset_index])
-                saved_dataset["labels"].append(dataset[original_dataset_number]["labels"][original_dataset_index])
-                saved_dataset["input_lengths"].append(dataset[original_dataset_number]["input_lengths"][original_dataset_index])
+    # for set_number in range(len(data_set)):
+    #     saved_dataset = {
+    #         "label_lengths": [],
+    #         "mel_spectrogram": [],
+    #         "labels": [],
+    #         "input_lengths": []
+    #     }
+    #     for current_dataset_index in range(average_dataset_length):
+    #         original_dataset_index = int(current_dataset_index/len(data_set))
+    #         original_dataset_number = current_dataset_index % len(data_set)
+
+    #         if (original_dataset_index >= len(dataset[original_dataset_number]["label_lengths"])):
+    #             break
+    #         else:
+    #             saved_dataset["mel_spectrogram"].append(dataset[original_dataset_number]["mel_spectrogram"][original_dataset_index])
+    #             saved_dataset["label_lengths"].append(dataset[original_dataset_number]["label_lengths"][original_dataset_index])
+    #             saved_dataset["labels"].append(dataset[original_dataset_number]["labels"][original_dataset_index])
+    #             saved_dataset["input_lengths"].append(dataset[original_dataset_number]["input_lengths"][original_dataset_index])
 
 
-        saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(saved_dataset["mel_spectrogram"], saved_dataset["labels"])
-        saved_dataset["input_lengths"] = torch.Tensor(saved_dataset["input_lengths"])
-        saved_dataset["label_lengths"] = torch.Tensor(saved_dataset["label_lengths"])
+    #     saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(saved_dataset["mel_spectrogram"], saved_dataset["labels"])
+    #     saved_dataset["input_lengths"] = torch.Tensor(saved_dataset["input_lengths"])
+    #     saved_dataset["label_lengths"] = torch.Tensor(saved_dataset["label_lengths"])
 
-        current_saved_file = SAVED_FILE + str(set_number) + ".pt"
-        torch.save(saved_dataset, current_saved_file)
+    #     current_saved_file = SAVED_FILE + str(set_number) + ".pt"
+    #     torch.save(saved_dataset, current_saved_file)
 
-        print("Padding set success", set_number)
+    #     print("Padding set success", set_number)
 
