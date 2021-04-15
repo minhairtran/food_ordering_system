@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 import json
+import torch.nn as nn
+
 import sys
 sys.path.append("../")
 
