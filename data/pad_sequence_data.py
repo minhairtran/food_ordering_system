@@ -29,8 +29,8 @@ if __name__ == "__main__":
     data_set = []
     all_data_length = 0
 
-    for i, data in enumerate(zip(DATA_FILE)):
-        with open(data[i], "r") as fp:
+    for i, data in enumerate(DATA_FILE):
+        with open(data, "r") as fp:
             data_set.append(json.load(fp))
             all_data_length += len(data_set[i]['labels'])
 
@@ -62,4 +62,6 @@ if __name__ == "__main__":
 
         current_saved_file = SAVED_FILE + str(set_number) + ".pt"
         torch.save(saved_dataset, current_saved_file)
+
+        print("Padding set success " + str(set_number))
 
