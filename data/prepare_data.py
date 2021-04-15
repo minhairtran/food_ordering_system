@@ -55,7 +55,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
 
         # torch.save(data, save_file)
         with open(save_file, 'w') as f:
-            json.dump(data, j, indent=4)
+            json.dump(data, f, indent=4)
 
 
 if __name__ == "__main__":
