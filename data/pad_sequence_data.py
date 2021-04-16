@@ -10,7 +10,7 @@ import torch.nn as nn
 DATA_FILE = "confirming_data/data.json"
 # DATA_FILE = "food_number_data/data.json"
 
-SAVED_FILE = "confirming_data/data_set.pt"
+SAVED_FILE = "confirming_data/data.pt"
 
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):

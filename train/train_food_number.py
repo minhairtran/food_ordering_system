@@ -79,7 +79,6 @@ class IterMeter(object):
 
 
 def load_data(data_path):
-    data = torch.load(data_path)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist()))
@@ -193,7 +192,7 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    load_data = load_data(DATA_PATH)
+    load_data = torch.load(DATA_PATH)
 
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
 
@@ -201,7 +200,8 @@ if __name__ == "__main__":
         
             filename = data_path.split("/")[-1]
             # Load all data
-            mel_spectrogram, labels, input_lengths, label_lengths = load_data[dataset_index]
+            mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data[dataset_index])
+
 
 
             # Split into train and test
