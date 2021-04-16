@@ -42,6 +42,8 @@ if __name__ == "__main__":
 
     average_dataset_length = int(all_data_length/len(data_set))
 
+    print("Length big data set", len(data_set[0]['labels']))
+
     for set_number in range(len(data_set)):
         saved_dataset = {
             "label_lengths": [],
@@ -71,6 +73,8 @@ if __name__ == "__main__":
             saved_dataset["input_lengths"])
         saved_dataset["label_lengths"] = torch.Tensor(
             saved_dataset["label_lengths"])
+
+        print("Separated dataset size", saved_dataset["labels"].size())
 
         current_saved_file = SAVED_FILE + str(set_number) + ".pt"
         torch.save(saved_dataset, current_saved_file)
