@@ -3,7 +3,7 @@ sys.path.append("../")
 
 import json
 import numpy as np
-from train.text_transform import ConfirmTextTransform
+from train.text_transform import FoodNumberTextTransform
 import os
 import librosa
 import torch
@@ -44,7 +44,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
                                                                  hop_length=hop_length)
 
-                text_transform = ConfirmTextTransform()
+                text_transform = FoodNumberTextTransform()
 
                 added_label = text_transform.text_to_int(label)
 
