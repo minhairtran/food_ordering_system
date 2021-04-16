@@ -16,7 +16,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 
 
-DATA_PATH = "../data/confirming_data/data.pt"
+DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt", \
+    "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt", \
+        "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt", \
+            "../data/food_number_data/data_set_9.pt"]
 SAVED_MODEL_PATH = "model_food_number.h5"
 text_transform = FoodNumberTextTransform()
 error_calculating = ErrorCalculating()
@@ -78,7 +81,8 @@ class IterMeter(object):
         return self.val
 
 
-def load_data(data):
+def load_data(data_path):
+    data = torch.load(data_path)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist()))
@@ -192,17 +196,13 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    load_data = torch.load(DATA_PATH)
-
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
 
-        for dataset_index in range(len(load_data)):
-        
+        for data_path in DATA_PATH:
             filename = data_path.split("/")[-1]
             # Load all data
-            mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data[dataset_index])
-
-
+            mel_spectrogram, labels, input_lengths, label_lengths = load_data(
+                data_path)
 
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
