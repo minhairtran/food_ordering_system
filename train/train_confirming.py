@@ -15,7 +15,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = ["../data/confirming_data/data_set_0.pt", "../data/confirming_data/data_set_1.pt"]
+DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -119,7 +119,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
 
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
-    print('\nEvaluating ' + filename + "...")
+    print('\nEvaluating ' + str(filename) + "...")
     model.eval()
     test_loss = 0
     # test_cer, test_wer = [], []
@@ -161,8 +161,8 @@ if __name__ == "__main__":
         workspace="hai321",
     )
 
-    experiment.add_tags(["confirm_data", "deep_speech_model"])
-    experiment.set_name("Test confirm data with deepspeech model")
+    experiment.add_tags(["food_number_data", "deep_speech_model"])
+    experiment.set_name("Test food number data with deepspeech model")
 
     experiment.log_parameters(SpeechRecognitionModel.hparams)
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if use_cuda else "cpu")
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-    7, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+    6, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -190,13 +190,13 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
+    load_data = load_data(DATA_PATH)
+
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
 
-        for data_path in DATA_PATH:
-            filename = data_path.split("/")[-1]
+        for dataset_index in range(len(load_data)):
             # Load all data
-            mel_spectrogram, labels, input_lengths, label_lengths = load_data(
-                data_path)
+            mel_spectrogram, labels, input_lengths, label_lengths = load_data[dataset_index]
 
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
@@ -228,7 +228,7 @@ if __name__ == "__main__":
             train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
-            test(model, device, test_loader, criterion, iter_meter, experiment, filename)
+            test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
             
 
     # Save model

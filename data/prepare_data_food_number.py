@@ -12,12 +12,13 @@ import torch.nn as nn
 
 DATASET_PATH = ["../../food_number_dataset/zero", "../../food_number_dataset/one", "../../food_number_dataset/two", "../../food_number_dataset/three", "../../food_number_dataset/four",
                 "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine", "../../food_number_dataset/noise"]
-SAVED_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json", "food_number_data/data_two.json", "food_number_data/data_three.json", "food_number_data/data_four.json",
-              "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_noise.json"]
+SAVED_FILE = "food_number_data/data.json"
 
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
-    for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
+    saved_data = []
+    
+    for data_set in enumerate(dataset_path):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
         data = {
@@ -55,10 +56,10 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
 
-        # torch.save(data, save_file)
-        with open(save_file, 'w') as f:
-            json.dump(data, f, indent=4)
+            saved_data.append(data)
 
+    with open(saved_file_path, 'w') as f:
+        json.dump(saved_data, f, indent=4)
 
 if __name__ == "__main__":
     preprocess_dataset(DATASET_PATH, SAVED_FILE)

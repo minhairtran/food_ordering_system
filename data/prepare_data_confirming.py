@@ -10,10 +10,12 @@ import numpy as np
 import json
 
 DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no", "../../confirming_dataset/noise"]
-SAVED_FILE = ["confirming_data/data_yes.json", "confirming_data/data_no.json", "confirming_data/data_noise.json"]
+SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
-    for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
+    saved_data = []
+
+    for data_set in enumerate(dataset_path):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
         data = {
@@ -51,9 +53,10 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 data["label_lengths"].append(len(label))
                 print("{}: {}".format(file_path, i-1))
 
-        # torch.save(data, save_file)
-        with open(save_file, 'w') as f:
-            json.dump(data, f, indent=4)
+            saved_data.append(data)
+
+    with open(saved_file_path, 'w') as f:
+        json.dump(saved_data, f, indent=4)
 
 
 if __name__ == "__main__":
