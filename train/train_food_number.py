@@ -78,7 +78,7 @@ class IterMeter(object):
         return self.val
 
 
-def load_data(data_path):
+def load_data(data):
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist()))
