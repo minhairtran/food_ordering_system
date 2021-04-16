@@ -11,7 +11,7 @@ import torch.nn as nn
 
 
 DATASET_PATH = ["../../food_number_dataset/zero", "../../food_number_dataset/one", "../../food_number_dataset/two", "../../food_number_dataset/three", "../../food_number_dataset/four",
-                "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine", "../../food_number_dataset/noise"]
+                "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine"]
 SAVED_FILE = "food_number_data/data.json"
 
 

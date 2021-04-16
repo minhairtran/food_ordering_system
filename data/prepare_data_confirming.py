@@ -9,7 +9,7 @@ from train.text_transform import ConfirmTextTransform
 import numpy as np
 import json
 
-DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no", "../../confirming_dataset/noise"]
+DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
