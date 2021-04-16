@@ -189,13 +189,13 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    load_data = torch.load(DATA_PATH)
+    load_data_set = torch.load(DATA_PATH)
 
     for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
 
-        for dataset_index in range(len(load_data)):
+        for dataset_index in range(len(load_data_set)):
             # Load all data
-            mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data[dataset_index])
+            mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
 
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
