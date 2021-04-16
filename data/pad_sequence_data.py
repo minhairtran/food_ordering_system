@@ -14,8 +14,6 @@ DATA_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json"
 
 SAVED_FILE = "food_number_data/data_set_"
 
-DATA_NOISE = "food_number_data/data_noise.json"
-
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
@@ -44,9 +42,6 @@ if __name__ == "__main__":
         data_set.append(temp_data_set)
         all_data_length += len(data_set[i]['labels'])
 
-    with open(DATA_NOISE, "r") as fp:
-        data_noise = json.load(fp)
-
     average_dataset_length = int(all_data_length/len(data_set))
 
     for set_number in range(len(data_set)):
@@ -71,16 +66,6 @@ if __name__ == "__main__":
                     data_set[original_dataset_number]["labels"][original_dataset_index])
                 saved_dataset["input_lengths"].append(
                     data_set[original_dataset_number]["input_lengths"][original_dataset_index])
-
-        for data_noise_index in range(6):
-            saved_dataset["mel_spectrogram"].append(
-                data_noise["mel_spectrogram"][data_noise_index])
-            saved_dataset["label_lengths"].append(
-                data_noise["label_lengths"][data_noise_index])
-            saved_dataset["labels"].append(
-                data_noise["labels"][data_noise_index])
-            saved_dataset["input_lengths"].append(
-                data_noise["input_lengths"][data_noise_index])
 
         saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(
             saved_dataset["mel_spectrogram"], saved_dataset["labels"])
