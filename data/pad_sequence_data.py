@@ -8,9 +8,9 @@ import torch.nn as nn
 
 
 # DATA_FILE = "confirming_data/data.json"
-DATA_FILE = "food_number_data/data.json"
-
 # SAVED_FILE = "confirming_data/data.pt"
+
+DATA_FILE = "food_number_data/data.json"
 SAVED_FILE = "food_number_data/data.pt"
 
 
