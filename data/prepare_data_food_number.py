@@ -18,7 +18,7 @@ SAVED_FILE = "food_number_data/data.json"
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
     saved_data = []
     
-    for data_set in enumerate(dataset_path):
+    for data_set in dataset_path:
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
         data = {
