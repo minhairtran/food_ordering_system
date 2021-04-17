@@ -13,7 +13,7 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = ["../data/confirming_data/data_no.pt", "../data/confirming_data/data_yes.pt"]
+DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -75,8 +75,7 @@ class IterMeter(object):
         return self.val
 
 
-def load_data(data_path):
-    data = torch.load(data_path)
+def load_data(data):
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist())) 
@@ -138,7 +137,7 @@ if __name__ == "__main__":
     device = torch.device("cuda:1" if use_cuda else "cpu")
 
         model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-        SpeechRecognitionModel.hparams['n_class'], SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+        6, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -150,12 +149,12 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    for data_path in DATA_PATH:
-        filename = data_path.split("/")[-1]
+    load_data_set = torch.load(DATA_PATH)
 
-        # Load all data
-        mel_spectrogram, labels, input_lengths, label_lengths = load_data(
-            data_path)
+    for dataset_index in range(len(load_data_set)):
+
+        mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
+
 
         # Create test dataset and Dataloader
         test_dataset = Dataset(mel_spectrogram, labels,
@@ -165,4 +164,4 @@ if __name__ == "__main__":
                                     batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                     shuffle=False)
 
-        test(model, device, test_loader, criterion, iter_meter, experiment, filename)
+        test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
