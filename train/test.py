@@ -84,7 +84,7 @@ def load_data(data):
     return mel_spectrogram, labels, input_lengths, label_lengths
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
-    print('\nEvaluating ' + filename + "...")
+    print('\nEvaluating ' + str(filename) + "...")
     model.eval()
     test_loss = 0
     # test_cer, test_wer = [], []
