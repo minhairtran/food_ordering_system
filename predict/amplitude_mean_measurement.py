@@ -38,12 +38,12 @@ stream = p.open(format=SAMPLE_FORMAT, channels=CHANNELS,
 data = stream.read(CHUNKSIZE)
 noise_sample = np.frombuffer(data, dtype=np.float32)
 
-book = load_workbook('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/report.xlsx')
+# book = load_workbook('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/report.xlsx')
 writer = pd.ExcelWriter('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/report.xlsx', engine = 'openpyxl')
-writer.book = book
+# writer.book = book
 
 # Voice mean amplitude measurement
-# mean_amplitude = {'mean_amplitude': [], 'file_name': []}
+# mean_amplitude = {'mean_amplitude': [], 'max_local_amplitude': [], 'file_name': []}
 
 # for i, (dirpath, dirnames, filenames) in enumerate(os.walk("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/test/")):
 #     for f in filenames:
@@ -51,9 +51,10 @@ writer.book = book
 #         signal, sample_rate = librosa.load(file_path)
 #         signal = nr.reduce_noise(audio_clip=signal, noise_clip=noise_sample, verbose=False)
 #         mean_amplitude['mean_amplitude'].append(np.mean(np.abs(signal)))
+#         mean_amplitude['max_local_amplitude'].append(np.amax(signal))
 #         mean_amplitude['file_name'].append(f)
 
-# df1 = pd.DataFrame(mean_amplitude, columns = ['mean_amplitude', 'file_name'])
+# df1 = pd.DataFrame(mean_amplitude, columns = ['mean_amplitude', 'max_local_amplitude','file_name'])
 
 # df1.to_excel (writer, sheet_name='voice_mean_amplitude', index = False, header=True)
 
@@ -66,24 +67,38 @@ def id_generator():
 
 FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/" + id_generator() + ".wav", 'wb'
 
-mean_amplitude = {'time_(s)': [], 'mean_amplitude': [], 'file_name': []}
+mean_amplitude = {'time_(s)': [], 'mean_amplitude': [], 'max_local_amplitude': [], 'file_name': []}
 frames = []
 
 print("Start recording...")
 start = time.time()
+all_windows = []
 
-while(time.time() - start < 60):
+while(time.time() - start < 20):
     data = stream.read(CHUNKSIZE)
     frames.append(data)
     current_window = np.frombuffer(data, dtype=np.float32)
 
     current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-    print((time.time() - start), np.mean(np.abs(current_window)))
+    if len(all_windows) == 0:
+        all_windows = current_window
+    else:
+        all_windows  = np.append(all_windows, current_window)
+
+    print((time.time() - start), np.mean(np.abs(current_window)), np.amax(current_window))
 
     mean_amplitude['time_(s)'].append(time.time() - start)
     mean_amplitude['mean_amplitude'].append(np.mean(np.abs(current_window)))
+    mean_amplitude['max_local_amplitude'].append(np.amax(current_window))
     mean_amplitude['file_name'].append(FILENAME)
+    time.sleep(1)
+    
+plt.figure(figsize=(25, 10))
+
+plt.plot(all_windows)
+plt.savefig('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/' + id_generator() + '_plot.png')
+plt.show()
 
 # close stream
 stream.stop_stream()
@@ -100,12 +115,11 @@ wf.setframerate(RATE)
 wf.writeframes(b''.join(frames))
 wf.close()
 
-df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'mean_amplitude', 'file_name'])
+df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
-df2.to_excel (writer, sheet_name='low_noise_environment', startrow=12, index = False, header=False, columns = ['time_(s)', 'mean_amplitude', 'file_name'])
+df2.to_excel (writer, sheet_name='low_noise_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
 writer.save()
 writer.close()
-
 
 

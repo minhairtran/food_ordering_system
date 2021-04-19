@@ -32,7 +32,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
 
             label = dirpath.split("/")[-1]
 
-            print("\nProcessing: '{}'".format(label))
+            print("\nProcessing: '{}' with save file: ".format(label, save_file))
 
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
@@ -53,7 +53,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 data["labels"].append(added_label)
                 data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
                 data["label_lengths"].append(len(label))
-                print("{}: {}".format(file_path, i-1))
+                print("{}: {}".format(file_path, label))
 
         # torch.save(data, save_file)
         with open(save_file, 'w') as f:
