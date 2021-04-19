@@ -3,7 +3,6 @@ sys.path.append("../../food_ordering_system")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from comet_ml import Experiment
 import numpy as np
 import torch.nn.functional as F
 import torch.utils.data as data
@@ -13,7 +12,13 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-DATA_PATH = "../data/confirming_data/data.pt"
+# DATA_PATH = "../data/confirming_data/data.pt"
+
+DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt", \
+    "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt", \
+        "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt", \
+            "../data/food_number_data/data_set_9.pt"]
+
 SAVED_MODEL_PATH = "model_confirming.h5"
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
@@ -76,6 +81,8 @@ class IterMeter(object):
 
 
 def load_data(data):
+    data = torch.load(data)
+
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
     label_lengths = list(map(int, data["label_lengths"].tolist())) 
@@ -83,54 +90,38 @@ def load_data(data):
 
     return mel_spectrogram, labels, input_lengths, label_lengths
 
-def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
+def test(model, device, test_loader, criterion, iter_meter, filename):
     print('\nEvaluating ' + str(filename) + "...")
     model.eval()
     test_loss = 0
     # test_cer, test_wer = [], []
     test_cer = []
 
-    with experiment.test():
-        with torch.no_grad():
-            for i, _data in enumerate(test_loader):
-                spectrograms, labels, input_lengths, label_lengths = _data
-                spectrograms, labels = spectrograms.to(
-                    device), labels.to(device)
+    with torch.no_grad():
+        for i, _data in enumerate(test_loader):
+            spectrograms, labels, input_lengths, label_lengths = _data
+            spectrograms, labels = spectrograms.to(
+                device), labels.to(device)
 
-                output = model(spectrograms)  # (batch, time, n_class)
-                output = F.log_softmax(output, dim=2)
-                output = output.transpose(0, 1)  # (time, batch, n_class)
+            output = model(spectrograms)  # (batch, time, n_class)
+            output = F.log_softmax(output, dim=2)
+            output = output.transpose(0, 1)  # (time, batch, n_class)
 
-                loss = criterion(output, labels, input_lengths, label_lengths)
-                test_loss += loss.item() / len(test_loader)
+            loss = criterion(output, labels, input_lengths, label_lengths)
+            test_loss += loss.item() / len(test_loader)
 
-                decoded_preds, decoded_targets = GreedyDecoder(
-                    output.transpose(0, 1), labels, label_lengths)
-                for j in range(len(decoded_preds)):
-                    test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
+            decoded_preds, decoded_targets = GreedyDecoder(
+                output.transpose(0, 1), labels, label_lengths)
+            for j in range(len(decoded_preds)):
+                test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
 
     avg_cer = sum(test_cer)/len(test_cer)
-    experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
-    experiment.log_metric('cer', avg_cer, step=iter_meter.get())
 
     print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(
         test_loss, avg_cer))
 
 
 if __name__ == "__main__":
-
-    # Create an experiment with your api key
-    experiment = Experiment(
-        api_key="NXte5ivrmxMfwBeYjvahf97PC",
-        project_name="general",
-        workspace="hai321",
-    )
-
-    experiment.add_tags(["confirm_data", "deep_speech_model"])
-    experiment.set_name("Test confirm data with deepspeech model")
-
-    experiment.log_parameters(SpeechRecognitionModel.hparams)
-
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
@@ -149,12 +140,15 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    load_data_set = torch.load(DATA_PATH)
+    # load_data_set = torch.load(DATA_PATH)
 
-    for dataset_index in range(len(load_data_set)):
+    # for dataset_index in range(len(load_data_set)):
 
-        mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
+    #     mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
 
+    for data_path in DATA_PATH:
+        filename = data_path.split("/")[-1]
+        mel_spectrogram, labels, input_lengths, label_lengths = load_data(data_path)
 
         # Create test dataset and Dataloader
         test_dataset = Dataset(mel_spectrogram, labels,
@@ -164,4 +158,4 @@ if __name__ == "__main__":
                                     batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                     shuffle=False)
 
-        test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+        test(model, device, test_loader, criterion, iter_meter, dataset_index)
