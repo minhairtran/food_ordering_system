@@ -12,14 +12,16 @@ from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import SpeechRecognitionModel
 
-# DATA_PATH = "../data/confirming_data/data.pt"
+DATA_PATH = "../data/confirming_data/data.pt"
 
-DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt", \
-    "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt", \
-        "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt", \
-            "../data/food_number_data/data_set_9.pt"]
+# DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt", \
+#     "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt", \
+#         "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt", \
+#             "../data/food_number_data/data_set_9.pt"]
 
-SAVED_MODEL_PATH = "model_confirming.h5"
+# SAVED_MODEL_PATH = "model_confirming.h5"
+SAVED_MODEL_PATH = "model_food_number.h5"
+
 text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
 
@@ -45,6 +47,8 @@ class Dataset(torch.utils.data.Dataset):
         labels = self.labels[index]
         label_length = self.label_lengths[index]
         input_length = self.input_lengths[index]
+
+        print(labels)
 
         return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels, input_length, label_length)
 
@@ -81,7 +85,7 @@ class IterMeter(object):
 
 
 def load_data(data):
-    data = torch.load(data)
+    # data = torch.load(data)
 
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
@@ -128,7 +132,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if use_cuda else "cpu")
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-        16, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+        6, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -140,15 +144,15 @@ if __name__ == "__main__":
 
     iter_meter = IterMeter()
 
-    # load_data_set = torch.load(DATA_PATH)
+    load_data_set = torch.load(DATA_PATH)
 
-    # for dataset_index in range(len(load_data_set)):
+    for dataset_index in range(len(load_data_set)):
 
-    #     mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
+        mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
 
-    for data_path in DATA_PATH:
-        filename = data_path.split("/")[-1]
-        mel_spectrogram, labels, input_lengths, label_lengths = load_data(data_path)
+    # for data_path in DATA_PATH:
+    #     filename = data_path.split("/")[-1]
+    #     mel_spectrogram, labels, input_lengths, label_lengths = load_data(data_path)
 
         # Create test dataset and Dataloader
         test_dataset = Dataset(mel_spectrogram, labels,
@@ -158,6 +162,6 @@ if __name__ == "__main__":
                                     batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                     shuffle=False)
 
-        # test(model, device, test_loader, criterion, iter_meter, dataset_index)
-        test(model, device, test_loader, criterion, iter_meter, filename)
+        test(model, device, test_loader, criterion, iter_meter, dataset_index)
+        # test(model, device, test_loader, criterion, iter_meter, filename)
 
