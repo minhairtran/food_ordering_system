@@ -158,4 +158,6 @@ if __name__ == "__main__":
                                     batch_size=SpeechRecognitionModel.hparams["batch_size"],
                                     shuffle=False)
 
-        test(model, device, test_loader, criterion, iter_meter, dataset_index)
+        # test(model, device, test_loader, criterion, iter_meter, dataset_index)
+        test(model, device, test_loader, criterion, iter_meter, filename)
+
