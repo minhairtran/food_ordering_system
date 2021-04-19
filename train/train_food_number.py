@@ -47,6 +47,8 @@ class Dataset(torch.utils.data.Dataset):
         label_length = self.label_lengths[index]
         input_length = self.input_lengths[index]
 
+        print(labels)
+
         return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels, input_length, label_length)
 
 
