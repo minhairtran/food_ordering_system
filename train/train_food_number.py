@@ -207,7 +207,7 @@ if __name__ == "__main__":
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
                 input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                               input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=False)
+                                                                                               input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=True)
 
             # Create train dataset and Dataloader
             train_dataset = Dataset(
@@ -215,7 +215,7 @@ if __name__ == "__main__":
 
             train_loader = data.DataLoader(dataset=train_dataset,
                                            batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                           shuffle=True)
+                                           shuffle=False)
 
             # Create test dataset and Dataloader
             test_dataset = Dataset(mel_spectrogram_test, labels_test,
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
             test_loader = data.DataLoader(dataset=test_dataset,
                                           batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                          shuffle=True)
+                                          shuffle=False)
 
             scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
                                                       steps_per_epoch=int(
