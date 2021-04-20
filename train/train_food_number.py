@@ -215,7 +215,7 @@ if __name__ == "__main__":
 
             train_loader = data.DataLoader(dataset=train_dataset,
                                            batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                           shuffle=False)
+                                           shuffle=True)
 
             # Create test dataset and Dataloader
             test_dataset = Dataset(mel_spectrogram_test, labels_test,
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
             test_loader = data.DataLoader(dataset=test_dataset,
                                           batch_size=SpeechRecognitionModel.hparams["batch_size"],
-                                          shuffle=False)
+                                          shuffle=True)
 
             scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
                                                       steps_per_epoch=int(
