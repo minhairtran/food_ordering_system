@@ -13,9 +13,9 @@ class CNNLayerNorm(nn.Module):
 
     def forward(self, x):
         # x (batch, channel, feature, time)
-        x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
+        x = x.transpose(1, 2).contiguous() # (batch, channel, time, feature)
         x = self.layer_norm(x)
-        return x.transpose(2, 3).contiguous() # (batch, channel, feature, time) 
+        return x.transpose(1, 2).contiguous() # (batch, channel, feature, time) 
 
 class ResidualCNN(nn.Module):
     """Residual CNN inspired by https://arxiv.org/pdf/1603.05027.pdf
@@ -103,9 +103,9 @@ class SpeechRecognitionModel(nn.Module):
     def forward(self, x):
         # x = self.cnn(x)
         x = self.rescnn_layers(x)
-        sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2],
-                   sizes[3])  # (batch, feature, time)
+        # sizes = x.size()
+        # x = x.view(sizes[0], sizes[1] * sizes[2],
+        #            sizes[3])  # (batch, feature, time)
         x = x.transpose(1, 2)  # (batch, time, feature)
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
