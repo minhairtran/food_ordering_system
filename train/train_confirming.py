@@ -170,8 +170,8 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-    6, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
+    9, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
                 input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=True)
+                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=False)
 
             # Create train dataset and Dataloader
             train_dataset = Dataset(

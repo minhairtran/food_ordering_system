@@ -7,7 +7,9 @@ class ConfirmTextTransform:
         o 3
         s 4
         y 5
-        i 6
+        u 6
+        k 7
+        w 8
         """
         self.char_map = {}
         self.index_map = {}
@@ -52,6 +54,7 @@ class FoodNumberTextTransform:
         w 13
         x 14
         z 15
+        k 16
         """
         self.char_map = {}
         self.index_map = {}

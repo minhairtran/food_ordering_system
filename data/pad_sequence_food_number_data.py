@@ -8,7 +8,7 @@ import torch.nn as nn
 
 DATA_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json", "food_number_data/data_two.json", "food_number_data/data_three.json", \
     "food_number_data/data_four.json", "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", \
-        "food_number_data/data_eight.json", "food_number_data/data_nine.json"]
+        "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
 
 SAVED_FILE = "food_number_data/data_set_"
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
 
         print("Separated dataset size", saved_dataset["labels"].size())
 
-        # current_saved_file = SAVED_FILE + str(set_number) + ".pt"
-        # torch.save(saved_dataset, current_saved_file)
+        current_saved_file = SAVED_FILE + str(set_number) + ".pt"
+        torch.save(saved_dataset, current_saved_file)
 
         print("Padding set success", set_number)

@@ -11,9 +11,9 @@ import torch.nn as nn
 
 
 DATASET_PATH = ["../../food_number_dataset/zero", "../../food_number_dataset/one", "../../food_number_dataset/two", "../../food_number_dataset/three", "../../food_number_dataset/four",
-                "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine"]
+                "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine",  "../../food_number_dataset/unknown"]
 SAVED_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json", "food_number_data/data_two.json", "food_number_data/data_three.json", "food_number_data/data_four.json",
-              "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json"]
+              "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
 
 
 def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
