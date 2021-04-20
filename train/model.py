@@ -5,6 +5,18 @@ sys.path.append(
 import torch.nn as nn
 import torch.nn.functional as F
 
+class CNNLayerNorm(nn.Module):
+    """Layer normalization built for cnns input"""
+    def __init__(self, n_feats):
+        super(CNNLayerNorm, self).__init__()
+        self.layer_norm = nn.LayerNorm(n_feats)
+
+    def forward(self, x):
+        # x (batch, channel, feature, time)
+        x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
+        x = self.layer_norm(x)
+        return x.transpose(2, 3).contiguous() # (batch, channel, feature, time) 
+
 class ResidualCNN(nn.Module):
     """Residual CNN inspired by https://arxiv.org/pdf/1603.05027.pdf
         except with layer norm instead of batch norm
@@ -63,12 +75,13 @@ class SpeechRecognitionModel(nn.Module):
         "dropout": 0.1,
         "learning_rate": 5e-4,
         "batch_size": 4,
-        "epochs": 20, 
+        "epochs": 10, 
         "test_size": 0.2
     }
 
-    def __init__(self , n_rnn_layers, rnn_dim, n_class, n_feats, dropout):
+    def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, dropout):
         super(SpeechRecognitionModel, self).__init__()
+        
         self.rescnn_layers = nn.Sequential(*[
             ResidualCNN(32, 32, kernel=3, stride=1,
                         dropout=dropout, n_feats=n_feats)
