@@ -176,7 +176,7 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],
                                    17, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
