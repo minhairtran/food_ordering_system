@@ -24,7 +24,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
 
     labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
     mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True).transpose(1, 2)
+        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
     return mel_spectrogram, labels
 
@@ -72,8 +72,6 @@ if __name__ == "__main__":
             saved_dataset["input_lengths"])
         saved_dataset["label_lengths"] = torch.Tensor(
             saved_dataset["label_lengths"])
-
-        print("Separated dataset size", saved_dataset["labels"].size())
 
         current_saved_file = SAVED_FILE + str(set_number) + ".pt"
         torch.save(saved_dataset, current_saved_file)
