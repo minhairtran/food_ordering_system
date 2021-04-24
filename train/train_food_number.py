@@ -1,3 +1,9 @@
+import sys
+sys.path.append("../../food_ordering_system")
+sys.path.append(
+    "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
+from comet_ml import Experiment
+
 from sklearn.model_selection import train_test_split
 import numpy as np
 import torch.nn.functional as F
@@ -8,12 +14,6 @@ import torch
 from error_calculating import ErrorCalculating
 from text_transform import FoodNumberTextTransform
 from model import SpeechRecognitionModel
-from comet_ml import Experiment
-import sys
-sys.path.append("../../food_ordering_system")
-sys.path.append(
-    "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
-
 
 DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt",
              "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt",
