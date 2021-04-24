@@ -1,25 +1,24 @@
+from sklearn.model_selection import train_test_split
+import numpy as np
+import torch.nn.functional as F
+import torch.optim as optim
+import torch.utils.data as data
+import torch.nn as nn
+import torch
+from error_calculating import ErrorCalculating
+from text_transform import FoodNumberTextTransform
+from model import SpeechRecognitionModel
 from comet_ml import Experiment
 import sys
 sys.path.append("../../food_ordering_system")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from model import SpeechRecognitionModel
-from text_transform import FoodNumberTextTransform
-from error_calculating import ErrorCalculating
-import torch
-import torch.nn as nn
-import torch.utils.data as data
-import torch.optim as optim
-import torch.nn.functional as F
-import numpy as np
-from sklearn.model_selection import train_test_split
 
-
-DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt", \
-    "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt", \
-        "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt", \
-            "../data/food_number_data/data_set_9.pt", "../data/food_number_data/data_set_10.pt"]
+DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt",
+             "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt",
+             "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt",
+             "../data/food_number_data/data_set_9.pt", "../data/food_number_data/data_set_10.pt"]
 SAVED_MODEL_PATH = "model_food_number.h5"
 text_transform = FoodNumberTextTransform()
 error_calculating = ErrorCalculating()
@@ -102,8 +101,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
 
             optimizer.zero_grad()
 
-            print(spectrograms)
-
             output = model(spectrograms)  # (batch, time, n_class)
             output = F.log_softmax(output, dim=2)
             output = output.transpose(0, 1)  # (time, batch, n_class)
@@ -179,7 +176,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if use_cuda else "cpu")
 
     model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'],
-                                   17, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+                                   17, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)

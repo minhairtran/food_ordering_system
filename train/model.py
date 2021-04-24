@@ -73,6 +73,7 @@ class SpeechRecognitionModel(nn.Module):
         "rnn_dim": 64,
         "n_feats": 128,
         "dropout": 0.1,
+        "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
         "epochs": 10, 
