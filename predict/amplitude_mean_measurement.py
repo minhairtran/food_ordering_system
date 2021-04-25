@@ -74,7 +74,7 @@ print("Start recording...")
 start = time.time()
 all_windows = []
 
-while(time.time() - start < 270):
+while(time.time() - start < 20):
 # while (True):
     data = stream.read(CHUNKSIZE)
     frames.append(data)
@@ -117,7 +117,7 @@ wf.close()
 
 df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
-df2.to_excel (writer, sheet_name='music_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
+df2.to_excel (writer, sheet_name='voice_live_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
 writer.save()
 writer.close()
