@@ -74,7 +74,7 @@ print("Start recording...")
 start = time.time()
 all_windows = []
 
-while(time.time() - start < 20):
+while(time.time() - start < 270):
 # while (True):
     data = stream.read(CHUNKSIZE)
     frames.append(data)
@@ -87,13 +87,12 @@ while(time.time() - start < 20):
     else:
         all_windows  = np.append(all_windows, current_window)
 
-    print((time.time() - start), np.mean(np.abs(current_window)), np.amax(current_window))
+    print((time.time() - start), np.amax(current_window))
 
     mean_amplitude['time_(s)'].append(time.time() - start)
     mean_amplitude['mean_amplitude'].append(np.mean(np.abs(current_window)))
     mean_amplitude['max_local_amplitude'].append(np.amax(current_window))
     mean_amplitude['file_name'].append(FILENAME)
-    time.sleep(1)
     
 plt.figure(figsize=(25, 10))
 
@@ -118,7 +117,7 @@ wf.close()
 
 df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
-df2.to_excel (writer, sheet_name='noise_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
+df2.to_excel (writer, sheet_name='music_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
 
 writer.save()
 writer.close()
