@@ -163,15 +163,15 @@ if __name__ == "__main__":
     experiment.add_tags(["food_number_data", "deep_speech_model"])
     experiment.set_name("Test food number data with deepspeech model")
 
-    experiment.log_parameters(SpeechRecognitionModel.hparams)
+    experiment.log_parameters(SpeechRecognitionModel.hparams_confirming)
 
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_cnn_layers'], SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-    9, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['dropout']).to(device)
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams_confirming['n_cnn_layers'], SpeechRecognitionModel.hparams_confirming['n_rnn_layers'], SpeechRecognitionModel.hparams_confirming['rnn_dim'], \
+    9, SpeechRecognitionModel.hparams_confirming['n_feats'], SpeechRecognitionModel.hparams_confirming['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             # Split into train and test
             mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
                 input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=False)
+                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=False if epoch <=10 else True)
 
             # Create train dataset and Dataloader
             train_dataset = Dataset(
