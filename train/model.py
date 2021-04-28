@@ -89,7 +89,7 @@ class SpeechRecognitionModel(nn.Module):
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
-        "epochs": 20, 
+        "epochs": 30, 
         "test_size": 0.2
     }
     
