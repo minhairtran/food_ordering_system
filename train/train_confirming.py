@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
-    for epoch in range(1, SpeechRecognitionModel.hparams["epochs"] + 1):
+    for epoch in range(1, SpeechRecognitionModel.hparams_confirming["epochs"] + 1):
 
         for dataset_index in range(len(load_data_set)):
             # Load all data
@@ -207,7 +207,7 @@ if __name__ == "__main__":
                 mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
 
             train_loader = data.DataLoader(dataset=train_dataset,
-                                        batch_size=SpeechRecognitionModel.hparams["batch_size"],
+                                        batch_size=SpeechRecognitionModel.hparams_confirming["batch_size"],
                                         shuffle=False)
 
             # Create test dataset and Dataloader
@@ -215,13 +215,13 @@ if __name__ == "__main__":
                                 input_lengths_test, label_lengths_test)
 
             test_loader = data.DataLoader(dataset=test_dataset,
-                                        batch_size=SpeechRecognitionModel.hparams["batch_size"],
+                                        batch_size=SpeechRecognitionModel.hparams_confirming["batch_size"],
                                         shuffle=False)
 
-            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams["learning_rate"],
+            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams_confirming["learning_rate"],
                                                     steps_per_epoch=int(
                                                         len(train_loader)),
-                                                    epochs=SpeechRecognitionModel.hparams["epochs"],
+                                                    epochs=SpeechRecognitionModel.hparams_confirming["epochs"],
                                                     anneal_strategy='linear')
 
             train(model, device, train_loader, criterion, optimizer,
