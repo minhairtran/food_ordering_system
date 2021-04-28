@@ -81,7 +81,7 @@ class SpeechRecognitionModel(nn.Module):
     }
 
     hparams_confirming = {
-        "n_cnn_layers": 1,
+        "n_cnn_layers": 3,
         "n_rnn_layers": 2,
         "rnn_dim": 64,
         "n_feats": 128,
