@@ -13,7 +13,7 @@ import torch.nn as nn
 import torch
 from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
-from model import SpeechRecognitionModel
+from model import ConfirmingModel
 
 DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
@@ -28,8 +28,6 @@ class Dataset(torch.utils.data.Dataset):
         'Initialization'
         self.mel_spectrogram = mel_spectrogram
         self.labels = labels
-        self.label_lengths = label_lengths
-        self.input_lengths = input_lengths
 
     def __len__(self):
         'Denotes the total number of samples'
@@ -40,29 +38,8 @@ class Dataset(torch.utils.data.Dataset):
         # Select sample
         mel_spectrogram = self.mel_spectrogram[index]
         labels = self.labels[index]
-        label_length = self.label_lengths[index]
-        input_length = self.input_lengths[index]
 
-        return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels, input_length, label_length)
-
-
-def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
-    arg_maxes = torch.argmax(output, dim=2)
-    decodes = []
-    targets = []
-
-    for i, args in enumerate(arg_maxes):
-        decode = []
-        targets.append(text_transform.int_to_text(
-            labels[i][:label_lengths[i]].tolist()))
-        for j, index in enumerate(args):
-            if index != blank_label:
-                if collapse_repeated and j != 0 and index == args[j - 1]:
-                    continue
-                decode.append(index.item())
-        decodes.append(text_transform.int_to_text(decode))
-    return decodes, targets
-
+        return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().requires_grad_(), labels)
 
 class IterMeter(object):
     """keeps track of total iterations"""
@@ -80,10 +57,8 @@ class IterMeter(object):
 def load_data(data):
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
-    label_lengths = list(map(int, data["label_lengths"].tolist())) 
-    input_lengths = list(map(int, data["input_lengths"].tolist())) 
 
-    return mel_spectrogram, labels, input_lengths, label_lengths
+    return mel_spectrogram, labels
 
 
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
@@ -91,7 +66,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
     data_len = len(train_loader.dataset)
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
-            spectrograms, labels, input_lengths, label_lengths = _data
+            spectrograms, labels = _data
             spectrograms, labels = spectrograms.to(device), labels.to(
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
@@ -101,7 +76,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             output = F.log_softmax(output, dim=2)
             output = output.transpose(0, 1)  # (time, batch, n_class)
 
-            loss = criterion(output, labels, input_lengths, label_lengths)
+            loss = criterion(output, labels)
             loss.backward()
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
@@ -121,13 +96,12 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('\nEvaluating ' + str(filename) + "...")
     model.eval()
     test_loss = 0
-    # test_cer, test_wer = [], []
     test_cer = []
 
     with experiment.test():
         with torch.no_grad():
             for i, _data in enumerate(test_loader):
-                spectrograms, labels, input_lengths, label_lengths = _data
+                spectrograms, labels= _data
                 spectrograms, labels = spectrograms.to(
                     device), labels.to(device)
 
@@ -135,20 +109,13 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 output = F.log_softmax(output, dim=2)
                 output = output.transpose(0, 1)  # (time, batch, n_class)
 
-                loss = criterion(output, labels, input_lengths, label_lengths)
+                loss = criterion(output, labels)
                 test_loss += loss.item() / len(test_loader)
 
-                decoded_preds, decoded_targets = GreedyDecoder(
-                    output.transpose(0, 1), labels, label_lengths)
-                for j in range(len(decoded_preds)):
-                    test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
-
-    avg_cer = sum(test_cer)/len(test_cer)
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
-    experiment.log_metric('cer', avg_cer, step=iter_meter.get())
 
-    print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(
-        test_loss, avg_cer))
+    print('Test set: Average loss: {:.4f}\n'.format(
+        test_loss))
 
 
 if __name__ == "__main__":
@@ -163,15 +130,15 @@ if __name__ == "__main__":
     experiment.add_tags(["food_confirming_data", "deep_speech_model"])
     experiment.set_name("Test confirming data with deepspeech model")
 
-    experiment.log_parameters(SpeechRecognitionModel.hparams_confirming)
+    experiment.log_parameters(ConfirmingModel.hparams)
 
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams_confirming['n_cnn_layers'], SpeechRecognitionModel.hparams_confirming['n_feats'], \
-        SpeechRecognitionModel.hparams_confirming['stride'], SpeechRecognitionModel.hparams_confirming['dropout']).to(device)
+    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_feats'], \
+        ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -184,44 +151,41 @@ if __name__ == "__main__":
     print('Num Model Parameters', sum(
         [param.nelement() for param in model.parameters()]))
 
-    optimizer = optim.AdamW(model.parameters(), SpeechRecognitionModel.hparams["learning_rate"])
-    criterion = nn.CTCLoss(blank=0).to(device)
+    optimizer = optim.AdamW(model.parameters(), ConfirmingModel.hparams["learning_rate"])
+    criterion = nn.CrossEntropyLoss().to(device)
 
     iter_meter = IterMeter()
 
     load_data_set = torch.load(DATA_PATH)
 
-    for epoch in range(1, SpeechRecognitionModel.hparams_confirming["epochs"] + 1):
+    for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
 
         for dataset_index in range(len(load_data_set)):
             # Load all data
-            mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
+            mel_spectrogram, labels = load_data(load_data_set[dataset_index])
 
             # Split into train and test
-            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
-                input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                            input_lengths, label_lengths, test_size=SpeechRecognitionModel.hparams['test_size'], shuffle=True)
+            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=True)
 
             # Create train dataset and Dataloader
             train_dataset = Dataset(
-                mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
+                mel_spectrogram_train, labels_train)
 
             train_loader = data.DataLoader(dataset=train_dataset,
-                                        batch_size=SpeechRecognitionModel.hparams_confirming["batch_size"],
+                                        batch_size=ConfirmingModel.hparams["batch_size"],
                                         shuffle=False)
 
             # Create test dataset and Dataloader
-            test_dataset = Dataset(mel_spectrogram_test, labels_test,
-                                input_lengths_test, label_lengths_test)
+            test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
             test_loader = data.DataLoader(dataset=test_dataset,
-                                        batch_size=SpeechRecognitionModel.hparams_confirming["batch_size"],
+                                        batch_size=ConfirmingModel.hparams["batch_size"],
                                         shuffle=False)
 
-            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=SpeechRecognitionModel.hparams_confirming["learning_rate"],
+            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
                                                     steps_per_epoch=int(
                                                         len(train_loader)),
-                                                    epochs=SpeechRecognitionModel.hparams_confirming["epochs"],
+                                                    epochs=ConfirmingModel.hparams["epochs"],
                                                     anneal_strategy='linear')
 
             train(model, device, train_loader, criterion, optimizer,
