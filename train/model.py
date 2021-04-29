@@ -164,9 +164,8 @@ class ConfirmingModel(nn.Module):
         self.cnn_layers.add_module("conv_2", CNN(in_channels=128, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
         self.cnn_layers.add_module("conv_3", CNN(in_channels=64, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
 
-        self.fully_connected = nn.Linear(n_feats*64, n_feats)
-        
         self.classifier = nn.Sequential(
+            nn.Linear(n_feats*64, n_feats)
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(n_feats, n_class)
