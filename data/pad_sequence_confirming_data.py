@@ -16,14 +16,10 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     for spectrogram in mel_spectrogram_not_tensorized:
         mel_spectrogram.append(torch.Tensor(spectrogram))
 
-    for label in labels_not_tensorized:
-        labels.append(torch.Tensor(label))
-
-    labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
     mel_spectrogram = nn.utils.rnn.pad_sequence(
         mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
-    return mel_spectrogram, labels
+    return mel_spectrogram
 
 
 if __name__ == "__main__":
@@ -57,8 +53,11 @@ if __name__ == "__main__":
                 saved_dataset_temp["labels"].append(
                     data_set[original_dataset_number]["labels"][original_dataset_index])
 
-        saved_dataset_temp["mel_spectrogram"], saved_dataset_temp["labels"] = tensorize(
-            saved_dataset_temp["mel_spectrogram"], saved_dataset_temp["labels"])
+        saved_dataset_temp["mel_spectrogram"] = tensorize(saved_dataset_temp["mel_spectrogram"])
+
+        saved_dataset_temp["labels"] = torch.Tensor(
+            saved_dataset_temp["labels"])
+
 
         saved_dataset.append(saved_dataset_temp)
 
