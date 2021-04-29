@@ -12,7 +12,7 @@ import json
 DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no", "../../confirming_dataset/unknown"]
 SAVED_FILE = "confirming_data/data.json"
 
-def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
+def preprocess_dataset(dataset_path, saved_file_path, n_mels=20, n_fft=512, hop_length=384):
     saved_data = []
 
     for data_set in dataset_path:
@@ -41,6 +41,8 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 # extract MFCCs (#features, #time binz)
                 mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
                                                 hop_length=hop_length)
+
+                mel_spectrogram = librosa.power_to_db(mel_spectrogram)
                 
                 text_transform = ConfirmTextTransform()
 
