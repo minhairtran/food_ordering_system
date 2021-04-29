@@ -58,6 +58,8 @@ def load_data(data):
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
 
+    print(labels)
+
     return mel_spectrogram, labels
 
 
@@ -67,7 +69,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
             spectrograms, labels = _data
-            print(labels)
             spectrograms, labels = spectrograms.to(device), labels.to(
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
