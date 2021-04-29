@@ -151,7 +151,8 @@ class ConfirmingModel(nn.Module):
         "batch_size": 4,
         "epochs": 10, 
         "test_size": 0.2,
-        "n_feats": 128,
+        "n_feats": 20,
+        "n_class": 1
     }
 
     def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
