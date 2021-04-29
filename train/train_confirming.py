@@ -58,8 +58,6 @@ def load_data(data):
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
 
-    print(labels)
-
     return mel_spectrogram, labels
 
 
