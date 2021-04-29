@@ -160,7 +160,7 @@ class ConfirmingModel(nn.Module):
 
         # n residual cnn layers with filter size of 32
         self.cnn_layers = nn.Sequential(*[
-            CNN(in_channels=1 if i==0 else if i==1 64 else 32, out_channels=64 if i == 0 else 32, kernel=3, stride=1, n_feats=n_feats) 
+            CNN(in_channels=1 if i==0 else 32, out_channels=32, kernel=3, stride=1, n_feats=n_feats) 
             for i in range(n_cnn_layers)
         ])
         
