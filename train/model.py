@@ -131,10 +131,10 @@ class CNN(nn.Module):
     def __init__(self, out_channels, kernel, stride, n_feats):
         super(CNN, self).__init__()
 
-        self.cnn = nn.Conv2d(out_channels,
-                              kernel, stride, padding=kernel//2)
+        self.cnn = nn.Conv2d(in_channels, out_channels,
+                              kernel_size=kernel, stride=stride, padding=kernel//2)
         self.layer_norm = CNNLayerNorm(n_feats)
-        self.max_pooling = nn.MaxPool2d(kernel_size=kernel, stride=stride, padding="same")
+        self.max_pooling = nn.MaxPool2d(kernel, stride, kernel//2)
 
     def forward(self, x):
         x = self.cnn(x)
@@ -145,7 +145,7 @@ class CNN(nn.Module):
 class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "dropout": 0.2,
+        "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
@@ -160,7 +160,7 @@ class ConfirmingModel(nn.Module):
 
         # n residual cnn layers with filter size of 32
         self.cnn_layers = nn.Sequential(*[
-            CNN(out_channels=64 if i == 0 else 32, kernel=3, stride=1, n_feats=n_feats) 
+            CNN(in_channels=1 if i==0 else if i==1 64 else 32, out_channels=64 if i == 0 else 32, kernel=3, stride=1, n_feats=n_feats) 
             for i in range(n_cnn_layers)
         ])
         
@@ -172,7 +172,6 @@ class ConfirmingModel(nn.Module):
         )
 
     def forward(self, x):
-        x = self.cnn(x)
         x = self.cnn_layers(x)
         x = self.classifier(x)
         return x
