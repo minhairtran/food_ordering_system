@@ -171,10 +171,15 @@ class ConfirmingModel(nn.Module):
             nn.Linear(n_feats, n_class)
         )
 
+        self.output = nn.LazyLinear(n_class)
+
     def forward(self, x):
         x = self.cnn_layers(x)
         sizes = x.size()
         x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
         x = x.transpose(1, 2) # (batch, time, feature)
         x = self.classifier(x)
+        sizes = x.size()
+        x = x.view(sizes[0], sizes[1] * sizes[2]) #(batch, time)
+        x = self.output(x)
         return x
