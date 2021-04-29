@@ -175,5 +175,6 @@ class ConfirmingModel(nn.Module):
     def forward(self, x):
         x = self.cnn_layers(x)
         x = self.fully_connected(x)
+        print(x.size())
         x = self.classifier(x)
         return x
