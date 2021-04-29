@@ -160,8 +160,8 @@ if __name__ == "__main__":
         workspace="hai321",
     )
 
-    experiment.add_tags(["food_number_data", "deep_speech_model"])
-    experiment.set_name("Test food number data with deepspeech model")
+    experiment.add_tags(["food_confirming_data", "deep_speech_model"])
+    experiment.set_name("Test confirming data with deepspeech model")
 
     experiment.log_parameters(SpeechRecognitionModel.hparams_confirming)
 
@@ -170,8 +170,8 @@ if __name__ == "__main__":
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams_confirming['n_cnn_layers'], SpeechRecognitionModel.hparams_confirming['n_rnn_layers'], SpeechRecognitionModel.hparams_confirming['rnn_dim'], \
-    9, SpeechRecognitionModel.hparams_confirming['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams_confirming['dropout']).to(device)
+    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams_confirming['n_cnn_layers'], SpeechRecognitionModel.hparams_confirming['n_feats'], \
+        SpeechRecognitionModel.hparams_confirming['stride'], SpeechRecognitionModel.hparams_confirming['dropout']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
