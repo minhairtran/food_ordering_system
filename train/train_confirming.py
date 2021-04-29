@@ -24,7 +24,7 @@ error_calculating = ErrorCalculating()
 class Dataset(torch.utils.data.Dataset):
     'Characterizes a dataset for PyTorch'
 
-    def __init__(self, mel_spectrogram, labels, input_lengths, label_lengths):
+    def __init__(self, mel_spectrogram, labels):
         'Initialization'
         self.mel_spectrogram = mel_spectrogram
         self.labels = labels
