@@ -157,11 +157,9 @@ class ConfirmingModel(nn.Module):
 
     def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
         super(ConfirmingModel, self).__init__()
-        n_feats = n_feats//2
-
         # n residual cnn layers with filter size of 32
         self.cnn_layers = nn.Sequential(*[
-            CNN(in_channels=1 if i==0 else 32, out_channels=32, kernel=3, stride=1, n_feats=n_feats) 
+            CNN(in_channels=1 if i==0 else 64, out_channels=64, kernel=3, stride=1, n_feats=n_feats) 
             for i in range(n_cnn_layers)
         ])
         
