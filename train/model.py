@@ -155,7 +155,7 @@ class ConfirmingModel(nn.Module):
     }
 
     def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
-        super(SpeechRecognitionModel, self).__init__()
+        super(ConfirmingModel, self).__init__()
         n_feats = n_feats//2
 
         # n residual cnn layers with filter size of 32
