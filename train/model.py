@@ -128,7 +128,7 @@ class SpeechRecognitionModel(nn.Module):
 
 
 class CNN(nn.Module):
-    def __init__(self, out_channels, kernel, stride, n_feats):
+    def __init__(self, in_channels, out_channels, kernel, stride, n_feats):
         super(CNN, self).__init__()
 
         self.cnn = nn.Conv2d(in_channels, out_channels,
