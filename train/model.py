@@ -158,13 +158,14 @@ class ConfirmingModel(nn.Module):
     def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
         super(ConfirmingModel, self).__init__()
         # n residual cnn layers with filter size of 32
-        self.cnn_layers = nn.Sequential(*[
-            CNN(in_channels=1 if i==0 else 64, out_channels=64, kernel=3, stride=1, n_feats=n_feats) 
-            for i in range(n_cnn_layers)
-        ])
+        self.cnn_layers = nn.Sequential()
+
+        self.cnn_layers.add(CNN(in_channels=1, out_channels=128, kernel=3, stride=1, n_feats=n_feats))
+        self.cnn_layers.add(CNN(in_channels=128, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
+        self.cnn_layers.add(CNN(in_channels=64, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
         
         self.classifier = nn.Sequential(
-            nn.Linear(n_feats*32, n_feats),  # birnn returns rnn_dim*2
+            nn.Linear(n_feats*64, n_feats),  # birnn returns rnn_dim*2
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(n_feats, n_class)
