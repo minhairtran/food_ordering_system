@@ -10,17 +10,20 @@ import torch.nn as nn
 DATA_FILE = "confirming_data/data.json"
 SAVED_FILE = "confirming_data/data.pt"
 
-def tensorize(mel_spectrogram_not_tensorized):
+def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
     mel_spectrogram, labels = [], []
 
     for spectrogram in mel_spectrogram_not_tensorized:
         mel_spectrogram.append(torch.Tensor(spectrogram))
 
+    for label in labels_not_tensorized:
+        labels.append(torch.tensor(label, dtype=torch.long))
+
+    labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
     mel_spectrogram = nn.utils.rnn.pad_sequence(
         mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
-    return mel_spectrogram
-
+    return mel_spectrogram, labels
 
 if __name__ == "__main__":
     data_set = []
@@ -53,10 +56,8 @@ if __name__ == "__main__":
                 saved_dataset_temp["labels"].append(
                     data_set[original_dataset_number]["labels"][original_dataset_index])
 
-        saved_dataset_temp["mel_spectrogram"] = tensorize(saved_dataset_temp["mel_spectrogram"])
-
-        saved_dataset_temp["labels"] = torch.Tensor(
-            saved_dataset_temp["labels"])
+        saved_dataset_temp["mel_spectrogram"], saved_dataset_temp["labels"] = tensorize(
+            saved_dataset_temp["mel_spectrogram"], saved_dataset_temp["labels"])
 
 
         saved_dataset.append(saved_dataset_temp)
