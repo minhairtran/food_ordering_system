@@ -149,7 +149,7 @@ class ConfirmingModel(nn.Module):
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
-        "epochs": 10, 
+        "epochs": 40, 
         "test_size": 0.2,
         "n_feats": 20,
         "n_class": 1
