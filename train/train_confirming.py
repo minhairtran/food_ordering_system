@@ -106,8 +106,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                     device), labels.to(device)
 
                 output = model(spectrograms)  # (batch, time, n_class)
-                output = F.log_softmax(output, dim=2)
-                output = output.transpose(0, 1)  # (time, batch, n_class)
+                output = F.log_softmax(output)
 
                 loss = criterion(output, labels)
                 test_loss += loss.item() / len(test_loader)
