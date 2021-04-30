@@ -179,6 +179,4 @@ class ConfirmingModel(nn.Module):
         x = self.classifier(x)
         sizes = x.size()
         x = x.view(sizes[0], sizes[1] * sizes[2]) #(batch, time)
-        sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2])  # (batch, feature, time)
         return x
