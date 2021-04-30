@@ -73,9 +73,8 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.zero_grad()
 
             output = model(spectrograms)  # (batch, time, n_class)
-            output = F.log_softmax(output, dim=2)
+            output = F.log_softmax(output)
             # output = output.transpose(0, 1)  # (time, batch, n_class)
-            print(output.size())
 
             loss = criterion(output, labels)
             loss.backward()
