@@ -157,41 +157,48 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
+    mel_spectrogram, labels = [], []
+
+    for dataset_index in range(len(load_data_set)):
+        # Load all data
+        mel_spectrogram_temp, labels_temp = load_data(load_data_set[dataset_index])
+
+        mel_spectrogram.append(mel_spectrogram_temp)
+        labels.append(labels_temp)
+
+
+    # Split into train and test
+    mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
+
+
     for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
 
-        for dataset_index in range(len(load_data_set)):
-            # Load all data
-            mel_spectrogram, labels = load_data(load_data_set[dataset_index])
+        # Create train dataset and Dataloader
+        train_dataset = Dataset(
+            mel_spectrogram_train, labels_train)
 
-            # Split into train and test
-            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
+        train_loader = data.DataLoader(dataset=train_dataset,
+                                    batch_size=ConfirmingModel.hparams["batch_size"],
+                                    shuffle=True)
 
-            # Create train dataset and Dataloader
-            train_dataset = Dataset(
-                mel_spectrogram_train, labels_train)
+        # Create test dataset and Dataloader
+        test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
-            train_loader = data.DataLoader(dataset=train_dataset,
-                                        batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True)
+        test_loader = data.DataLoader(dataset=test_dataset,
+                                    batch_size=ConfirmingModel.hparams["batch_size"],
+                                    shuffle=True)
 
-            # Create test dataset and Dataloader
-            test_dataset = Dataset(mel_spectrogram_test, labels_test)
+        scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
+                                                steps_per_epoch=int(
+                                                    len(train_loader)),
+                                                epochs=ConfirmingModel.hparams["epochs"],
+                                                anneal_strategy='linear')
 
-            test_loader = data.DataLoader(dataset=test_dataset,
-                                        batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True)
+        train(model, device, train_loader, criterion, optimizer,
+                scheduler, epoch, iter_meter, experiment)
 
-            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
-                                                    steps_per_epoch=int(
-                                                        len(train_loader)),
-                                                    epochs=ConfirmingModel.hparams["epochs"],
-                                                    anneal_strategy='linear')
-
-            train(model, device, train_loader, criterion, optimizer,
-                    scheduler, epoch, iter_meter, experiment)
-
-            test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
-            
+        test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+        
 
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
