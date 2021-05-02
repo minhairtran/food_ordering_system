@@ -3,7 +3,6 @@ sys.path.append("../")
 
 import json
 import numpy as np
-from train.text_transform import FoodNumberTextTransform
 import os
 import librosa
 import torch
@@ -16,15 +15,15 @@ SAVED_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json
               "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
 
 
-def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop_length=384):
+def preprocess_dataset(dataset_path, saved_file_path, n_mels=20, n_fft=512, hop_length=384):
+    dataset_number = 0
+
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
         data = {
-            "label_lengths": [],
             "mel_spectrogram": [],
-            "labels": [],
-            "input_lengths": []
+            "labels": []
         }
 
         # loop through all sub-dirs
@@ -32,7 +31,7 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
 
             label = dirpath.split("/")[-1]
 
-            print("\nProcessing: '{}' with save file: ".format(label, save_file))
+            print("\nProcessing: '{}' with save file: {}".format(label, save_file))
 
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
@@ -44,17 +43,15 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=128, n_fft=512, hop
                 mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
                                                                  hop_length=hop_length)
 
-                text_transform = FoodNumberTextTransform()
-
-                added_label = text_transform.text_to_int(label)
+                mel_spectrogram = librosa.power_to_db(mel_spectrogram)
 
                 # store data for analysed track
                 data["mel_spectrogram"].append(mel_spectrogram.T.tolist())
-                data["labels"].append(added_label)
-                data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
-                data["label_lengths"].append(len(label))
-                print("{}: {}".format(file_path, label))
+                data["labels"].append(dataset_number)
+                print("{}: {}".format(file_path, dataset_number))
 
+        print("\nSave: {}".format(save_file))
+        dataset_number += 1
         # torch.save(data, save_file)
         with open(save_file, 'w') as f:
             json.dump(data, f, indent=4)
