@@ -78,19 +78,6 @@ class SpeechRecognitionModel(nn.Module):
         "epochs": 10, 
         "test_size": 0.2
     }
-
-    hparams_confirming = {
-        "n_cnn_layers": 3,
-        "n_rnn_layers": 2,
-        "rnn_dim": 64,
-        "n_feats": 128,
-        "dropout": 0.1,
-        "stride": 2,
-        "learning_rate": 5e-4,
-        "batch_size": 4,
-        "epochs": 30, 
-        "test_size": 0.2
-    }
     
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
         super(SpeechRecognitionModel, self).__init__()
@@ -145,38 +132,87 @@ class CNN(nn.Module):
 class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
+        "n_rnn_layers": 2,
+        "rnn_dim": 64,
+        "n_feats": 128,
         "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
-        "epochs": 40, 
-        "test_size": 0.2,
-        "n_feats": 20,
-        "n_class": 1
+        "epochs": 30, 
+        "test_size": 0.2
     }
 
-    def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
-        super(ConfirmingModel, self).__init__()
+    def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
+        super(SpeechRecognitionModel, self).__init__()
+        n_feats = n_feats//2
+        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
+
         # n residual cnn layers with filter size of 32
-        self.cnn_layers = nn.Sequential()
-
-        self.cnn_layers.add_module("conv_1", CNN(in_channels=1, out_channels=128, kernel=3, stride=1, n_feats=n_feats))
-        self.cnn_layers.add_module("conv_2", CNN(in_channels=128, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
-        self.cnn_layers.add_module("conv_3", CNN(in_channels=64, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
-
+        self.rescnn_layers = nn.Sequential(*[
+            ResidualCNN(32, 32, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
+            for _ in range(n_cnn_layers)
+        ])
+        self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
+        self.birnn_layers = nn.Sequential(*[
+            BidirectionalGRU(rnn_dim=rnn_dim if i==0 else rnn_dim*2,
+                             hidden_size=rnn_dim, dropout=dropout, batch_first=i==0)
+            for i in range(n_rnn_layers)
+        ])
         self.classifier = nn.Sequential(
-            nn.Linear(n_feats*64, n_feats),
+            nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
             nn.GELU(),
             nn.Dropout(dropout),
-            nn.Linear(n_feats, n_class)
+            nn.Linear(rnn_dim, n_class)
         )
 
     def forward(self, x):
-        x = self.cnn_layers(x)
+        x = self.cnn(x)
+        x = self.rescnn_layers(x)
         sizes = x.size()
         x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
         x = x.transpose(1, 2) # (batch, time, feature)
+        x = self.fully_connected(x)
+        x = self.birnn_layers(x)
         x = self.classifier(x)
         sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2]) #(batch, time)
+        x = x.view(sizes[0], sizes[1] * sizes[2])  # (batch, feature, time)
         return x
+
+    # hparams = {
+    #     "n_cnn_layers": 3,
+    #     "dropout": 0.1,
+    #     "stride": 2,
+    #     "learning_rate": 5e-4,
+    #     "batch_size": 4,
+    #     "epochs": 40, 
+    #     "test_size": 0.2,
+    #     "n_feats": 20,
+    #     "n_class": 1
+    # }
+
+    # def __init__(self, n_cnn_layers, n_class, n_feats, stride=2, dropout=0.1):
+    #     super(ConfirmingModel, self).__init__()
+    #     # n residual cnn layers with filter size of 32
+    #     self.cnn_layers = nn.Sequential()
+
+    #     self.cnn_layers.add_module("conv_1", CNN(in_channels=1, out_channels=128, kernel=3, stride=1, n_feats=n_feats))
+    #     self.cnn_layers.add_module("conv_2", CNN(in_channels=128, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
+    #     self.cnn_layers.add_module("conv_3", CNN(in_channels=64, out_channels=64, kernel=3, stride=1, n_feats=n_feats))
+
+    #     self.classifier = nn.Sequential(
+    #         nn.Linear(n_feats*64, n_feats),
+    #         nn.GELU(),
+    #         nn.Dropout(dropout),
+    #         nn.Linear(n_feats, n_class)
+    #     )
+
+    # def forward(self, x):
+    #     x = self.cnn_layers(x)
+    #     sizes = x.size()
+    #     x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
+    #     x = x.transpose(1, 2) # (batch, time, feature)
+    #     x = self.classifier(x)
+    #     sizes = x.size()
+    #     x = x.view(sizes[0], sizes[1] * sizes[2]) #(batch, time)
+    #     return x
