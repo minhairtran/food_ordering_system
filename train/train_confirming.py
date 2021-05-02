@@ -116,6 +116,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('Test set: Average loss: {:.4f}\n'.format(
         test_loss))
 
+    return test_loss
+
 
 if __name__ == "__main__":
 
@@ -190,7 +192,10 @@ if __name__ == "__main__":
             train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
-            test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+            loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+
+        if loss < 0.12:
+            break
             
 
     # Save model
