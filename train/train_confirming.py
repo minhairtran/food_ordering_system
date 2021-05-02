@@ -167,8 +167,8 @@ if __name__ == "__main__":
             mel_spectrogram = mel_spectrogram_temp
             labels = labels_temp
         else:
-            mel_spectrogram.append(mel_spectrogram_temp)
-            labels.append(labels_temp)
+            mel_spectrogram = torch.cat((mel_spectrogram, mel_spectrogram_temp), 0)
+            labels = torch.cat((labels, labels_temp), 0)
 
 
     # Split into train and test
