@@ -163,8 +163,12 @@ if __name__ == "__main__":
         # Load all data
         mel_spectrogram_temp, labels_temp = load_data(load_data_set[dataset_index])
 
-        mel_spectrogram.append(mel_spectrogram_temp)
-        labels.append(labels_temp)
+        if len(mel_spectrogram) == 0:
+            mel_spectrogram = mel_spectrogram_temp
+            labels = labels_temp
+        else:
+            mel_spectrogram.append(mel_spectrogram_temp)
+            labels.append(labels_temp)
 
 
     # Split into train and test
