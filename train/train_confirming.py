@@ -73,7 +73,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.zero_grad()
 
             output = model(spectrograms)  # (batch, time, n_class)
-            output = F.log_softmax(output)
+            output = F.log_softmax(output, dim=1)
             # output = output.transpose(0, 1)  # (time, batch, n_class)
 
             loss = criterion(output, labels)
@@ -106,7 +106,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                     device), labels.to(device)
 
                 output = model(spectrograms)  # (batch, time, n_class)
-                output = F.log_softmax(output)
+                output = F.log_softmax(output, dim=1)
 
                 loss = criterion(output, labels)
                 test_loss += loss.item() / len(test_loader)
