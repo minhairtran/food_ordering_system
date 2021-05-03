@@ -194,7 +194,7 @@ if __name__ == "__main__":
 
             loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-        if loss < 0.12:
+        if loss < 0.09:
             break
             
 

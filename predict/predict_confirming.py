@@ -3,7 +3,7 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import SpeechRecognitionModel
+from train.model import ConfirmingModel
 
 import datetime
 import random
@@ -44,7 +44,7 @@ ERROR_HANDLER_FUNC = CFUNCTYPE(
 def py_error_handler(filename, line, function, err, fmt):
     pass
 
-def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
+def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
                fmax=8000):
 
     # extract MFCCs
@@ -63,20 +63,14 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
 
 
 def decoder(output, blank_label=0, collapse_repeated=True):
-    arg_maxes = torch.argmax(output, dim=2)
+    arg_maxes = torch.argmax(output, dim=1).tolist()
+    decode = {
+        0: "no",
+        1: "yes",
+        2: "unknown",
+    }
 
-    decodes = []
-
-    for i, args in enumerate(arg_maxes):
-        decode = []
-        for j, index in enumerate(args):
-            if index != blank_label:
-                if collapse_repeated and j != 0 and index == args[j - 1]:
-                    continue
-                decode.append(index.item())
-        text_transform = ConfirmTextTransform()
-        decodes.append(text_transform.int_to_text(decode))
-    return text_transform.list_to_string(decodes)
+    return decode.get(arg_maxes[0], "unknown")
 
 
 def predict(model, tested_audio):
@@ -86,7 +80,7 @@ def predict(model, tested_audio):
     # get the predicted label
     output = model(mel_spectrogram)
 
-    output = F.log_softmax(output, dim=2)
+    output = F.log_softmax(output, dim=1)
     predicted = decoder(output)
     return predicted
 
@@ -95,8 +89,8 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams_confirming['n_cnn_layers'], SpeechRecognitionModel.hparams_confirming['n_rnn_layers'], SpeechRecognitionModel.hparams_confirming['rnn_dim'], \
-    9, SpeechRecognitionModel.hparams_confirming['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams_confirming['dropout']).to(device)
+    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], \
+        ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
 
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
@@ -133,7 +127,7 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.9):
+        if(np.amax(current_window) > 0.6):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):
@@ -143,8 +137,7 @@ if __name__ == "__main__":
                 print(predicted_audio)
                 predicted_window = np.array([])
 
-
-        # print((time.time() - start), np.mean(np.abs(current_window)), np.amax(current_window))
+        print((time.time() - start), np.amax(current_window))
 
     # close stream
     stream.stop_stream()
