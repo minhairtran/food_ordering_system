@@ -154,7 +154,7 @@ class ConfirmingModel(nn.Module):
             ResidualCNN(64, 64, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
             for _ in range(n_cnn_layers)
         ])
-        self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
+        self.fully_connected = nn.Linear(n_feats*64, rnn_dim)
         self.birnn_layers = nn.Sequential(*[
             BidirectionalGRU(rnn_dim=rnn_dim if i==0 else rnn_dim*2,
                              hidden_size=rnn_dim, dropout=dropout, batch_first=i==0)
