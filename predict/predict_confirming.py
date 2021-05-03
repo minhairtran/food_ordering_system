@@ -32,8 +32,8 @@ def id_generator():
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
-CHUNKSIZE = 22050  # fixed chunk size
-RATE = 22050
+CHUNKSIZE = 16000  # fixed chunk size
+RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
 
@@ -60,7 +60,6 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
         mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
     return mel_spectrogram
-
 
 def decoder(output, blank_label=0, collapse_repeated=True):
     arg_maxes = torch.argmax(output, dim=1).tolist()

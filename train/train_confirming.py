@@ -159,15 +159,14 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
-    for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
+    for dataset_index in range(len(load_data_set)):
+        # Load all data
+        mel_spectrogram, labels = load_data(load_data_set[dataset_index])
 
-        for dataset_index in range(len(load_data_set)):
-            # Load all data
-            mel_spectrogram, labels = load_data(load_data_set[dataset_index])
+        # Split into train and test
+        mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
 
-            # Split into train and test
-            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
-
+        for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
             # Create train dataset and Dataloader
             train_dataset = Dataset(
                 mel_spectrogram_train, labels_train)
@@ -193,9 +192,6 @@ if __name__ == "__main__":
                     scheduler, epoch, iter_meter, experiment)
 
             loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
-
-        if loss < 0.09:
-            break
             
 
     # Save model
