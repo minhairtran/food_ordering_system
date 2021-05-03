@@ -135,7 +135,7 @@ class ConfirmingModel(nn.Module):
         "n_rnn_layers": 3,
         "rnn_dim": 64,
         "n_feats": 20,
-        "dropout": 0.15,
+        "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
@@ -147,11 +147,11 @@ class ConfirmingModel(nn.Module):
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
         super(ConfirmingModel, self).__init__()
         n_feats = n_feats//2
-        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
+        self.cnn = nn.Conv2d(1, 64, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
 
         # n residual cnn layers with filter size of 32
         self.rescnn_layers = nn.Sequential(*[
-            ResidualCNN(32, 32, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
+            ResidualCNN(64, 64, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
             for _ in range(n_cnn_layers)
         ])
         self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
