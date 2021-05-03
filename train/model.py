@@ -132,10 +132,10 @@ class CNN(nn.Module):
 class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "n_rnn_layers": 3,
-        "rnn_dim": 64,
+        "n_rnn_layers": 2,
+        "rnn_dim": 128,
         "n_feats": 20,
-        "dropout": 0.1,
+        "dropout": 0.2,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,
@@ -147,21 +147,21 @@ class ConfirmingModel(nn.Module):
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
         super(ConfirmingModel, self).__init__()
         n_feats = n_feats//2
-        self.cnn = nn.Conv2d(1, 64, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
+        self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
 
         # n residual cnn layers with filter size of 32
         self.rescnn_layers = nn.Sequential(*[
-            ResidualCNN(64, 64, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
+            ResidualCNN(32, 32, kernel=3, stride=1, dropout=dropout, n_feats=n_feats) 
             for _ in range(n_cnn_layers)
         ])
-        self.fully_connected = nn.Linear(n_feats*64, rnn_dim)
+        self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
         self.birnn_layers = nn.Sequential(*[
-            BidirectionalGRU(rnn_dim=rnn_dim if i==0 else rnn_dim*2,
+            BidirectionalGRU(rnn_dim=rnn_dim,
                              hidden_size=rnn_dim, dropout=dropout, batch_first=i==0)
             for i in range(n_rnn_layers)
         ])
         self.classifier = nn.Sequential(
-            nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
+            # nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(rnn_dim, n_class)
