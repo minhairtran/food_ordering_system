@@ -130,7 +130,8 @@ if __name__ == "__main__":
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):
-                pass
+                #Hoi 2 anh
+                noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
                 predicted_audio = predict(model, np.array(current_window))
                 print(predicted_audio)
