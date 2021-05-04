@@ -14,6 +14,7 @@ import torch
 from error_calculating import ErrorCalculating
 from text_transform import ConfirmTextTransform
 from model import ConfirmingModel
+from sklearn.metrics import precision_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
@@ -82,14 +83,16 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
             experiment.log_metric(
                 'learning_rate', scheduler.get_lr(), step=iter_meter.get())
+            
+            train_precision = precision_score(torch.argmax(output, dim=1), labels)
 
             optimizer.step()
             scheduler.step()
             iter_meter.step()
             if batch_idx % 100 == 0 or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
-                    100. * batch_idx / len(train_loader), loss.item()))
+                    100. * batch_idx / len(train_loader), loss.item(), train_precision))
 
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
@@ -111,12 +114,15 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 loss = criterion(output, labels)
                 test_loss += loss.item() / len(test_loader)
 
+                test_precision = precision_score(torch.argmax(output, dim=1), labels)
+
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
+    experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
 
-    print('Test set: Average loss: {:.4f}\n'.format(
-        test_loss))
+    print('Test set: Average loss: {:.4f}\tTest precision: {:.4f}\n'.format(
+        test_loss, test_precision))
 
-    return test_loss
+    return test_precision
 
 
 if __name__ == "__main__":
@@ -191,7 +197,7 @@ if __name__ == "__main__":
             train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
-            loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+            precision_score = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
             
 
     # Save model
