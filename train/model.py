@@ -177,9 +177,7 @@ class ConfirmingModel(nn.Module):
         x = self.birnn_layers(x)
         x = self.classifier(x)
         sizes = x.size()
-        print(sizes)
         x = x.view(sizes[0], sizes[1] * sizes[2])  # (batch, feature*time)
-        print(x.size())
         return x
 
     # hparams = {
