@@ -93,8 +93,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
             train_precision_average.append(train_precision)
 
-            print(train_precision_average)
-
             optimizer.step()
             scheduler.step()
             iter_meter.step()
