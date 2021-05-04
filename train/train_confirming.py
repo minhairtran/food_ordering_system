@@ -85,7 +85,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
             experiment.log_metric(
-                'learning_rate', scheduler.get_lr(), step=iter_meter.get())
+                'learning_rate', scheduler.get_last_lr(), step=iter_meter.get())
             
             label_pred = decoder(output)
 
