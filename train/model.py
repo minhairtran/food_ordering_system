@@ -132,8 +132,8 @@ class CNN(nn.Module):
 class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "n_rnn_layers": 2,
-        "rnn_dim": 80,
+        "n_rnn_layers": 5,
+        "rnn_dim": 40,
         "n_feats": 20,
         "dropout": 0.25,
         "stride": 2,
@@ -144,7 +144,7 @@ class ConfirmingModel(nn.Module):
         "n_class": 1
     }
 
-    def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.1):
+    def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.25):
         super(ConfirmingModel, self).__init__()
         n_feats = n_feats//2
         self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
