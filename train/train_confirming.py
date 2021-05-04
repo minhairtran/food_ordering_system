@@ -40,7 +40,7 @@ class Dataset(torch.utils.data.Dataset):
         mel_spectrogram = self.mel_spectrogram[index]
         labels = self.labels[index]
 
-        return (torch.tensor(mel_spectrogram, dtype=torch.float), labels)
+        return (torch.tensor(mel_spectrogram, dtype=torch.float).detach().clone().requires_grad_(True), labels)
 
 class IterMeter(object):
     """keeps track of total iterations"""
@@ -89,7 +89,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            train_precision = precision_score(np.array(label_pred), [0,0,0,0], average='micro')
+            train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
 
             optimizer.step()
             scheduler.step()
