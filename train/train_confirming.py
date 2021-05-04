@@ -40,7 +40,7 @@ class Dataset(torch.utils.data.Dataset):
         mel_spectrogram = self.mel_spectrogram[index]
         labels = self.labels[index]
 
-        return (torch.Tensor(mel_spectrogram, dtype=torch.float).clone().detach().requires_grad_(True), labels)
+        return (torch.tensor(mel_spectrogram, dtype=torch.float), labels)
 
 class IterMeter(object):
     """keeps track of total iterations"""
