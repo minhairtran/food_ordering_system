@@ -89,7 +89,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
+            # train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
 
             optimizer.step()
             scheduler.step()
@@ -97,7 +97,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             if batch_idx % 100 == 0 or batch_idx == data_len:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
-                    100. * batch_idx / len(train_loader), loss.item(), train_precision))
+                    100. * batch_idx / len(train_loader), loss.item()))
 
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
