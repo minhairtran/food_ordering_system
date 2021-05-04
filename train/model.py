@@ -135,7 +135,7 @@ class ConfirmingModel(nn.Module):
         "n_rnn_layers": 2,
         "rnn_dim": 128,
         "n_feats": 20,
-        "dropout": 0.2,
+        "dropout": 0.25,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 4,

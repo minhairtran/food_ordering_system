@@ -69,6 +69,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
     model.train()
     data_len = len(train_loader.dataset)
     train_precision_average = []
+    print(train_precision_average)
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
             spectrograms, labels = _data
@@ -178,8 +179,6 @@ if __name__ == "__main__":
     iter_meter = IterMeter()
 
     load_data_set = torch.load(DATA_PATH)
-
-    print(len(load_data_set))
 
     for dataset_index in range(len(load_data_set)):
         # Load all data
