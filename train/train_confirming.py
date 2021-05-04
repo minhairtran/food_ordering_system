@@ -89,8 +89,6 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            label_pred[0] = round(label_pred[0], 10)
-
             train_precision = precision_score(np.array(label_pred, dtype=np.float32), np.array(labels.tolist(), dtype=np.float32), average='micro')
 
             optimizer.step()
@@ -208,7 +206,7 @@ if __name__ == "__main__":
             train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
-            precision_score = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+            precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
             
 
     # Save model
