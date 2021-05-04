@@ -89,14 +89,15 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            train_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
+            label_pred[0] = round(label_pred[0], 10)
 
+            train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
 
             optimizer.step()
             scheduler.step()
             iter_meter.step()
             if batch_idx % 100 == 0 or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.2}%'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.42}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item(), 100*train_precision))
 
@@ -122,7 +123,9 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 label_pred = decoder(output)
 
-                test_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
+                label_pred[0] = round(label_pred[0], 10)
+
+                test_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
 
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
