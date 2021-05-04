@@ -62,7 +62,7 @@ def load_data(data):
     return mel_spectrogram, labels
 
 def decoder(output):
-    arg_maxes = torch.argmax(output, dim=1).tolist()
+    arg_maxes = torch.argmax(output, dim=1).float().tolist()
     return arg_maxes
 
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
@@ -95,7 +95,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             scheduler.step()
             iter_meter.step()
             if batch_idx % 100 == 0 or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}%'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.2}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item(), 100*train_precision))
 
@@ -126,7 +126,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
 
-    print('Test set: Average loss: {:.4f}\tTest precision: {:.4f}%\n'.format(
+    print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
         test_loss, 100*test_precision))
 
     return test_precision
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
             train_loader = data.DataLoader(dataset=train_dataset,
                                         batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True)
+                                        shuffle=True if epoch>10 else False)
 
             # Create test dataset and Dataloader
             test_dataset = Dataset(mel_spectrogram_test, labels_test)
