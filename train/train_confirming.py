@@ -215,6 +215,9 @@ if __name__ == "__main__":
                     scheduler, epoch, iter_meter, experiment)
 
             precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+
+            if precision > 70:
+                break
             
 
     # Save model
