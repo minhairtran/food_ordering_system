@@ -61,7 +61,7 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
 
     return mel_spectrogram
 
-def decoder(output, blank_label=0, collapse_repeated=True):
+def decoder(output):
     arg_maxes = torch.argmax(output, dim=1).tolist()
     decode = {
         0: "no",
