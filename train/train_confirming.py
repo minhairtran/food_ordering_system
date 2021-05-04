@@ -97,7 +97,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.step()
             scheduler.step()
             iter_meter.step()
-            if batch_idx % 100 == 0 or batch_idx == data_len:
+            if batch_idx % 100 == 0 or batch_idx == data_len or batch_idx != 0:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.2f}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item(), 100*np.mean(train_precision_average)))
@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
     
     for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
-        
+
         for dataset_index in range(len(load_data_set)):
             # Load all data
             mel_spectrogram, labels = load_data(load_data_set[dataset_index])
