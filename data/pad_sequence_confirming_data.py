@@ -44,6 +44,7 @@ if __name__ == "__main__":
             "labels": [],
         }
         for current_dataset_index in range(average_dataset_length):
+            print(original_dataset_index)
             original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set)) + 1
             original_dataset_number = current_dataset_index % len(data_set)
 
@@ -62,8 +63,5 @@ if __name__ == "__main__":
         saved_dataset.append(saved_dataset_temp)
 
         print("Padding set success", set_number)
-
-    comparison = saved_dataset[0] == saved_dataset[1]
-    print(comparison.all())
 
     torch.save(saved_dataset, SAVED_FILE)
