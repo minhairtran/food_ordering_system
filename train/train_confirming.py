@@ -89,7 +89,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            test_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
+            train_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
 
 
             optimizer.step()
