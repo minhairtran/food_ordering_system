@@ -161,7 +161,7 @@ class ConfirmingModel(nn.Module):
             for i in range(n_rnn_layers)
         ])
         self.classifier = nn.Sequential(
-            # nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
+            nn.Linear(rnn_dim*2, rnn_dim),  # birnn returns rnn_dim*2
             nn.GELU(),
             nn.Dropout(dropout),
             nn.Linear(rnn_dim, n_class)
