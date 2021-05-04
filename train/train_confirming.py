@@ -84,7 +84,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             experiment.log_metric(
                 'learning_rate', scheduler.get_lr(), step=iter_meter.get())
             
-            train_precision = precision_score(np.array(torch.argmax(output, dim=1).tolist()), np.array(labels.tolist()))
+            train_precision = precision_score(np.array(torch.argmax(output, dim=1).tolist()), np.array(labels.tolist()), average='micro')
 
             optimizer.step()
             scheduler.step()
@@ -114,7 +114,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 loss = criterion(output, labels)
                 test_loss += loss.item() / len(test_loader)
 
-                test_precision = precision_score(np.array(torch.argmax(output, dim=1).tolist()), np.array(labels.tolist()))
+                test_precision = precision_score(np.array(torch.argmax(output, dim=1).tolist()), np.array(labels.tolist()), average='micro')
 
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
