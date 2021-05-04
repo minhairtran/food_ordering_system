@@ -68,6 +68,7 @@ def decoder(output):
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
     model.train()
     data_len = len(train_loader.dataset)
+    train_precision_average = []
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
             spectrograms, labels = _data
@@ -90,6 +91,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             label_pred = decoder(output)
 
             train_precision = precision_score(np.array(label_pred, dtype=np.float32), np.array(labels.tolist(), dtype=np.float32), average='micro')
+            train_precision_average.append(train_precision)
 
             optimizer.step()
             scheduler.step()
@@ -97,7 +99,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             if batch_idx % 100 == 0 or batch_idx == data_len:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.42}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
-                    100. * batch_idx / len(train_loader), loss.item(), 100*train_precision))
+                    100. * batch_idx / len(train_loader), loss.item(), 100*np.mean(train_precision_average)))
 
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
@@ -105,6 +107,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     model.eval()
     test_loss = 0
     test_cer = []
+
+    test_precision_average = []
 
     with experiment.test():
         with torch.no_grad():
@@ -124,12 +128,13 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 label_pred[0] = round(label_pred[0], 10)
 
                 test_precision = precision_score(np.array(label_pred, dtype=np.float32), np.array(labels.tolist(), dtype=np.float32), average='micro')
+                test_precision_average.append(test_precision)
 
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
-    experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
+    experiment.log_metric('test_precision', np.mean(test_precision_average), step=iter_meter.get())
 
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
-        test_loss, 100*test_precision))
+        test_loss, 100*np.mean(test_precision_average)))
 
     return test_precision
 
