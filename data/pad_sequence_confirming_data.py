@@ -45,8 +45,21 @@ if __name__ == "__main__":
         }
         for current_dataset_index in range(average_dataset_length):
             original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set)) + 1
-            print(original_dataset_index)
             original_dataset_number = current_dataset_index % len(data_set)
+
+            if(original_dataset_index == 300):
+                print(original_dataset_index)
+                print(original_dataset_number)
+
+            if(original_dataset_index == 800):
+                print(original_dataset_index)
+                print(original_dataset_number)
+
+
+            if(original_dataset_index == 1400):
+                print(original_dataset_index)
+                print(original_dataset_number)
+
 
             if (original_dataset_index >= len(data_set[original_dataset_number]["labels"])):
                 break
