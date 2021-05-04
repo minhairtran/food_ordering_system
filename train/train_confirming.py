@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
-    print(load_data_set)
+    print(len(load_data_set))
 
     for dataset_index in range(len(load_data_set)):
         # Load all data
