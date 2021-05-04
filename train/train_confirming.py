@@ -62,7 +62,7 @@ def load_data(data):
     return mel_spectrogram, labels
 
 def decoder(output):
-    arg_maxes = torch.argmax(output, dim=1).float().tolist()
+    arg_maxes = torch.argmax(output, dim=1).tolist()
     return arg_maxes
 
 def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
@@ -89,7 +89,8 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             
             label_pred = decoder(output)
 
-            train_precision = precision_score(np.array(label_pred), np.array(labels.float().tolist()), average='micro')
+            test_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
+
 
             optimizer.step()
             scheduler.step()
@@ -121,7 +122,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 label_pred = decoder(output)
 
-                test_precision = precision_score(np.array(label_pred), np.array(labels.float().tolist()), average='micro')
+                test_precision = precision_score(np.float32(np.array(label_pred)), np.float32(np.array(labels.tolist())), average='micro')
 
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
