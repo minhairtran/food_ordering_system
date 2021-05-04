@@ -40,7 +40,7 @@ class Dataset(torch.utils.data.Dataset):
         mel_spectrogram = self.mel_spectrogram[index]
         labels = self.labels[index]
 
-        return (torch.tensor(mel_spectrogram, dtype=torch.float), labels)
+        return (torch.Tensor(mel_spectrogram, dtype=torch.float).clone().detach().requires_grad_(True), labels)
 
 class IterMeter(object):
     """keeps track of total iterations"""
@@ -95,7 +95,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             scheduler.step()
             iter_meter.step()
             if batch_idx % 100 == 0 or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item()))
 
