@@ -95,9 +95,9 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             scheduler.step()
             iter_meter.step()
             if batch_idx % 100 == 0 or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}'.format(
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.4f}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
-                    100. * batch_idx / len(train_loader), loss.item(), train_precision))
+                    100. * batch_idx / len(train_loader), loss.item(), 100*train_precision))
 
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
@@ -126,8 +126,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
     experiment.log_metric('test_precision', test_precision, step=iter_meter.get())
 
-    print('Test set: Average loss: {:.4f}\tTest precision: {:.4f}\n'.format(
-        test_loss, test_precision))
+    print('Test set: Average loss: {:.4f}\tTest precision: {:.4f}%\n'.format(
+        test_loss, 100*test_precision))
 
     return test_precision
 
