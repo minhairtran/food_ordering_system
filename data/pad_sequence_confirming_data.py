@@ -63,4 +63,7 @@ if __name__ == "__main__":
 
         print("Padding set success", set_number)
 
+    comparison = saved_dataset[0] == saved_dataset[1]
+    print(comparison.all())
+
     torch.save(saved_dataset, SAVED_FILE)
