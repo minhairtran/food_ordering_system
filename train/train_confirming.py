@@ -93,7 +93,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
 
             if batch_idx % 100 == 0 or batch_idx == data_len:
                 print(type(np.array(label_pred)))
-                print(type(np.array(labels.tolist()))
+                print(type(np.array(labels.tolist())))
 
             train_precision = precision_score(np.array(label_pred), np.array(labels.tolist()), average='micro')
 
