@@ -133,7 +133,7 @@ class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
         "n_rnn_layers": 2,
-        "rnn_dim": 64,
+        "rnn_dim": 128,
         "n_feats": 20,
         "dropout": 0.2,
         "stride": 2,
@@ -156,7 +156,7 @@ class ConfirmingModel(nn.Module):
         ])
         self.fully_connected = nn.Linear(n_feats*32, rnn_dim)
         self.birnn_layers = nn.Sequential(*[
-            BidirectionalGRU(rnn_dim=rnn_dim,
+            BidirectionalGRU(rnn_dim=rnn_dim if i==0 else rnn_dim*2,
                              hidden_size=rnn_dim, dropout=dropout, batch_first=i==0)
             for i in range(n_rnn_layers)
         ])
