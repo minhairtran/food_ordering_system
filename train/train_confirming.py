@@ -231,7 +231,7 @@ if __name__ == "__main__":
 
                 epoch_cer.append(cer_test)
 
-            if all(each_cer < 0.01 for each_cer in epoch_cer):
+            if all(each_cer < 0.001 for each_cer in epoch_cer):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
