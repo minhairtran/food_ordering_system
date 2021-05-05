@@ -58,7 +58,8 @@ class IterMeter(object):
         return self.val
 
 
-def load_data(data):
+def load_data(data_path):
+    data = torch.load(data_path)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
 
@@ -222,6 +223,6 @@ if __name__ == "__main__":
 
         if precision > 0.9:
             break
-        
+
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
