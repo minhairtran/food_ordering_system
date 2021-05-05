@@ -180,6 +180,7 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
+    precision = 0
     
     for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
 
@@ -216,8 +217,8 @@ if __name__ == "__main__":
 
             precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-            if precision > 0.9:
-                break
+        if precision > 0.9:
+            break
             
 
     # Save model
