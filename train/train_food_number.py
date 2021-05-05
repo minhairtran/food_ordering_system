@@ -211,6 +211,8 @@ if __name__ == "__main__":
                                             batch_size=FoodNumberModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
+                print("Data {} with step per epoch {}".format(filename, int(len(train_loader))))
+                
                 scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
                                                         steps_per_epoch=int(
                                                             len(train_loader)),

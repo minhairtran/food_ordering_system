@@ -8,20 +8,15 @@ from train.model import ConfirmingModel
 import datetime
 import random
 import wave
-from train.text_transform import ConfirmTextTransform
 import torch.nn as nn
 import torch.nn.functional as F
 import pyaudio
-import os
 import noisereduce as nr
 import librosa
 import torch
 import numpy as np
 import time
 from ctypes import *
-
-import pandas as pd
-from openpyxl import load_workbook
 
 def id_generator():
     now = datetime.datetime.now()
@@ -32,8 +27,8 @@ def id_generator():
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
-CHUNKSIZE = 16000  # fixed chunk size
-RATE = 16000
+CHUNKSIZE = 22050  # fixed chunk size
+RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
 

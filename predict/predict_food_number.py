@@ -11,7 +11,6 @@ import wave
 import torch.nn as nn
 import torch.nn.functional as F
 import pyaudio
-import os
 import noisereduce as nr
 import librosa
 import torch
