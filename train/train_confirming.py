@@ -183,7 +183,7 @@ if __name__ == "__main__":
     precision = 0
     try:
         for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
-
+            precision_average = []
             for dataset_index in range(len(load_data_set)):
                 # Load all data
                 mel_spectrogram, labels = load_data(load_data_set[dataset_index])
