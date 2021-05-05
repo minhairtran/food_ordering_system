@@ -63,9 +63,10 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
 
 def decoder(output):
     arg_maxes = torch.argmax(output, dim=1).tolist()
+    
     decode = {
-        0: "no",
-        1: "yes",
+        0: "yes",
+        1: "no",
         2: "unknown",
     }
 
@@ -126,7 +127,7 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.6):
+        if(np.amax(current_window) > 0.7):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):

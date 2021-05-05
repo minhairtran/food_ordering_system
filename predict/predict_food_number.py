@@ -59,21 +59,24 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
     return mel_spectrogram
 
 
-def decoder(output, blank_label=0, collapse_repeated=True):
-    arg_maxes = torch.argmax(output, dim=2)
+def decoder(output):
+    arg_maxes = torch.argmax(output, dim=1).tolist()
+    
+    decode = {
+        0: "zero",
+        1: "one",
+        2: "two",
+        3: "three",
+        4: "four",
+        5: "five",
+        6: "six",
+        7: "seven",
+        8: "eight",
+        9: "nine",
+        10: "unknown"
+    }
 
-    decodes = []
-
-    for i, args in enumerate(arg_maxes):
-        decode = []
-        for j, index in enumerate(args):
-            if index != blank_label:
-                if collapse_repeated and j != 0 and index == args[j - 1]:
-                    continue
-                decode.append(index.item())
-        text_transform = FoodNumberTextTransform()
-        decodes.append(text_transform.int_to_text(decode))
-    return text_transform.list_to_string(decodes)
+    return decode.get(arg_maxes[0], "unknown")
 
 
 def predict(model, tested_audio):
