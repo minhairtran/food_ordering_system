@@ -19,7 +19,7 @@ from sklearn.metrics import precision_score
 DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt",
              "../data/food_number_data/data_set_3.pt", "../data/food_number_data/data_set_4.pt", "../data/food_number_data/data_set_5.pt",
              "../data/food_number_data/data_set_6.pt", "../data/food_number_data/data_set_7.pt", "../data/food_number_data/data_set_8.pt",
-             "../data/food_number_data/data_set_9.pt", "../data/food_number_data/data_set_10.pt"]
+             "../data/food_number_data/data_set_9.pt"]
 SAVED_MODEL_PATH = "model_food_number.h5"
 error_calculating = ErrorCalculating()
 
