@@ -192,7 +192,11 @@ if __name__ == "__main__":
 
     load_data_set = torch.load(DATA_PATH)
 
-    precision = 0
+    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
+                                                        steps_per_epoch=51,
+                                                        epochs=ConfirmingModel.hparams["epochs"],
+                                                        anneal_strategy='linear')
+
     try:
         for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
             epoch_cer = []
@@ -219,14 +223,6 @@ if __name__ == "__main__":
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=ConfirmingModel.hparams["batch_size"],
                                             shuffle=False)
-
-                print(int(len(train_loader)))
-
-                scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
-                                                        steps_per_epoch=int(
-                                                            len(train_loader)),
-                                                        epochs=ConfirmingModel.hparams["epochs"],
-                                                        anneal_strategy='linear')
 
                 train(model, device, train_loader, criterion, optimizer,
                         scheduler, epoch, iter_meter, experiment)
