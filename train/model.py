@@ -77,7 +77,7 @@ class ConfirmingModel(nn.Module):
         "batch_size": 128,
         "epochs": 100, 
         "test_size": 0.1,
-        "n_class": 1
+        "n_class": 9
     }
 
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.25):
@@ -112,8 +112,6 @@ class ConfirmingModel(nn.Module):
         x = self.fully_connected(x)
         x = self.birnn_layers(x)
         x = self.classifier(x)
-        sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2])  # (batch, feature*time)
         return x
 
 class FoodNumberModel(nn.Module):
