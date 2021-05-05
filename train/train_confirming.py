@@ -19,6 +19,8 @@ DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 error_calculating = ErrorCalculating()
 
+class GetOutOfLoop( Exception ):
+    pass
 
 class Dataset(torch.utils.data.Dataset):
     'Characterizes a dataset for PyTorch'
@@ -179,46 +181,47 @@ if __name__ == "__main__":
     load_data_set = torch.load(DATA_PATH)
 
     precision = 0
-    
-    for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
+    try:
+        for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
 
-        for dataset_index in range(len(load_data_set)):
-            # Load all data
-            mel_spectrogram, labels = load_data(load_data_set[dataset_index])
+            for dataset_index in range(len(load_data_set)):
+                # Load all data
+                mel_spectrogram, labels = load_data(load_data_set[dataset_index])
 
-            # Split into train and test
-            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
+                # Split into train and test
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=ConfirmingModel.hparams['test_size'], shuffle=False)
 
-            # Create train dataset and Dataloader
-            train_dataset = Dataset(
-                mel_spectrogram_train, labels_train)
+                # Create train dataset and Dataloader
+                train_dataset = Dataset(
+                    mel_spectrogram_train, labels_train)
 
-            train_loader = data.DataLoader(dataset=train_dataset,
-                                        batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True if epoch>10 else False)
+                train_loader = data.DataLoader(dataset=train_dataset,
+                                            batch_size=ConfirmingModel.hparams["batch_size"],
+                                            shuffle=True if epoch>10 else False)
 
-            # Create test dataset and Dataloader
-            test_dataset = Dataset(mel_spectrogram_test, labels_test)
+                # Create test dataset and Dataloader
+                test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
-            test_loader = data.DataLoader(dataset=test_dataset,
-                                        batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True if epoch>10 else False)
+                test_loader = data.DataLoader(dataset=test_dataset,
+                                            batch_size=ConfirmingModel.hparams["batch_size"],
+                                            shuffle=True if epoch>10 else False)
 
-            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
-                                                    steps_per_epoch=int(
-                                                        len(train_loader)),
-                                                    epochs=ConfirmingModel.hparams["epochs"],
-                                                    anneal_strategy='linear')
+                scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
+                                                        steps_per_epoch=int(
+                                                            len(train_loader)),
+                                                        epochs=ConfirmingModel.hparams["epochs"],
+                                                        anneal_strategy='linear')
 
-            train(model, device, train_loader, criterion, optimizer,
-                    scheduler, epoch, iter_meter, experiment)
+                train(model, device, train_loader, criterion, optimizer,
+                        scheduler, epoch, iter_meter, experiment)
 
-            precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+                precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-        print(precision)
-        
-        if precision > 0.9:
-            break
+                if precision > 0.9:
+                    raise GetOutOfLoop
+
+    except GetOutOfLoop:
+        pass
             
 
     # Save model
