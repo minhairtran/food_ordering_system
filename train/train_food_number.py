@@ -179,7 +179,8 @@ if __name__ == "__main__":
 
     optimizer = optim.AdamW(
         model.parameters(), FoodNumberModel.hparams["learning_rate"])
-    criterion = nn.CTCLoss(blank=0).to(device)
+    criterion = nn.CrossEntropyLoss().to(device)
+
 
     iter_meter = IterMeter()
 
