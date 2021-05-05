@@ -182,6 +182,11 @@ if __name__ == "__main__":
         model.parameters(), FoodNumberModel.hparams["learning_rate"])
     criterion = nn.CrossEntropyLoss().to(device)
 
+    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
+                                                        steps_per_epoch=5,
+                                                        epochs=FoodNumberModel.hparams["epochs"],
+                                                        anneal_strategy='linear')
+
     iter_meter = IterMeter()
     try:
         for epoch in range(1, FoodNumberModel.hparams["epochs"] + 1):
@@ -210,14 +215,6 @@ if __name__ == "__main__":
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=FoodNumberModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
-
-                print("Data {} with step per epoch {}".format(filename, int(len(train_loader))))
-                
-                scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                        steps_per_epoch=int(
-                                                            len(train_loader)),
-                                                        epochs=FoodNumberModel.hparams["epochs"],
-                                                        anneal_strategy='linear')
 
                 train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
