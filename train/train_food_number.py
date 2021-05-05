@@ -102,7 +102,7 @@ def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, i
             optimizer.step()
             scheduler.step()
             iter_meter.step()
-            if (batch_idx % 3 == 0 and batch_idx != 0) or batch_idx == data_len:
+            if (batch_idx % 2 == 0 and batch_idx != 0) or batch_idx == data_len:
                 print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}\tPrecision: {:.2f}%'.format(
                     epoch, batch_idx * len(spectrograms), data_len,
                     100. * batch_idx / len(train_loader), loss.item(), 100*np.mean(train_precision_average)))
