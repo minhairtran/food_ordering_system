@@ -19,6 +19,8 @@ import torch
 import numpy as np
 import time
 from ctypes import *
+import sounddevice as sd
+import soundfile as sf
 
 def id_generator():
     now = datetime.datetime.now()
@@ -29,6 +31,36 @@ def id_generator():
 SAVE_AUDIO_FILE_PATH = "recorded_audios/" + id_generator() + ".wav"
 CONFIRMING_MODEL_PATH = "../train/model_confirming.h5"
 FOOD_NUMBER_MODEL_PATH = "../train/model_food_number.h5"
+
+# System audio path 
+WELCOME_PATH = "recorded_audios/system_audio/welcome.wav"
+ASK_ORDER_NTH_PATH = "recorded_audios/system_audio/ask_order_nth.wav"
+ORDER_AGAIN_PATH = "recorded_audios/system_audio/order_again.wav"
+ORDER_FAILURE_PATH = "recorded_audios/system_audio/order_failure.wav"
+ORDER_MORE_PATH = "recorded_audios/system_audio/order_more.wav"
+ORDER_SUCCESS_PATH = "recorded_audios/system_audio/order_success.wav"
+
+CONFIRM_DISH_0_1ST_PATH = "recorded_audios/system_audio/confirm_dish_0_1st.wav"
+CONFIRM_DISH_1_1ST_PATH = "recorded_audios/system_audio/confirm_dish_1_1st.wav"
+CONFIRM_DISH_2_1ST_PATH = "recorded_audios/system_audio/confirm_dish_2_1st.wav"
+CONFIRM_DISH_3_1ST_PATH = "recorded_audios/system_audio/confirm_dish_3_1st.wav"
+CONFIRM_DISH_4_1ST_PATH = "recorded_audios/system_audio/confirm_dish_4_1st.wav"
+CONFIRM_DISH_5_1ST_PATH = "recorded_audios/system_audio/confirm_dish_5_1st.wav"
+CONFIRM_DISH_6_1ST_PATH = "recorded_audios/system_audio/confirm_dish_6_1st.wav"
+CONFIRM_DISH_7_1ST_PATH = "recorded_audios/system_audio/confirm_dish_7_1st.wav"
+CONFIRM_DISH_8_1ST_PATH = "recorded_audios/system_audio/confirm_dish_8_1st.wav"
+CONFIRM_DISH_9_1ST_PATH = "recorded_audios/system_audio/confirm_dish_9_1st.wav"
+
+CONFIRM_DISH_0_NTH_PATH = "recorded_audios/system_audio/confirm_dish_0_nth.wav"
+CONFIRM_DISH_1_NTH_PATH = "recorded_audios/system_audio/confirm_dish_1_nth.wav"
+CONFIRM_DISH_2_NTH_PATH = "recorded_audios/system_audio/confirm_dish_2_nth.wav"
+CONFIRM_DISH_3_NTH_PATH = "recorded_audios/system_audio/confirm_dish_3_nth.wav"
+CONFIRM_DISH_4_NTH_PATH = "recorded_audios/system_audio/confirm_dish_4_nth.wav"
+CONFIRM_DISH_5_NTH_PATH = "recorded_audios/system_audio/confirm_dish_5_nth.wav"
+CONFIRM_DISH_6_NTH_PATH = "recorded_audios/system_audio/confirm_dish_6_nth.wav"
+CONFIRM_DISH_7_NTH_PATH = "recorded_audios/system_audio/confirm_dish_7_nth.wav"
+CONFIRM_DISH_8_NTH_PATH = "recorded_audios/system_audio/confirm_dish_8_nth.wav"
+CONFIRM_DISH_9_NTH_PATH = "recorded_audios/system_audio/confirm_dish_9_nth.wav"
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -58,7 +90,7 @@ if __name__ == "__main__":
     food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
         FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
 
-    food_number_checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
+    food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
     food_number_model.load_state_dict(food_number_checkpoint)
     food_number_model.eval()
 
@@ -82,5 +114,29 @@ if __name__ == "__main__":
     frames = []
     predicted_window = np.array([])
 
-    
+    order_conversation = True
+
+    while (order_conversation):
+        # System welcome customers
+        data, fs = sf.read(WELCOME_PATH, dtype='float32') 
+        sd.play(data, fs)
+        sd.wait()
+
+        # User replies
+        data = stream.read(CHUNKSIZE)
+        frames.append(data)
+        current_window = np.frombuffer(data, dtype=np.float32)
+
+        current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+
+        if(np.amax(current_window) > 0.9):
+            predicted_window = np.append(predicted_window, current_window)
+        else:
+            if(len(predicted_window) == 0):
+                #Hoi 2 anh
+                noise_sample = np.frombuffer(data, dtype=np.float32)
+            else:
+                predicted_audio = food_number_prediction.predict(model, np.array(current_window))
+                print(predicted_audio)
+                predicted_window = np.array([])
 
