@@ -3,12 +3,11 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import SpeechRecognitionModel
+from train.model import FoodNumberModel
 
 import datetime
 import random
 import wave
-from train.text_transform import FoodNumberTextTransform
 import torch.nn as nn
 import torch.nn.functional as F
 import pyaudio
@@ -41,7 +40,7 @@ ERROR_HANDLER_FUNC = CFUNCTYPE(
 def py_error_handler(filename, line, function, err, fmt):
     pass
 
-def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
+def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
                fmax=8000):
 
     # extract MFCCs
@@ -54,7 +53,7 @@ def preprocess(signal, n_fft=512, hop_length=384, n_mels=128,
         mel_spectrogram.T, dtype=torch.float).detach().requires_grad_()
 
     mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True).transpose(1, 2)
+        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
     return mel_spectrogram
 
@@ -86,7 +85,7 @@ def predict(model, tested_audio):
     # get the predicted label
     output = model(mel_spectrogram)
 
-    output = F.log_softmax(output, dim=2)
+    output = F.log_softmax(output, dim=1)
     predicted = decoder(output)
     return predicted
 
@@ -99,8 +98,8 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    model = SpeechRecognitionModel(SpeechRecognitionModel.hparams['n_rnn_layers'], SpeechRecognitionModel.hparams['rnn_dim'], \
-        16, SpeechRecognitionModel.hparams['n_feats'], SpeechRecognitionModel.hparams['stride'], SpeechRecognitionModel.hparams['dropout']).to(device)
+    model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
+        FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -119,14 +118,15 @@ if __name__ == "__main__":
     # noise window
     data = stream.read(CHUNKSIZE)
     noise_sample = np.frombuffer(data, dtype=np.float32)
-    loud_threshold = np.mean(np.abs(noise_sample)) * 10
     audio_buffer = []
     frames = []
-    near = 0
+    predicted_window = np.array([])
+
 
     print("Start recording...")
     start = time.time()
 
+    # while(time.time() - start < 60):
     while(True):
         # Read chunk and load it into numpy array.
         data = stream.read(CHUNKSIZE)
@@ -135,15 +135,18 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.mean(np.abs(current_window)) > 0.009 and np.amax(current_window) > 0.5):
-            predicted_audio = predict(model, np.array(current_window))
-            print(predicted_audio)
+        if(np.amax(current_window) > 0.2):
+            predicted_window = np.append(predicted_window, current_window)
         else:
-            pass
+            if(len(predicted_window) == 0):
+                #Hoi 2 anh
+                noise_sample = np.frombuffer(data, dtype=np.float32)
+            else:
+                predicted_audio = predict(model, np.array(current_window))
+                print(predicted_audio)
+                predicted_window = np.array([])
 
-        print((time.time() - start), np.mean(np.abs(current_window)), np.amax(current_window))
-
-        time.sleep(1)
+        print((time.time() - start), np.amax(current_window))
 
     # close stream
     stream.stop_stream()

@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=ConfirmingModel.hparams["batch_size"],
-                                            shuffle=True if epoch>10 else False)
+                                            shuffle=False)
 
                 scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
                                                         steps_per_epoch=int(
