@@ -216,8 +216,6 @@ if __name__ == "__main__":
                                             batch_size=FoodNumberModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
-                print(int(len(train_loader)))
-
                 train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
