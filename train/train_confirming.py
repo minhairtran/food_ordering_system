@@ -218,7 +218,7 @@ if __name__ == "__main__":
 
                 precision_average.append(precision)
 
-            if np.mean(precision_average) > 0.9:
+            if np.mean(precision_average) > 0.97:
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
