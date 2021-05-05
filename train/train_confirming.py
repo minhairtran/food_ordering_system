@@ -182,7 +182,7 @@ if __name__ == "__main__":
     precision = 0
     try:
         for epoch in range(1, ConfirmingModel.hparams["epochs"] + 1):
-            precision_average = []
+            epoch_precision = []
             for dataset_index in range(len(load_data_set)):
                 # Load all data
                 mel_spectrogram, labels = load_data(load_data_set[dataset_index])
@@ -216,9 +216,9 @@ if __name__ == "__main__":
 
                 precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-                precision_average.append(precision)
+                epoch_precision.append(precision)
 
-            if np.mean(precision_average) > 0.97:
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
