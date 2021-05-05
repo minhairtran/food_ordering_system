@@ -12,13 +12,11 @@ import torch.utils.data as data
 import torch.nn as nn
 import torch
 from error_calculating import ErrorCalculating
-from text_transform import ConfirmTextTransform
 from model import ConfirmingModel
 from sklearn.metrics import precision_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
-text_transform = ConfirmTextTransform()
 error_calculating = ErrorCalculating()
 
 
@@ -204,7 +202,7 @@ if __name__ == "__main__":
 
             test_loader = data.DataLoader(dataset=test_dataset,
                                         batch_size=ConfirmingModel.hparams["batch_size"],
-                                        shuffle=True)
+                                        shuffle=True if epoch>10 else False)
 
             scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
                                                     steps_per_epoch=int(
