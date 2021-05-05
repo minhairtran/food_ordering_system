@@ -185,7 +185,7 @@ if __name__ == "__main__":
     iter_meter = IterMeter()
     try:
         for epoch in range(1, FoodNumberModel.hparams["epochs"] + 1):
-            precision_average = []
+            epoch_precisions = []
 
             for data_path in DATA_PATH:
                 filename = data_path.split("/")[-1]
@@ -223,9 +223,9 @@ if __name__ == "__main__":
                 precision = test(model, device, test_loader, criterion,
                     iter_meter, experiment, filename)
 
-                precision_average.append(precision)
+                epoch_precisions.append(precision)
 
-            if np.mean(precision_average) > 0.97:
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:

@@ -40,62 +40,62 @@ ERROR_HANDLER_FUNC = CFUNCTYPE(
 def py_error_handler(filename, line, function, err, fmt):
     pass
 
-def preprocess(signal, n_fft=512, hop_length=384, n_mels=20,
-               fmax=8000):
-
-    # extract MFCCs
-    mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
-                                                     hop_length=hop_length, n_mels=n_mels, fmax=fmax)
-
-    mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
-
-    mel_spectrogram = torch.tensor(
-        mel_spectrogram.T, dtype=torch.float).detach().requires_grad_()
-
-    mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
-
-    return mel_spectrogram
+class FoodNumberPrediction():
+    def __init__(self):
+        super(FoodNumberPrediction, self).__init__()
 
 
-def decoder(output):
-    arg_maxes = torch.argmax(output, dim=1).tolist()
-    
-    decode = {
-        0: "zero",
-        1: "one",
-        2: "two",
-        3: "three",
-        4: "four",
-        5: "five",
-        6: "six",
-        7: "seven",
-        8: "eight",
-        9: "nine",
-        10: "unknown"
-    }
+    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20,
+                fmax=8000):
 
-    return decode.get(arg_maxes[0], "unknown")
+        # extract MFCCs
+        mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
+                                                        hop_length=hop_length, n_mels=n_mels, fmax=fmax)
+
+        mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
+
+        mel_spectrogram = torch.tensor(
+            mel_spectrogram.T, dtype=torch.float).detach().requires_grad_()
+
+        mel_spectrogram = nn.utils.rnn.pad_sequence(
+            mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+
+        return mel_spectrogram
 
 
-def predict(model, tested_audio):
-    mel_spectrogram = preprocess(tested_audio)
-    mel_spectrogram = mel_spectrogram.to(device)
+    def decoder(self, output):
+        arg_maxes = torch.argmax(output, dim=1).tolist()
+        
+        decode = {
+            0: "zero",
+            1: "one",
+            2: "two",
+            3: "three",
+            4: "four",
+            5: "five",
+            6: "six",
+            7: "seven",
+            8: "eight",
+            9: "nine",
+            10: "unknown"
+        }
 
-    # get the predicted label
-    output = model(mel_spectrogram)
+        return decode.get(arg_maxes[0], "unknown")
 
-    output = F.log_softmax(output, dim=1)
-    predicted = decoder(output)
-    return predicted
+
+    def predict(self, model, tested_audio):
+        mel_spectrogram = self.preprocess(tested_audio)
+        mel_spectrogram = mel_spectrogram.to(device)
+
+        # get the predicted label
+        output = model(mel_spectrogram)
+
+        output = F.log_softmax(output, dim=1)
+        predicted = self.decoder(output)
+        return predicted
 
 
 if __name__ == "__main__":
-
-    # use_cuda = torch.cuda.is_available()
-    # torch.manual_seed(7)
-    # device = torch.device("cuda" if use_cuda else "cpu")
-
     device = torch.device("cpu")
 
     model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
@@ -104,6 +104,8 @@ if __name__ == "__main__":
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
     model.eval()
+
+    food_number_prediction = FoodNumberPrediction()
 
     c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
     asound = cdll.LoadLibrary('libasound.so')
@@ -135,14 +137,14 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.2):
+        if(np.amax(current_window) > 0.9):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):
                 #Hoi 2 anh
                 noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
-                predicted_audio = predict(model, np.array(current_window))
+                predicted_audio = food_number_prediction.predict(model, np.array(current_window))
                 print(predicted_audio)
                 predicted_window = np.array([])
 
