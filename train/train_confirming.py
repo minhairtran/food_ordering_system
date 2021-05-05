@@ -137,7 +137,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
         test_loss, 100*np.mean(test_precision_average)))
 
-    return test_precision
+    return np.mean(test_precision_average)
 
 
 if __name__ == "__main__":
