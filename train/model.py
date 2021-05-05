@@ -132,7 +132,7 @@ class FoodNumberModel(nn.Module):
     }
 
     def __init__(self, n_cnn_layers, n_rnn_layers, rnn_dim, n_class, n_feats, stride=2, dropout=0.25):
-        super(ConfirmingModel, self).__init__()
+        super(FoodNumberModel, self).__init__()
         n_feats = n_feats//2
         self.cnn = nn.Conv2d(1, 32, 3, stride=stride, padding=3//2)  # cnn for extracting heirachal features
 
