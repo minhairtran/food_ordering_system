@@ -183,7 +183,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss().to(device)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                        steps_per_epoch=5,
+                                                        steps_per_epoch=50,
                                                         epochs=FoodNumberModel.hparams["epochs"],
                                                         anneal_strategy='linear')
 
