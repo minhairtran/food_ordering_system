@@ -216,7 +216,7 @@ if __name__ == "__main__":
 
             precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-            if precision > 70:
+            if precision > 0.9:
                 break
             
 
