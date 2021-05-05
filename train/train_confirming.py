@@ -217,8 +217,10 @@ if __name__ == "__main__":
 
                 precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
-                if precision > 0.9:
-                    raise GetOutOfLoop
+                precision_average.append(precision)
+
+            if np.mean(precision_average) > 0.9:
+                raise GetOutOfLoop
 
     except GetOutOfLoop:
         pass

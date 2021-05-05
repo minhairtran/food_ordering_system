@@ -23,6 +23,8 @@ DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data
 SAVED_MODEL_PATH = "model_food_number.h5"
 error_calculating = ErrorCalculating()
 
+class GetOutOfLoop( Exception ):
+    pass
 
 class Dataset(torch.utils.data.Dataset):
     'Characterizes a dataset for PyTorch'
@@ -181,49 +183,54 @@ if __name__ == "__main__":
         model.parameters(), FoodNumberModel.hparams["learning_rate"])
     criterion = nn.CrossEntropyLoss().to(device)
 
-
     iter_meter = IterMeter()
+    try:
+        for epoch in range(1, FoodNumberModel.hparams["epochs"] + 1):
+            precision_average = []
 
-    for epoch in range(1, FoodNumberModel.hparams["epochs"] + 1):
+            for data_path in DATA_PATH:
+                filename = data_path.split("/")[-1]
+                # Load all data
+                mel_spectrogram, labels = load_data(data_path)
 
-        for data_path in DATA_PATH:
-            filename = data_path.split("/")[-1]
-            # Load all data
-            mel_spectrogram, labels = load_data(data_path)
+                # Split into train and test
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=FoodNumberModel.hparams['test_size'], shuffle=False)
+                
 
-            # Split into train and test
-            mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=FoodNumberModel.hparams['test_size'], shuffle=False)
-            
+                # Create train dataset and Dataloader
+                train_dataset = Dataset(
+                    mel_spectrogram_train, labels_train)
 
-            # Create train dataset and Dataloader
-            train_dataset = Dataset(
-                mel_spectrogram_train, labels_train)
+                train_loader = data.DataLoader(dataset=train_dataset,
+                                            batch_size=FoodNumberModel.hparams["batch_size"],
+                                            shuffle=True if epoch>10 else False)
 
-            train_loader = data.DataLoader(dataset=train_dataset,
-                                        batch_size=FoodNumberModel.hparams["batch_size"],
-                                        shuffle=True if epoch>10 else False)
+                # Create test dataset and Dataloader
+                test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
-            # Create test dataset and Dataloader
-            test_dataset = Dataset(mel_spectrogram_test, labels_test)
+                test_loader = data.DataLoader(dataset=test_dataset,
+                                            batch_size=FoodNumberModel.hparams["batch_size"],
+                                            shuffle=True if epoch>10 else False)
 
-            test_loader = data.DataLoader(dataset=test_dataset,
-                                        batch_size=FoodNumberModel.hparams["batch_size"],
-                                        shuffle=True if epoch>10 else False)
+                scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
+                                                        steps_per_epoch=int(
+                                                            len(train_loader)),
+                                                        epochs=FoodNumberModel.hparams["epochs"],
+                                                        anneal_strategy='linear')
 
-            scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                    steps_per_epoch=int(
-                                                        len(train_loader)),
-                                                    epochs=FoodNumberModel.hparams["epochs"],
-                                                    anneal_strategy='linear')
+                train(model, device, train_loader, criterion, optimizer,
+                    scheduler, epoch, iter_meter, experiment)
 
-            train(model, device, train_loader, criterion, optimizer,
-                  scheduler, epoch, iter_meter, experiment)
+                precision = test(model, device, test_loader, criterion,
+                    iter_meter, experiment, filename)
 
-            precision = test(model, device, test_loader, criterion,
-                 iter_meter, experiment, filename)
+                precision_average.append(precision)
 
-        if precision > 0.9:
-            break
+            if np.mean(precision_average) > 0.9:
+                raise GetOutOfLoop
+
+    except GetOutOfLoop:
+        pass
 
     # Save model
     torch.save(model.state_dict(), SAVED_MODEL_PATH)
