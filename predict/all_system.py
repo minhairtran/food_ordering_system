@@ -28,7 +28,7 @@ def id_generator():
 
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
-SAVE_AUDIO_FILE_PATH = "recorded_audios/" + id_generator() + ".wav"
+SAVE_AUDIO_FILE_PATH = "recorded_audios/further_training" + id_generator() + ".wav"
 CONFIRMING_MODEL_PATH = "../train/model_confirming.h5"
 FOOD_NUMBER_MODEL_PATH = "../train/model_food_number.h5"
 
@@ -57,6 +57,7 @@ CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
+SYSTEM_UNDERSTAND = True
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -75,6 +76,7 @@ def system_say(audio_path):
 def user_reply(noise_sample, prediction, user_response_type):
     user_response_content = ""
     system_understand = False
+    frame = []
 
     predicted_window = np.array([])
 
@@ -86,6 +88,7 @@ def user_reply(noise_sample, prediction, user_response_type):
         #     stream.start_stream()
 
         data = stream.read(CHUNKSIZE)
+        frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
@@ -112,8 +115,7 @@ def user_reply(noise_sample, prediction, user_response_type):
                     else:
                         raise SystemNotUnderstand
                 else:
-                    return user_response_content, noise_sample
-
+                    return user_response_content, noise_sample, frame
 
 def system_understand_f(user_response_content, user_response_type):
     confirming_labels = ["yes", "no"]
@@ -123,12 +125,14 @@ def system_understand_f(user_response_content, user_response_type):
         if(user_response_content in confirming_labels):
             return True
         else:
+            SYSTEM_UNDERSTAND = False
             return False
 
     if(user_response_type == "food_number"):
         if(user_response_content in food_number_labels):
             return True
         else:
+            SYSTEM_UNDERSTAND = False
             return False
     else:
         return None
@@ -145,15 +149,16 @@ def handle_confirming_dish(noise_sample, confirming_prediction):
     time = 1
     
     while(time <= 3):
-        user_response, noise_sample = user_reply(noise_sample, confirming_prediction, "confirming")
+        user_response, noise_sample, frame = user_reply(noise_sample, confirming_prediction, "confirming")
         
         if (user_response == "no"):
+            SYSTEM_UNDERSTAND = False
             time += 1
     
     if (time == 4):
-        raise SystemNotUnderstand
-
-
+        return False, frame
+    else:
+        return True, frame
 
 if __name__ == "__main__":
     device = torch.device("cpu")
@@ -193,31 +198,41 @@ if __name__ == "__main__":
     noise_sample = np.frombuffer(data, dtype=np.float32)
     # loud_threshold = np.mean(np.abs(noise_sample)) * 10
     audio_buffer = []
-    frames = []
+    all_frames = []
     predicted_window = np.array([])
 
     try:
         # System welcome customers
-        user_response = ""
+        start_conversation = True
+        order_more = False
 
-        while user_response == "yes" or user_response == "":
-            if(user_response == ""):
+        while order_more or start_conversation:
+            if start_conversation:
                 system_say(WELCOME_PATH)
+                start_conversation = False
             else:
                 system_say(ORDER_MORE_PATH)
 
-            user_response, noise_sample = user_reply(noise_sample, food_number_prediction, "food_number")
+            user_response, noise_sample, frame = user_reply(noise_sample, food_number_prediction, "food_number")
+
+            all_frames.append(frame)
 
             system_say(find_confirmed_dish_number_path(user_response, 1))
 
-            handle_confirming_dish(noise_sample, confirming_prediction)
+            is_handled, frame = handle_confirming_dish(noise_sample, confirming_prediction)
+            all_frames.append(frame)
+
+            if not is_handled:
+                raise SystemNotUnderstand
 
             system_say(ORDER_MORE_PATH)
 
-            user_response, noise_sample = user_reply(noise_sample, confirming_prediction, "confirming")
+            user_response, noise_sample, frame = user_reply(noise_sample, confirming_prediction, "confirming")
+            all_frames.append(frame)
+
+            order_more = user_response == "yes"
         
         system_say(ORDER_SUCCESS_PATH)
-
 
     except SystemNotUnderstand:
         system_say(ORDER_FAILURE_PATH)
@@ -226,4 +241,13 @@ if __name__ == "__main__":
         stream.stop_stream()
         stream.close()
         p.terminate()
+
+        if not SYSTEM_UNDERSTAND:
+            # Save the recorded data as a WAV file when not understanding appears in the conversation
+            wf = wave.open(SAVE_AUDIO_FILE_PATH, 'wb')
+            wf.setnchannels(CHANNELS)
+            wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
+            wf.setframerate(RATE)
+            wf.writeframes(b''.join(all_frames))
+            wf.close()
 
