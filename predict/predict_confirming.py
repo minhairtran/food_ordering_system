@@ -17,6 +17,8 @@ import torch
 import numpy as np
 import time
 from ctypes import *
+from train.text_transform import ConfirmTextTransform
+
 
 def id_generator():
     now = datetime.datetime.now()
@@ -31,6 +33,7 @@ CHUNKSIZE = 22050  # fixed chunk size
 RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
+text_transform = ConfirmTextTransform()
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -60,15 +63,19 @@ class ConfirmingPrediction():
 
         return mel_spectrogram
 
-    def decoder(self, output):
-        arg_maxes = torch.argmax(output, dim=1).tolist()
-        decode = {
-            0: "no",
-            1: "yes",
-            2: "unknown",
-        }
+    def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
+        arg_maxes = torch.argmax(output, dim=2)
+        decodes = []
 
-        return decode.get(arg_maxes[0], "unknown")
+        for i, args in enumerate(arg_maxes):
+            decode = []
+            for j, index in enumerate(args):
+                if index != blank_label:
+                    if collapse_repeated and j != 0 and index == args[j - 1]:
+                        continue
+                    decode.append(index.item())
+            decodes.append(text_transform.int_to_text(decode))
+        return decodes
 
 
     def predict(self, model, tested_audio):
@@ -78,8 +85,9 @@ class ConfirmingPrediction():
         # get the predicted label
         output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=1)
-        predicted = self.decoder(output)
+        output = F.log_softmax(output, dim=2)
+
+        predicted = self.GreedyDecoder(output)
         return predicted
 
 
@@ -87,9 +95,8 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], \
-        ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
-
+    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
+        ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)

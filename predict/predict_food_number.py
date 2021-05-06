@@ -17,6 +17,8 @@ import torch
 import numpy as np
 import time
 from ctypes import *
+from text_transform import FoodNumberTextTransform
+
 
 def id_generator():
     now = datetime.datetime.now()
@@ -31,6 +33,8 @@ CHUNKSIZE = 22050  # fixed chunk size
 RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
+text_transform = FoodNumberTextTransform()
+
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -62,24 +66,19 @@ class FoodNumberPrediction():
         return mel_spectrogram
 
 
-    def decoder(self, output):
-        arg_maxes = torch.argmax(output, dim=1).tolist()
-        
-        decode = {
-            0: "zero",
-            1: "one",
-            2: "two",
-            3: "three",
-            4: "four",
-            5: "five",
-            6: "six",
-            7: "seven",
-            8: "eight",
-            9: "nine",
-            10: "unknown"
-        }
+    def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
+        arg_maxes = torch.argmax(output, dim=2)
+        decodes = []
 
-        return decode.get(arg_maxes[0], "unknown")
+        for i, args in enumerate(arg_maxes):
+            decode = []
+            for j, index in enumerate(args):
+                if index != blank_label:
+                    if collapse_repeated and j != 0 and index == args[j - 1]:
+                        continue
+                    decode.append(index.item())
+            decodes.append(text_transform.int_to_text(decode))
+        return decodes
 
 
     def predict(self, model, tested_audio):
@@ -89,7 +88,7 @@ class FoodNumberPrediction():
         # get the predicted label
         output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=1)
+        output = F.log_softmax(output, dim=2)
         predicted = self.decoder(output)
         return predicted
 

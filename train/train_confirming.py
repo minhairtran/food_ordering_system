@@ -13,7 +13,6 @@ import torch.nn as nn
 import torch
 from error_calculating import ErrorCalculating
 from model import ConfirmingModel
-from sklearn.metrics import precision_score
 from text_transform import ConfirmTextTransform
 
 DATA_PATH = "../data/confirming_data/data.pt"
