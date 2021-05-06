@@ -41,27 +41,17 @@ ORDER_MORE_PATH = "recorded_audios/system_audio/order_more.wav"
 ORDER_SUCCESS_PATH = "recorded_audios/system_audio/order_success.wav"
 NOT_UNDERSTAND_ORDER = "recorded_audios/system_audio/not_understand_order.wav"
 
-CONFIRM_DISH_0_1ST_PATH = "recorded_audios/system_audio/confirm_dish_0_1st.wav"
-CONFIRM_DISH_1_1ST_PATH = "recorded_audios/system_audio/confirm_dish_1_1st.wav"
-CONFIRM_DISH_2_1ST_PATH = "recorded_audios/system_audio/confirm_dish_2_1st.wav"
-CONFIRM_DISH_3_1ST_PATH = "recorded_audios/system_audio/confirm_dish_3_1st.wav"
-CONFIRM_DISH_4_1ST_PATH = "recorded_audios/system_audio/confirm_dish_4_1st.wav"
-CONFIRM_DISH_5_1ST_PATH = "recorded_audios/system_audio/confirm_dish_5_1st.wav"
-CONFIRM_DISH_6_1ST_PATH = "recorded_audios/system_audio/confirm_dish_6_1st.wav"
-CONFIRM_DISH_7_1ST_PATH = "recorded_audios/system_audio/confirm_dish_7_1st.wav"
-CONFIRM_DISH_8_1ST_PATH = "recorded_audios/system_audio/confirm_dish_8_1st.wav"
-CONFIRM_DISH_9_1ST_PATH = "recorded_audios/system_audio/confirm_dish_9_1st.wav"
+CONFIRM_DISH_1ST_PATH = ["recorded_audios/system_audio/confirm_dish_0_1st.wav", "recorded_audios/system_audio/confirm_dish_1_1st.wav", \
+    "recorded_audios/system_audio/confirm_dish_2_1st.wav", "recorded_audios/system_audio/confirm_dish_3_1st.wav", \
+        "recorded_audios/system_audio/confirm_dish_4_1st.wav", "recorded_audios/system_audio/confirm_dish_5_1st.wav", \
+            "recorded_audios/system_audio/confirm_dish_6_1st.wav", "recorded_audios/system_audio/confirm_dish_7_1st.wav",\
+                 "recorded_audios/system_audio/confirm_dish_8_1st.wav", "recorded_audios/system_audio/confirm_dish_9_1st.wav"]
 
-CONFIRM_DISH_0_NTH_PATH = "recorded_audios/system_audio/confirm_dish_0_nth.wav"
-CONFIRM_DISH_1_NTH_PATH = "recorded_audios/system_audio/confirm_dish_1_nth.wav"
-CONFIRM_DISH_2_NTH_PATH = "recorded_audios/system_audio/confirm_dish_2_nth.wav"
-CONFIRM_DISH_3_NTH_PATH = "recorded_audios/system_audio/confirm_dish_3_nth.wav"
-CONFIRM_DISH_4_NTH_PATH = "recorded_audios/system_audio/confirm_dish_4_nth.wav"
-CONFIRM_DISH_5_NTH_PATH = "recorded_audios/system_audio/confirm_dish_5_nth.wav"
-CONFIRM_DISH_6_NTH_PATH = "recorded_audios/system_audio/confirm_dish_6_nth.wav"
-CONFIRM_DISH_7_NTH_PATH = "recorded_audios/system_audio/confirm_dish_7_nth.wav"
-CONFIRM_DISH_8_NTH_PATH = "recorded_audios/system_audio/confirm_dish_8_nth.wav"
-CONFIRM_DISH_9_NTH_PATH = "recorded_audios/system_audio/confirm_dish_9_nth.wav"
+CONFIRM_DISH_NTH_PATH = "recorded_audios/system_audio/confirm_dish_0_nth.wav", "recorded_audios/system_audio/confirm_dish_1_nth.wav"\
+    , "recorded_audios/system_audio/confirm_dish_2_nth.wav", "recorded_audios/system_audio/confirm_dish_3_nth.wav", \
+        "recorded_audios/system_audio/confirm_dish_4_nth.wav", "recorded_audios/system_audio/confirm_dish_5_nth.wav", \
+            "recorded_audios/system_audio/confirm_dish_6_nth.wav", "recorded_audios/system_audio/confirm_dish_7_nth.wav"\
+                , "recorded_audios/system_audio/confirm_dish_8_nth.wav", "recorded_audios/system_audio/confirm_dish_9_nth.wav"]
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -143,6 +133,28 @@ def system_understand_f(user_response_content, user_response_type):
     else:
         return None
 
+def find_confirmed_dish_number_path(user_response, time):
+    food_number_labels = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+    if time == 1:
+        return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
+    else:
+        return CONFIRM_DISH_NTH_PATH[food_number_labels.index(user_response)]
+
+def handle_confirming_dish(noise_sample, confirming_prediction):
+    time = 1
+    
+    while(time <= 3):
+        user_response, noise_sample = user_reply(noise_sample, confirming_prediction, "confirming")
+        
+        if (user_response == "no"):
+            time += 1
+    
+    if (time == 4):
+        raise SystemNotUnderstand
+
+
+
 if __name__ == "__main__":
     device = torch.device("cpu")
 
@@ -156,15 +168,15 @@ if __name__ == "__main__":
 
     confirming_prediction = ConfirmingPrediction()
 
-    # Food model initialization 
-    # food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-    #     FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    Food model initialization 
+    food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
+        FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
 
-    # food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
-    # food_number_model.load_state_dict(food_number_checkpoint)
-    # food_number_model.eval()
+    food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
+    food_number_model.load_state_dict(food_number_checkpoint)
+    food_number_model.eval()
 
-    # food_number_prediction = FoodNumberPrediction()
+    food_number_prediction = FoodNumberPrediction()
 
     # Handle streaming error
     c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
@@ -184,14 +196,29 @@ if __name__ == "__main__":
     frames = []
     predicted_window = np.array([])
 
-    order_conversation = True
-
     try:
-        while (order_conversation):
-            # System welcome customers
-            system_say(WELCOME_PATH)
+        # System welcome customers
+        user_response = ""
+
+        while user_response == "yes" or user_response == "":
+            if(user_response == ""):
+                system_say(WELCOME_PATH)
+            else:
+                system_say(ORDER_MORE_PATH)
+
+            user_response, noise_sample = user_reply(noise_sample, food_number_prediction, "food_number")
+
+            system_say(find_confirmed_dish_number_path(user_response, 1))
+
+            handle_confirming_dish(noise_sample, confirming_prediction)
+
+            system_say(ORDER_MORE_PATH)
 
             user_response, noise_sample = user_reply(noise_sample, confirming_prediction, "confirming")
+        
+        system_say(ORDER_SUCCESS_PATH)
+
+
     except SystemNotUnderstand:
         system_say(ORDER_FAILURE_PATH)
     finally:
