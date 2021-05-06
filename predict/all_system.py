@@ -39,6 +39,7 @@ ORDER_AGAIN_PATH = "recorded_audios/system_audio/order_again.wav"
 ORDER_FAILURE_PATH = "recorded_audios/system_audio/order_failure.wav"
 ORDER_MORE_PATH = "recorded_audios/system_audio/order_more.wav"
 ORDER_SUCCESS_PATH = "recorded_audios/system_audio/order_success.wav"
+NOT_UNDERSTAND_ORDER = "recorded_audios/system_audio/not_understand_order.wav"
 
 CONFIRM_DISH_0_1ST_PATH = "recorded_audios/system_audio/confirm_dish_0_1st.wav"
 CONFIRM_DISH_1_1ST_PATH = "recorded_audios/system_audio/confirm_dish_1_1st.wav"
@@ -70,15 +71,84 @@ CHANNELS = 2
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
+class SystemNotUnderstand(Exception):
+    pass
+
 def py_error_handler(filename, line, function, err, fmt):
     pass
+
+def system_say(audio_path):
+    data, fs = sf.read(audio_path, dtype='float32') 
+    sd.play(data, fs)
+    sd.wait()
+
+def user_reply(noise_sample, prediction, user_response_type):
+    user_response_content = ""
+    system_understand = False
+
+    predicted_window = np.array([])
+
+    times_trying_understand = 1
+
+    while not system_understand:
+        # User replies
+        # if(stream.is_stopped()):
+        #     stream.start_stream()
+
+        data = stream.read(CHUNKSIZE)
+        current_window = np.frombuffer(data, dtype=np.float32)
+
+        current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+
+        if(np.amax(current_window) > 0.9):
+            predicted_window = np.append(predicted_window, current_window)
+        else:
+            if(len(predicted_window) == 0):
+                noise_sample = np.frombuffer(data, dtype=np.float32)
+            else:
+                user_response_content = prediction.predict(confirming_model, np.array(current_window))[0]
+                print(user_response_content)
+                predicted_window = np.array([])
+
+
+                # Not understand solution
+                system_understand = system_understand_f(user_response_content, user_response_type)
+
+                if not system_understand:
+                    if times_trying_understand < 3:
+                        # stream.stop_stream()
+                        system_say(NOT_UNDERSTAND_ORDER)
+                        times_trying_understand += 1
+                    else:
+                        raise SystemNotUnderstand
+                else:
+                    return user_response_content, noise_sample
+
+
+def system_understand_f(user_response_content, user_response_type):
+    confirming_labels = ["yes", "no"]
+    food_number_labels = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+    if(user_response_type == "confirming"):
+        if(user_response_content in confirming_labels):
+            return True
+        else:
+            return False
+
+    if(user_response_type == "food_number"):
+        if(user_response_content in food_number_labels):
+            return True
+        else:
+            return False
+    else:
+        return None
 
 if __name__ == "__main__":
     device = torch.device("cpu")
 
     # Confirming model initialization
-    confirming_model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], \
-        ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
+    confirming_model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
+        ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
 
     confirming_model_checkpoint = torch.load(CONFIRMING_MODEL_PATH, map_location=device)
     confirming_model.load_state_dict(confirming_model_checkpoint)
@@ -87,14 +157,14 @@ if __name__ == "__main__":
     confirming_prediction = ConfirmingPrediction()
 
     # Food model initialization 
-    food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-        FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    # food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
+    #     FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
 
-    food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
-    food_number_model.load_state_dict(food_number_checkpoint)
-    food_number_model.eval()
+    # food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
+    # food_number_model.load_state_dict(food_number_checkpoint)
+    # food_number_model.eval()
 
-    food_number_prediction = FoodNumberPrediction()
+    # food_number_prediction = FoodNumberPrediction()
 
     # Handle streaming error
     c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
@@ -116,27 +186,17 @@ if __name__ == "__main__":
 
     order_conversation = True
 
-    while (order_conversation):
-        # System welcome customers
-        data, fs = sf.read(WELCOME_PATH, dtype='float32') 
-        sd.play(data, fs)
-        sd.wait()
+    try:
+        while (order_conversation):
+            # System welcome customers
+            system_say(WELCOME_PATH)
 
-        # User replies
-        data = stream.read(CHUNKSIZE)
-        frames.append(data)
-        current_window = np.frombuffer(data, dtype=np.float32)
-
-        current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
-
-        if(np.amax(current_window) > 0.9):
-            predicted_window = np.append(predicted_window, current_window)
-        else:
-            if(len(predicted_window) == 0):
-                #Hoi 2 anh
-                noise_sample = np.frombuffer(data, dtype=np.float32)
-            else:
-                predicted_audio = food_number_prediction.predict(model, np.array(current_window))
-                print(predicted_audio)
-                predicted_window = np.array([])
+            user_response, noise_sample = user_reply(noise_sample, confirming_prediction, "confirming")
+    except SystemNotUnderstand:
+        system_say(ORDER_FAILURE_PATH)
+    finally:
+        # close stream
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
 

@@ -17,7 +17,7 @@ import torch
 import numpy as np
 import time
 from ctypes import *
-from text_transform import FoodNumberTextTransform
+from train.text_transform import FoodNumberTextTransform
 
 
 def id_generator():

@@ -23,4 +23,4 @@ if __name__ == "__main__":
     print("recording......")
     recorded_voice = sounddevice.rec(int(SECOND * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=CHANNELS)
     sounddevice.wait()
-    write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/test/ask_order_nth.wav", SAMPLE_RATE, recorded_voice)
+    write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/system_audio/not_understand_order.wav", SAMPLE_RATE, recorded_voice)

@@ -20,7 +20,7 @@ SAVED_MODEL_PATH = "model_confirming.h5"
 error_calculating = ErrorCalculating()
 text_transform = ConfirmTextTransform()
 
-class GetOutOfLoop( Exception ):
+class GetOutOfLoop(Exception):
     pass
 
 class Dataset(torch.utils.data.Dataset):
@@ -230,12 +230,11 @@ if __name__ == "__main__":
 
                 epoch_cer.append(cer_test)
 
+            # Save model
+            torch.save(model.state_dict(), SAVED_MODEL_PATH)
+
             if all(each_cer < 0.001 for each_cer in epoch_cer):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
         pass
-            
-
-    # Save model
-    torch.save(model.state_dict(), SAVED_MODEL_PATH)
