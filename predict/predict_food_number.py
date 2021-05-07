@@ -81,7 +81,7 @@ class FoodNumberPrediction():
         return decodes
 
 
-    def predict(self, model, tested_audio):
+    def predict(self, model, tested_audio, device=torch.device("cpu")):
         mel_spectrogram = self.preprocess(tested_audio)
         mel_spectrogram = mel_spectrogram.to(device)
 
