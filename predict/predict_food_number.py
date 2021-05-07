@@ -66,7 +66,7 @@ class FoodNumberPrediction():
         return mel_spectrogram
 
 
-    def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
+    def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
         arg_maxes = torch.argmax(output, dim=2)
         decodes = []
 
@@ -89,7 +89,7 @@ class FoodNumberPrediction():
         output = model(mel_spectrogram)
 
         output = F.log_softmax(output, dim=2)
-        predicted = self.decoder(output)
+        predicted = self.GreedyDecoder(output)
         return predicted
 
 

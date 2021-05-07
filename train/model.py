@@ -68,7 +68,7 @@ class BidirectionalGRU(nn.Module):
 class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "n_rnn_layers": 4,
+        "n_rnn_layers": 2,
         "rnn_dim": 60,
         "n_feats": 20,
         "dropout": 0.1,
