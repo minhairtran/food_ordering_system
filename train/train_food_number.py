@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
     optimizer = optim.AdamW(
         model.parameters(), FoodNumberModel.hparams["learning_rate"])
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CTCLoss(blank=0).to(device)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
                                                         steps_per_epoch=54,
