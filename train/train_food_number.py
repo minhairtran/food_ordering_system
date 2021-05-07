@@ -13,6 +13,7 @@ import torch.nn as nn
 import torch
 from error_calculating import ErrorCalculating
 from model import FoodNumberModel
+from text_transform import FoodNumberTextTransform
 
 
 DATA_PATH = ["../data/food_number_data/data_set_0.pt", "../data/food_number_data/data_set_1.pt", "../data/food_number_data/data_set_2.pt",
