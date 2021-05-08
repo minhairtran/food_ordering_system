@@ -192,7 +192,7 @@ if __name__ == "__main__":
     load_data_set = torch.load(DATA_PATH)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
-                                                        steps_per_epoch=51,
+                                                        steps_per_epoch=66,
                                                         epochs=ConfirmingModel.hparams["epochs"],
                                                         anneal_strategy='linear')
 
