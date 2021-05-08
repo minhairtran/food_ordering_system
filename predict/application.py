@@ -15,35 +15,129 @@ sys.path.append(
 from PyQt5 import QtCore, QtGui, QtWidgets
 from all_system import AllSystem
 
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(640, 480)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.ActiveTable = QtWidgets.QGroupBox(self.centralwidget)
+        self.ActiveTable.setGeometry(QtCore.QRect(430, 10, 201, 431))
+        font = QtGui.QFont()
+        font.setPointSize(14)
 
-class Ui_Dialog(object):
-    def setupUi(self, Dialog):
-        Dialog.setObjectName("Dialog")
-        Dialog.resize(400, 300)
-        self.pushButton = QtWidgets.QPushButton(Dialog)
-        self.pushButton.setGeometry(QtCore.QRect(90, 150, 89, 25))
-        self.pushButton.setObjectName("pushButton")
+        self.dishes_ordered_input = QtWidgets.QPlainTextEdit(self.centralwidget)
+        self.dishes_ordered_input.setGeometry(QtCore.QRect(10, 40, 411, 391))
+        self.dishes_ordered_input.setObjectName("dishes_ordered_input")
 
-        self.pushButton.clicked.connect(self.start)
+        self.dishes_ordered_label = QtWidgets.QLabel(self.centralwidget)
+        self.dishes_ordered_label.setGeometry(QtCore.QRect(10, 10, 411, 31))
+        self.dishes_ordered_label.setObjectName("dishes_ordered_label")
 
-        self.retranslateUi(Dialog)
-        QtCore.QMetaObject.connectSlotsByName(Dialog)
+        self.ActiveTable.setFont(font)
+        self.ActiveTable.setStyleSheet("border: 1px solid black;")
+        self.ActiveTable.setTitle("")
+        self.ActiveTable.setObjectName("ActiveTable")
 
-    def retranslateUi(self, Dialog):
+        self.TableLabel = QtWidgets.QLabel(self.ActiveTable)
+        self.TableLabel.setGeometry(QtCore.QRect(0, 0, 201, 31))
+        self.TableLabel.setObjectName("TableLabel")
+
+        self.table1 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table1.setGeometry(QtCore.QRect(10, 40, 92, 23))
+        self.table1.setStyleSheet("border: none;")
+        self.table1.setObjectName("table1")
+        self.table1.stateChanged.connect(lambda: self.start(self.table1.objectName()) if self.table1.isChecked() else None)
+
+        self.table2 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table2.setGeometry(QtCore.QRect(10, 90, 92, 23))
+        self.table2.setStyleSheet("border: none;")
+        self.table2.setObjectName("table2")
+        self.table2.stateChanged.connect(lambda: self.start(self.table2.objectName()) if self.table2.isChecked() else None)
+
+        self.table3 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table3.setGeometry(QtCore.QRect(10, 140, 92, 23))
+        self.table3.setStyleSheet("border: none;")
+        self.table3.setObjectName("table3")
+        self.table3.stateChanged.connect(lambda: self.start(self.table3.objectName()) if self.table3.isChecked() else None)
+
+        self.table6 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table6.setGeometry(QtCore.QRect(10, 290, 92, 23))
+        self.table6.setStyleSheet("border: none;")
+        self.table6.setObjectName("table6")
+        self.table6.stateChanged.connect(lambda: self.start(self.table6.objectName()) if self.table6.isChecked() else None)
+
+        self.table4 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table4.setGeometry(QtCore.QRect(10, 190, 92, 23))
+        self.table4.setStyleSheet("border: none;")
+        self.table4.setObjectName("table4")
+        self.table4.stateChanged.connect(lambda: self.start(self.table4.objectName()) if self.table4.isChecked() else None)
+
+        self.table5 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table5.setGeometry(QtCore.QRect(10, 240, 92, 23))
+        self.table5.setStyleSheet("border: none;")
+        self.table5.setObjectName("table5")
+        self.table5.stateChanged.connect(lambda: self.start(self.table5.objectName()) if self.table5.isChecked() else None)
+
+        self.table8 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table8.setGeometry(QtCore.QRect(10, 390, 92, 23))
+        self.table8.setStyleSheet("border: none;")
+        self.table8.setObjectName("table8")
+        self.table8.stateChanged.connect(lambda: self.start(self.table8.objectName()) if self.table8.isChecked() else None)
+
+        self.table7 = QtWidgets.QCheckBox(self.ActiveTable)
+        self.table7.setGeometry(QtCore.QRect(10, 340, 92, 23))
+        self.table7.setStyleSheet("border: none;")
+        self.table7.setObjectName("table7")
+        self.table7.stateChanged.connect(lambda: self.start(self.table7.objectName()) if self.table7.isChecked() else None)
+
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 640, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
-        self.pushButton.setText(_translate("Dialog", "PushButton"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.table1.setText(_translate("MainWindow", "Table 1"))
+        self.table1.setShortcut(_translate("MainWindow", "Ctrl+1"))
+        self.table2.setText(_translate("MainWindow", "Table 2"))
+        self.table2.setShortcut(_translate("MainWindow", "Ctrl+2"))
+        self.table3.setText(_translate("MainWindow", "Table 3"))
+        self.table3.setShortcut(_translate("MainWindow", "Ctrl+3"))
+        self.table6.setText(_translate("MainWindow", "Table 6"))
+        self.table6.setShortcut(_translate("MainWindow", "Ctrl+6"))
+        self.table4.setText(_translate("MainWindow", "Table 4"))
+        self.table4.setShortcut(_translate("MainWindow", "Ctrl+4"))
+        self.table5.setText(_translate("MainWindow", "Table 5"))
+        self.table5.setShortcut(_translate("MainWindow", "Ctrl+5"))
+        self.TableLabel.setText(_translate("MainWindow", "Active table"))
+        self.table8.setText(_translate("MainWindow", "Table 8"))
+        self.table8.setShortcut(_translate("MainWindow", "Ctrl+8"))
+        self.table7.setText(_translate("MainWindow", "Table 7"))
+        self.table7.setShortcut(_translate("MainWindow", "Ctrl+7"))
+        self.dishes_ordered_label.setText(_translate("MainWindow", "Dishes ordered displayed here"))
 
-    def start(self):
+    def start(self, tableNumber):
         allSystem = AllSystem()
         all_dishes = allSystem.start()
-
+        if all_dishes != None:
+            all_dishes_ordered_input = all_dishes + str(tableNumber) + "\n" + self.dishes_ordered_input.toPlainText()
+            self.dishes_ordered_input.setPlainText(all_dishes_ordered_input)
+            self.ActiveTable.findChild(QtWidgets.QCheckBox, str(tableNumber)).setCheckState(False)
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    Dialog = QtWidgets.QDialog()
-    ui = Ui_Dialog()
-    ui.setupUi(Dialog)
-    Dialog.show()
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
     sys.exit(app.exec_())
