@@ -69,7 +69,7 @@ class ConfirmingModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
         "n_rnn_layers": 2,
-        "rnn_dim": 80,
+        "rnn_dim": 100,
         "n_feats": 40,
         "dropout": 0.1,
         "stride": 2,
