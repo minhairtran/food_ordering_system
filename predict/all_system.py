@@ -155,6 +155,15 @@ class AllSystem:
         else:
             return CONFIRM_DISH_NTH_PATH[food_number_labels.index(user_response)]
 
+    def listToString(s): 
+    
+        # initialize an empty string
+        str1 = ", " 
+        
+        # return string  
+        return (str1.join(s))
+        
+    
     def start(self):
         device = torch.device("cpu")
 
@@ -257,7 +266,7 @@ class AllSystem:
                 wf.close()
 
             if not order_fail:
-                return all_dishes_ordered
+                return self.listToString(all_dishes_ordered)
             else:
                 return None
 
