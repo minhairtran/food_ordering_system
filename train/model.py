@@ -74,7 +74,7 @@ class ConfirmingModel(nn.Module):
         "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
-        "batch_size": 128,
+        "batch_size": 100,
         "epochs": 100, 
         "test_size": 0.1,
         "n_class": 9
@@ -117,9 +117,9 @@ class ConfirmingModel(nn.Module):
 class FoodNumberModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
-        "n_rnn_layers": 4,
+        "n_rnn_layers": 2,
         "rnn_dim": 80,
-        "n_feats": 20,
+        "n_feats": 40,
         "dropout": 0.25,
         "stride": 2,
         "learning_rate": 5e-4,
