@@ -55,6 +55,8 @@ class Prediction():
 
     def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
         arg_maxes = torch.argmax(output, dim=2)
+        print(arg_maxes)
+        
         decodes = []
 
         for i, args in enumerate(arg_maxes):
