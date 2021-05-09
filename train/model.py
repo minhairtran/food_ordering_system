@@ -118,9 +118,9 @@ class FoodNumberModel(nn.Module):
     hparams = {
         "n_cnn_layers": 3,
         "n_rnn_layers": 2,
-        "rnn_dim": 80,
-        "n_feats": 40,
-        "dropout": 0.25,
+        "rnn_dim": 100,
+        "n_feats": 20,
+        "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 512,

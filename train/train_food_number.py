@@ -147,6 +147,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 decoded_preds, decoded_targets = GreedyDecoder(
                     output.transpose(0, 1), labels, label_lengths)
+
                 for j in range(len(decoded_preds)):
                     test_cer.append(error_calculating.cer(
                         decoded_targets[j], decoded_preds[j]))
@@ -233,6 +234,8 @@ if __name__ == "__main__":
                                             batch_size=FoodNumberModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
+                # print(int(len(train_loader)))
+                
                 train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
 
