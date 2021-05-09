@@ -44,7 +44,7 @@ class Prediction():
         
         mel_spectrogram = librosa.power_to_db(mel_spectrogram)
 
-        mel_spectrogram = mel_spectrogram.T.tolist()
+        mel_spectrogram = mel_spectrogram.T
 
         mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
 
