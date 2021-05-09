@@ -107,8 +107,8 @@ if __name__ == "__main__":
             file_path = os.path.join(dirpath, f)
             signal, sample_rate = librosa.load(file_path)
 
-            # predicted_audio = food_number_prediction.predict(model, np.array(signal))
-            predicted_audio = confirming_prediction.predict(model, np.array(signal))
+            predicted_audio = food_number_prediction.predict(model, np.array(signal))
+            # predicted_audio = confirming_prediction.predict(model, np.array(signal))
 
             print(f ,predicted_audio)
 
