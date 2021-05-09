@@ -46,13 +46,15 @@ class Prediction():
 
         mel_spectrogram = mel_spectrogram.T
 
-        mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
+        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
         mel_spectrogram = torch.tensor(
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
         mel_spectrogram = nn.utils.rnn.pad_sequence(
             mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+
+        print(mel_spectrogram.size())
 
         return mel_spectrogram
 
