@@ -139,6 +139,9 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 decoded_preds, decoded_targets = GreedyDecoder(
                     output.transpose(0, 1), labels, label_lengths)
+                
+                print(decoded_preds)
+
                 for j in range(len(decoded_preds)):
                     test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
 
