@@ -219,7 +219,6 @@ if __name__ == "__main__":
                                             batch_size=ConfirmingModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
-                print(int(len(train_loader)))
                 # Create test dataset and Dataloader
                 test_dataset = Dataset(mel_spectrogram_test, labels_test, input_lengths_test, label_lengths_test)
 

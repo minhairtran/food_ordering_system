@@ -52,11 +52,15 @@ class ConfirmingPrediction():
         # extract MFCCs
         mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
                                                         hop_length=hop_length, n_mels=n_mels, fmax=fmax)
+        
+        mel_spectrogram = librosa.power_to_db(mel_spectrogram)
 
-        mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
+        mel_spectrogram = mel_spectrogram.T
+
+        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
         mel_spectrogram = torch.tensor(
-            mel_spectrogram.T, dtype=torch.float).detach().requires_grad_()
+            mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
         mel_spectrogram = nn.utils.rnn.pad_sequence(
             mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)

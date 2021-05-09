@@ -54,8 +54,6 @@ class Prediction():
         mel_spectrogram = nn.utils.rnn.pad_sequence(
             mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
-        print(mel_spectrogram.size())
-
         return mel_spectrogram
 
 
