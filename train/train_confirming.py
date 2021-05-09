@@ -49,6 +49,8 @@ class Dataset(torch.utils.data.Dataset):
 
 def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
     arg_maxes = torch.argmax(output, dim=2)
+    print(arg_maxes)
+
     decodes = []
     targets = []
 
@@ -139,8 +141,6 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 decoded_preds, decoded_targets = GreedyDecoder(
                     output.transpose(0, 1), labels, label_lengths)
-                
-                print(decoded_preds)
 
                 for j in range(len(decoded_preds)):
                     test_cer.append(error_calculating.cer(decoded_targets[j], decoded_preds[j]))
