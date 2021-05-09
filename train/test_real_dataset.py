@@ -41,22 +41,21 @@ class Prediction():
         # extract MFCCs
         mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
                                                         hop_length=hop_length, n_mels=n_mels, fmax=fmax)
+        
+        mel_spectrogram = librosa.power_to_db(mel_spectrogram)
 
-        mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis])
+        mel_spectrogram = mel_spectrogram.T.tolist()
 
-        mel_spectrogram = torch.tensor(
-            mel_spectrogram.T, dtype=torch.float).detach().requires_grad_()
+        mel_spectrogram = np.array(mel_spectrogram[..., np.newaxis]).unsqueeze(1).transpose(2, 3)
 
-        mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+        mel_spectrogram = torch.tensor(mel_spectrogram)
 
         return mel_spectrogram
 
 
     def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
         arg_maxes = torch.argmax(output, dim=2)
-        print(arg_maxes)
-        
+
         decodes = []
 
         for i, args in enumerate(arg_maxes):
