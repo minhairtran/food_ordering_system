@@ -148,8 +148,6 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 decoded_preds, decoded_targets = GreedyDecoder(
                     output.transpose(0, 1), labels, label_lengths)
 
-                print(decoded_preds)
-                
                 for j in range(len(decoded_preds)):
                     test_cer.append(error_calculating.cer(
                         decoded_targets[j], decoded_preds[j]))
@@ -202,7 +200,7 @@ if __name__ == "__main__":
     criterion = nn.CTCLoss(blank=0).to(device)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                        steps_per_epoch=65,
+                                                        steps_per_epoch=54,
                                                         epochs=FoodNumberModel.hparams["epochs"],
                                                         anneal_strategy='linear')
 

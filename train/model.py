@@ -119,11 +119,11 @@ class FoodNumberModel(nn.Module):
         "n_cnn_layers": 3,
         "n_rnn_layers": 2,
         "rnn_dim": 100,
-        "n_feats": 40,
+        "n_feats": 20,
         "dropout": 0.1,
         "stride": 2,
         "learning_rate": 5e-4,
-        "batch_size": 400,
+        "batch_size": 512,
         "epochs": 100, 
         "test_size": 0.1,
         "n_class": 17

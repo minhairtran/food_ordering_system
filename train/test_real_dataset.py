@@ -35,7 +35,7 @@ class Prediction():
         super(Prediction, self).__init__()
 
 
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40,
+    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20,
                 fmax=8000):
 
         # extract MFCCs
