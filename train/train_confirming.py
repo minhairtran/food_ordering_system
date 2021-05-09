@@ -194,7 +194,7 @@ if __name__ == "__main__":
     load_data_set = torch.load(DATA_PATH)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=ConfirmingModel.hparams["learning_rate"],
-                                                        steps_per_epoch=66,
+                                                        steps_per_epoch=51,
                                                         epochs=ConfirmingModel.hparams["epochs"],
                                                         anneal_strategy='linear')
 
@@ -225,7 +225,7 @@ if __name__ == "__main__":
                                             batch_size=ConfirmingModel.hparams["batch_size"],
                                             shuffle=False)
 
-                print(int(len(train_loader)))
+                # print(int(len(train_loader)))
             
 
                 train(model, device, train_loader, criterion, optimizer,
