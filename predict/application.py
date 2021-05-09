@@ -128,10 +128,12 @@ class Ui_MainWindow(object):
     def start(self, tableNumber):
         allSystem = AllSystem()
         all_dishes = allSystem.start()
+
         if all_dishes != None:
             all_dishes_ordered_input = all_dishes + str(tableNumber) + "\n" + self.dishes_ordered_input.toPlainText()
             self.dishes_ordered_input.setPlainText(all_dishes_ordered_input)
-            self.ActiveTable.findChild(QtWidgets.QCheckBox, str(tableNumber)).setCheckState(False)
+            
+        self.ActiveTable.findChild(QtWidgets.QCheckBox, str(tableNumber)).setCheckState(False)
 
 if __name__ == "__main__":
     import sys

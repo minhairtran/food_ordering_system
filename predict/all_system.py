@@ -53,8 +53,8 @@ CONFIRM_DISH_NTH_PATH = ["recorded_audios/system_audio/confirm_dish_0_nth.wav", 
             "recorded_audios/system_audio/confirm_dish_6_nth.wav", "recorded_audios/system_audio/confirm_dish_7_nth.wav"\
                 , "recorded_audios/system_audio/confirm_dish_8_nth.wav", "recorded_audios/system_audio/confirm_dish_9_nth.wav"]
 
-CHUNKSIZE = 16000  # fixed chunk size
-RATE = 16000
+CHUNKSIZE = 22050  # fixed chunk size
+RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
 
@@ -123,7 +123,7 @@ class AllSystem:
                             self.system_say(NOT_UNDERSTAND_ORDER)
                             times_trying_understand += 1
                         else:
-                            raise SystemNotUnderstand
+                            return "", noise_sample, frame
                     else:
                         return user_response_content, noise_sample, frame
 
@@ -218,20 +218,28 @@ class AllSystem:
                     user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model,"food_number")
                     
                     all_dishes_ordered.append(user_response)
-                    all_frames.append(frame)
+                    if len(all_frames) == 0:
+                        all_frames = frame
+                    else:
+                        all_frames.append(frame)
+
+                    if user_response == "":
+                        raise SystemNotUnderstand
 
                     self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model,"confirming")
 
+                    all_frames.append(frame)
+
                     if (user_response == "no"):
                         all_dishes_ordered.pop()
                         self.SYSTEM_UNDERSTAND = False
                         time_order_fail_successively += 1
-                    else:
+                    if (user_response == ""):
+                        raise SystemNotUnderstand
+                    if (user_response == "yes"):
                         one_order_sucess = True
-
-                    all_frames.append(frame)
 
                 if time_order_fail_successively == 3:
                     raise SystemNotUnderstand
@@ -240,6 +248,9 @@ class AllSystem:
 
                 user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, "confirming")
                 all_frames.append(frame)
+
+                if (user_response == ""):
+                    raise SystemNotUnderstand
 
                 order_more = user_response == "yes"
 
@@ -250,6 +261,8 @@ class AllSystem:
         except SystemNotUnderstand:
             order_fail = True
             self.system_say(ORDER_FAILURE_PATH)
+            data = self.stream.read(CHUNKSIZE)
+            all_frames.append(data)
         finally:
             # close self.stream
             self.stream.stop_stream()
@@ -260,7 +273,7 @@ class AllSystem:
                 # Save the recorded data as a WAV file when not understanding appears in the conversation
                 wf = wave.open(SAVE_AUDIO_FILE_PATH, 'wb')
                 wf.setnchannels(CHANNELS)
-                wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
+                wf.setsampwidth(self.p.get_sample_size(SAMPLE_FORMAT))
                 wf.setframerate(RATE)
                 wf.writeframes(b''.join(all_frames))
                 wf.close()
