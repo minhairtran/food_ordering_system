@@ -124,7 +124,7 @@ class FoodNumberModel(nn.Module):
         "stride": 2,
         "learning_rate": 5e-4,
         "batch_size": 100,
-        "epochs": 100, 
+        "epochs": 256, 
         "test_size": 0.1,
         "n_class": 17
     }
