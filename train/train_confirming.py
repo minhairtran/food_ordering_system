@@ -49,7 +49,6 @@ class Dataset(torch.utils.data.Dataset):
 
 def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
     arg_maxes = torch.argmax(output, dim=2)
-    print(arg_maxes)
 
     decodes = []
     targets = []
@@ -225,6 +224,9 @@ if __name__ == "__main__":
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=ConfirmingModel.hparams["batch_size"],
                                             shuffle=False)
+
+                print(int(len(train_loader)))
+            
 
                 train(model, device, train_loader, criterion, optimizer,
                         scheduler, epoch, iter_meter, experiment)
