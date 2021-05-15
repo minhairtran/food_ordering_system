@@ -105,9 +105,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                     device)  # spectro (batch, cnn_feature, n_class, time)
                 output = model(spectrograms)  # (batch, time, n_class)
 
-                preds, _ = torch.max(output, 1)
-
-                preds = preds.tolist()
+                preds = torch.argmax(output, 1).tolist()
 
                 loss = criterion(output, labels)
 
