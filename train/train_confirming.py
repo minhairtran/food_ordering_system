@@ -74,9 +74,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
             optimizer.zero_grad()
-            spectrograms = spectrograms.permute(0, 2, 1)
 
-            print(spectrograms.size())
             output = model(spectrograms)  # (batch, time, n_class)
 
             loss = criterion(output, labels)
@@ -160,7 +158,7 @@ if __name__ == "__main__":
         [param.nelement() for param in model.parameters()]))
 
     optimizer = optim.Adam(model.parameters(), KWS_model.hparams["learning_rate"])
-    criterion = nn.NLLLoss().to(device)
+    criterion = nn.CrossEntropyLoss().to(device)
 
     iter_meter = IterMeter()
 
