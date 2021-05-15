@@ -29,7 +29,7 @@ class KWS_model(nn.Module):
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
         "batch_size": 512,
-        "epochs": 50, 
+        "epochs": 200, 
         "test_size": 0.1,
         "n_classes": 3
     }
