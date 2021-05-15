@@ -103,7 +103,6 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 spectrograms, labels = _data
                 spectrograms, labels = spectrograms.to(device), labels.to(
                     device)  # spectro (batch, cnn_feature, n_class, time)
-                spectrograms = spectrograms.permute(0, 2, 1)
                 output = model(spectrograms)  # (batch, time, n_class)
 
                 _, preds = torch.max(output, 1).tolist()
