@@ -172,22 +172,20 @@ if __name__ == "__main__":
 
             for dataset_index in range(len(load_data_set)):
                 # Load all data
-                mel_spectrogram, labels, input_lengths, label_lengths = load_data(load_data_set[dataset_index])
+                mel_spectrogram, labels = load_data(load_data_set[dataset_index])
 
                 # Split into train and test
-                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
-                    input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                            input_lengths, label_lengths, test_size=KWS_model.hparams['test_size'], shuffle=False)
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=KWS_model.hparams['test_size'], shuffle=False)
 
                 # Create train dataset and Dataloader
-                train_dataset = Dataset(mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
+                train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
                 train_loader = data.DataLoader(dataset=train_dataset,
                                             batch_size=KWS_model.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
                 # Create test dataset and Dataloader
-                test_dataset = Dataset(mel_spectrogram_test, labels_test, input_lengths_test, label_lengths_test)
+                test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=KWS_model.hparams["batch_size"],
