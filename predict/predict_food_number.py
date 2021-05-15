@@ -48,7 +48,7 @@ class FoodNumberPrediction():
         super(FoodNumberPrediction, self).__init__()
 
 
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20,
+    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40,
                 fmax=8000):
 
         # extract MFCCs
@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.9):
+        if(np.amax(current_window) > 0.4):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):

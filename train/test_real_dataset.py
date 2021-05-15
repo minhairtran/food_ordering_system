@@ -18,11 +18,11 @@ from train.text_transform import FoodNumberTextTransform
 from train.text_transform import ConfirmTextTransform
 
 DATA_SET = "../predict/test"
-SAVED_MODEL_PATH = "../train/model_food_number.h5"
-# SAVED_MODEL_PATH = "../train/model_confirming.h5"
+# SAVED_MODEL_PATH = "../train/model_food_number.h5"
+SAVED_MODEL_PATH = "../train/model_confirming.h5"
 
-text_transform = FoodNumberTextTransform()
-# text_transform = ConfirmTextTransform()
+# text_transform = FoodNumberTextTransform()
+text_transform = ConfirmTextTransform()
 
 # def plot_spectrogram(Y, hop_length, y_axis="linear"):
 #     plt.figure(figsize=(25, 10))
@@ -88,15 +88,15 @@ class Prediction():
 if __name__ == "__main__":
     device = torch.device("cpu")
 
-    model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-        FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    # model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
+    #     FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
 
-    food_number_prediction = Prediction()
+    # food_number_prediction = Prediction()
 
-    # model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
-    #     ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
+    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
+        ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
 
-    # confirming_prediction = Prediction()
+    confirming_prediction = Prediction()
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -107,8 +107,8 @@ if __name__ == "__main__":
             file_path = os.path.join(dirpath, f)
             signal, sample_rate = librosa.load(file_path)
 
-            predicted_audio = food_number_prediction.predict(model, np.array(signal))
-            # predicted_audio = confirming_prediction.predict(model, np.array(signal))
+            # predicted_audio = food_number_prediction.predict(model, np.array(signal))
+            predicted_audio = confirming_prediction.predict(model, np.array(signal))
 
             print(f ,predicted_audio)
 
