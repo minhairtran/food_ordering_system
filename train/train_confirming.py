@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
-    device = torch.device("cuda" if use_cuda else "cpu")
+    device = torch.device("cpu")
 
     model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
         KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size']).to(device)
