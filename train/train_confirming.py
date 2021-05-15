@@ -107,13 +107,15 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 preds, _ = torch.max(output, 1)
 
-                print(preds)
-
                 preds = preds.tolist()
 
                 loss = criterion(output, labels)
 
                 epoch_loss += loss.item() * spectrograms.size(0)
+
+                preds[0] = round(preds[0], 10)
+
+                print(preds)
 
                 test_precision = precision_score(np.array(preds), np.array(labels.tolist()), average='micro')
                 test_precision_average.append(test_precision)
