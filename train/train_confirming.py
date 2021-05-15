@@ -93,7 +93,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
     print('\nEvaluating ' + str(filename) + "...")
     model.eval()
-    test_precision_average = 0
+    test_precision_average = []
 
     epoch_loss = 0
 
