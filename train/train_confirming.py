@@ -163,7 +163,7 @@ if __name__ == "__main__":
         [param.nelement() for param in model.parameters()]))
 
     optimizer = optim.Adam(model.parameters(), KWS_model.hparams["learning_rate"])
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.NLLLoss().to(device)
 
     iter_meter = IterMeter()
 
