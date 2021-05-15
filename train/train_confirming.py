@@ -109,6 +109,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 print(preds)
 
+                preds = preds.tolist()
+
                 loss = criterion(output, labels)
 
                 epoch_loss += loss.item() * spectrograms.size(0)
