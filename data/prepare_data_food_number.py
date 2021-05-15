@@ -16,7 +16,7 @@ SAVED_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json
               "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
 
 
-def preprocess_dataset(dataset_path, saved_file_path, n_mels=20, n_fft=512, hop_length=384):
+def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_length=384):
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames

@@ -200,7 +200,7 @@ if __name__ == "__main__":
     criterion = nn.CTCLoss(blank=0).to(device)
 
     scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                        steps_per_epoch=54,
+                                                        steps_per_epoch=65,
                                                         epochs=FoodNumberModel.hparams["epochs"],
                                                         anneal_strategy='linear')
 
@@ -234,7 +234,7 @@ if __name__ == "__main__":
                                             batch_size=FoodNumberModel.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
-                # print(int(len(train_loader)))
+                print(int(len(train_loader)))
                 
                 train(model, device, train_loader, criterion, optimizer,
                     scheduler, epoch, iter_meter, experiment)
