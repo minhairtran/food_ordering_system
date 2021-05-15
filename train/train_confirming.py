@@ -77,8 +77,6 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
 
             output = model(spectrograms)  # (batch, time, n_class)
 
-            print(labels.size())
-
             loss = criterion(output, labels)
             loss.backward()
 
@@ -146,7 +144,7 @@ if __name__ == "__main__":
     device = torch.device("cpu")
 
     model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
-        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size']).to(device)
+        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)

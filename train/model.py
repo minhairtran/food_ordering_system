@@ -31,6 +31,7 @@ class KWS_model(nn.Module):
         "batch_size": 128,
         "epochs": 50, 
         "test_size": 0.1,
+        "n_classes": 3
     }
 
     def __init__(self, 
@@ -38,7 +39,8 @@ class KWS_model(nn.Module):
                  cnn_channels = 16, 
                  cnn_kernel_size = 51,
                  gru_hidden_size = 64, 
-                 attention_hidden_size = 64):
+                 attention_hidden_size = 64,
+                 n_classes = 0):
       
         super().__init__()
         self.cnn = nn.Conv1d(n_mels, cnn_channels, kernel_size=cnn_kernel_size, 
@@ -47,7 +49,7 @@ class KWS_model(nn.Module):
         self.rnn = nn.GRU(input_size=cnn_channels, hidden_size=gru_hidden_size, 
                           bidirectional=True, batch_first=True)
         self.attention = Attention(gru_hidden_size * 2, attention_hidden_size)
-        self.linear = nn.Linear(gru_hidden_size * 2, 2, bias=False)
+        self.linear = nn.Linear(gru_hidden_size * 2, n_classes, bias=False)
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
