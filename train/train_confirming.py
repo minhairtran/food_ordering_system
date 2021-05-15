@@ -111,7 +111,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 epoch_loss += loss.item() * spectrograms.size(0)
 
-                labels[0] = round(labels[0], 0)
+                # labels[0] = round(labels[0], 0)
 
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
