@@ -73,6 +73,8 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
             spectrograms, labels = spectrograms.to(device), labels.to(
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
+            print(spectrograms.size())
+
             optimizer.zero_grad()
             spectrograms = spectrograms.permute(0, 2, 1)
             output = model(spectrograms)  # (batch, time, n_class)
