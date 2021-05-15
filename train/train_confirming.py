@@ -113,7 +113,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 epoch_loss += loss.item() * spectrograms.size(0)
 
-                preds[0] = round(preds[0], 10)
+                labels[0] = round(labels[0], 10)
 
                 print(preds)
 
