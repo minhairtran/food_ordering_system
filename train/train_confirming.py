@@ -77,7 +77,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
 
             output = model(spectrograms)  # (batch, time, n_class)
 
-            print(output)
+            print(labels.size())
 
             loss = criterion(output, labels)
             loss.backward()
