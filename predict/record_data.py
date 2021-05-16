@@ -5,11 +5,11 @@ import random
 
 SAMPLE_RATE = 22050
 CHANNELS = 2
-SECOND = 5
+SECOND = 1
 
 
-def id_generator(size=17, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
+def id_generator(random_number, size=2, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random_number + "noise_restaurant")
 
 if __name__ == "__main__":
     """
@@ -21,6 +21,11 @@ if __name__ == "__main__":
     """
 
     print("recording......")
-    recorded_voice = sounddevice.rec(int(SECOND * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=CHANNELS)
-    sounddevice.wait()
-    write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/system_audio/not_understand_order.wav", SAMPLE_RATE, recorded_voice)
+
+    for i in range(20):
+        recorded_voice = sounddevice.rec(int(SECOND * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=CHANNELS)
+        sounddevice.wait()
+        write("D:/Study/uni/DoAn/food_ordering_system/data/restaurant_noise/" + id_generator(str(i)) +  ".wav", SAMPLE_RATE, recorded_voice)
+        sounddevice.sleep(1)
+
+    # write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/system_audio/" ".wav", SAMPLE_RATE, recorded_voice)
