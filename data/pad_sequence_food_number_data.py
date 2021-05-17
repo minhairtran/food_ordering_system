@@ -6,11 +6,12 @@ import numpy as np
 import json
 import torch.nn as nn
 
-DATA_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json", "food_number_data/data_two.json", "food_number_data/data_three.json", \
-    "food_number_data/data_four.json", "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", \
-        "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
+DATA_FILE = ["food_data/data_ca_kho.json", "food_data/data_ca_xot.json", "food_data/data_com_ga.json", "food_data/data_com_heo_xi_muoi.json", "food_data/data_com_nieu.json", \
+                "food_data/data_com_tam.json", "food_data/data_com_thap_cam.json", "food_data/data_khong_biet.json", "food_data/data_rau_muong_luoc.json",\
+                    "food_data/data_rau_muong_xao.json", "food_data/data_salad_tron.json", "food_data/data_tra_hoa_cuc.json", "food_data/data_tra_sam_dua.json", \
+                        "food_data/data_trung_chien.json"]
 
-SAVED_FILE = "food_number_data/data_set_"
+SAVED_FILE = "food_data/data_set_"
 
 
 def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
@@ -24,7 +25,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
 
     labels = nn.utils.rnn.pad_sequence(labels, batch_first=True)
     mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+        mel_spectrogram, batch_first=True).transpose(1, 2)
 
     return mel_spectrogram, labels
 
@@ -44,10 +45,8 @@ if __name__ == "__main__":
 
     for set_number in range(len(data_set)):
         saved_dataset = {
-            "label_lengths": [],
             "mel_spectrogram": [],
-            "labels": [],
-            "input_lengths": []
+            "labels": []
         }
         for current_dataset_index in range(average_dataset_length):
             original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set)) + 1
@@ -58,19 +57,11 @@ if __name__ == "__main__":
             else:
                 saved_dataset["mel_spectrogram"].append(
                     data_set[original_dataset_number]["mel_spectrogram"][original_dataset_index])
-                saved_dataset["label_lengths"].append(
-                    data_set[original_dataset_number]["label_lengths"][original_dataset_index])
                 saved_dataset["labels"].append(
                     data_set[original_dataset_number]["labels"][original_dataset_index])
-                saved_dataset["input_lengths"].append(
-                    data_set[original_dataset_number]["input_lengths"][original_dataset_index])
 
         saved_dataset["mel_spectrogram"], saved_dataset["labels"] = tensorize(
             saved_dataset["mel_spectrogram"], saved_dataset["labels"])
-        saved_dataset["input_lengths"] = torch.Tensor(
-            saved_dataset["input_lengths"])
-        saved_dataset["label_lengths"] = torch.Tensor(
-            saved_dataset["label_lengths"])
 
         current_saved_file = SAVED_FILE + str(set_number) + ".pt"
         torch.save(saved_dataset, current_saved_file)

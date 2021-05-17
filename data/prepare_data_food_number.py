@@ -3,28 +3,49 @@ sys.path.append("../")
 
 import json
 import numpy as np
-from train.text_transform import FoodNumberTextTransform
 import os
 import librosa
 import torch
 import torch.nn as nn
+import torchaudio
+import augment
+from scipy.io import wavfile
 
 
-DATASET_PATH = ["../../food_number_dataset/zero", "../../food_number_dataset/one", "../../food_number_dataset/two", "../../food_number_dataset/three", "../../food_number_dataset/four",
-                "../../food_number_dataset/five", "../../food_number_dataset/six", "../../food_number_dataset/seven", "../../food_number_dataset/eight", "../../food_number_dataset/nine",  "../../food_number_dataset/unknown"]
-SAVED_FILE = ["food_number_data/data_zero.json", "food_number_data/data_one.json", "food_number_data/data_two.json", "food_number_data/data_three.json", "food_number_data/data_four.json",
-              "food_number_data/data_five.json", "food_number_data/data_six.json", "food_number_data/data_seven.json", "food_number_data/data_eight.json", "food_number_data/data_nine.json", "food_number_data/data_unknown.json"]
+DATASET_PATH = ["../../food_dataset/ca_kho", "../../food_dataset/ca_xot", "../../food_dataset/com_ga", "../../food_dataset/com_heo_xi_muoi", "../../food_dataset/com_nieu", \
+                    "../../food_dataset/com_tam", "../../food_dataset/com_thap_cam", "../../food_dataset/khong_biet", "../../food_dataset/rau_muong_luoc", \
+                        "../../food_dataset/rau_muong_xao",  "../../food_dataset/salad_tron", "../../food_dataset/tra_hoa_cuc", "../../food_dataset/tra_sam_dua", \
+                            "../../food_dataset/trung_chien"]
+SAVED_FILE = ["food_data/data_ca_kho.json", "food_data/data_ca_xot.json", "food_data/data_com_ga.json", "food_data/data_com_heo_xi_muoi.json", "food_data/data_com_nieu.json", \
+                "food_data/data_com_tam.json", "food_data/data_com_thap_cam.json", "food_data/data_khong_biet.json", "food_data/data_rau_muong_luoc.json",\
+                    "food_data/data_rau_muong_xao.json", "food_data/data_salad_tron.json", "food_data/data_tra_hoa_cuc.json", "food_data/data_tra_sam_dua.json", \
+                        "food_data/data_trung_chien.json"]
 
 
-def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_length=384):
+def preprocess_dataset(dataset_path, saved_file_path):
+    # mel spectrogram
+    kwargs = {
+        'n_fft': 512,
+        'n_mels': 40,
+    }
+    wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
+
+    # spectrogram augmentation
+    kwargs = {
+        'rect_freq': 10,
+        'rect_masks': 10,
+        'rect_time': 40,
+    }
+    spec_augment = augment.SpectrogramAugmentation(**kwargs)
+
+    dataset_number = 0
+
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
-        data = {
-            "label_lengths": [],
+        data_temporary = {
             "mel_spectrogram": [],
-            "labels": [],
-            "input_lengths": []
+            "labels": []
         }
 
         # loop through all sub-dirs
@@ -37,29 +58,26 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
 
-                # load audio file and slice it to ensure length consistency among different files
-                signal, sample_rate = librosa.load(file_path)
+                fs, data = wavfile.read(file_path)
+                data = torch.Tensor(data.copy())
+                data = data / data.abs().max()
 
-                # extract MFCCs (#features, #time binz)
-                mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
-                                                                 hop_length=hop_length)
+                x = wav_to_spec(data.clone())
 
-                mel_spectrogram = librosa.power_to_db(mel_spectrogram)
-                
-                text_transform = FoodNumberTextTransform()
+                for i in range(250):
+                    mel_spectrogram = np.array(spec_augment(x.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
-                added_label = text_transform.text_to_int(label)
-
-                # store data for analysed track
-                data["mel_spectrogram"].append(mel_spectrogram.T.tolist())
-                data["labels"].append(added_label)
-                data["input_lengths"].append(mel_spectrogram.T.shape[0]//2)
-                data["label_lengths"].append(len(label))
-                print("{}: {}".format(file_path, label))
+                    # store data for analysed track
+                    data_temporary["mel_spectrogram"].append(mel_spectrogram)
+                    data_temporary["labels"].append(dataset_number)
+                    print("{}: {}".format(file_path, dataset_number))
+            
+        print("\nSave: {}".format(save_file))
+        dataset_number += 1
 
         # torch.save(data, save_file)
         with open(save_file, 'w') as f:
-            json.dump(data, f, indent=4)
+            json.dump(data_temporary, f, indent=4)
 
 
 if __name__ == "__main__":
