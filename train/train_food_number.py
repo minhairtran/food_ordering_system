@@ -11,7 +11,7 @@ import torch.utils.data as data
 import torch.nn as nn
 import torch
 from sklearn.metrics import precision_score
-from model import KWS_model
+from model import Food_model
 
 
 DATA_PATH = ["../data/food_data/data_set_0.pt", "../data/food_data/data_set_1.pt", "../data/food_data/data_set_2.pt",
@@ -134,15 +134,15 @@ if __name__ == "__main__":
     experiment.add_tags(["food_data", "attention_based_model"])
     experiment.set_name("Test confirm data with deepspeech model")
 
-    experiment.log_parameters(KWS_model.hparams)
+    experiment.log_parameters(Food_model.hparams)
 
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
-        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
+    model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
+        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -155,13 +155,13 @@ if __name__ == "__main__":
     print('Num Model Parameters', sum(
         [param.nelement() for param in model.parameters()]))
 
-    optimizer = optim.Adam(model.parameters(), KWS_model.hparams["learning_rate"])
+    optimizer = optim.Adam(model.parameters(), Food_model.hparams["learning_rate"])
 
     criterion = nn.NLLLoss().to(device)
 
     iter_meter = IterMeter()
     try:
-        for epoch in range(1, KWS_model.hparams["epochs"] + 1):
+        for epoch in range(1, Food_model.hparams["epochs"] + 1):
             epoch_precisions = []
 
 
@@ -170,20 +170,20 @@ if __name__ == "__main__":
                 mel_spectrogram, labels = load_data(data_path)
 
                 # Split into train and test
-                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=KWS_model.hparams['test_size'], shuffle=False)
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=Food_model.hparams['test_size'], shuffle=False)
 
                 # Create train dataset and Dataloader
                 train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
                 train_loader = data.DataLoader(dataset=train_dataset,
-                                            batch_size=KWS_model.hparams["batch_size"],
+                                            batch_size=Food_model.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
                 # Create test dataset and Dataloader
                 test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
                 test_loader = data.DataLoader(dataset=test_dataset,
-                                            batch_size=KWS_model.hparams["batch_size"],
+                                            batch_size=Food_model.hparams["batch_size"],
                                             shuffle=True)
                 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)

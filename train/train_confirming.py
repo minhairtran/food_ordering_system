@@ -10,7 +10,7 @@ import torch.optim as optim
 import torch.utils.data as data
 import torch.nn as nn
 import torch
-from model import KWS_model
+from model import Confirming_model
 from sklearn.metrics import precision_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
@@ -130,15 +130,15 @@ if __name__ == "__main__":
     experiment.add_tags(["food_confirming_data", "deep_speech_model"])
     experiment.set_name("Test confirming data with attention-based model")
 
-    experiment.log_parameters(KWS_model.hparams)
+    experiment.log_parameters(Confirming_model.hparams)
 
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
-        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
+    model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
+        Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     print('Num Model Parameters', sum(
         [param.nelement() for param in model.parameters()]))
 
-    optimizer = optim.Adam(model.parameters(), KWS_model.hparams["learning_rate"])
+    optimizer = optim.Adam(model.parameters(), Confirming_model.hparams["learning_rate"])
     criterion = nn.NLLLoss().to(device)
 
     iter_meter = IterMeter()
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     precision = 0
 
     try:
-        for epoch in range(1, KWS_model.hparams["epochs"] + 1):
+        for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
             epoch_precisions = []
 
             for dataset_index in range(len(load_data_set)):
@@ -169,20 +169,20 @@ if __name__ == "__main__":
                 mel_spectrogram, labels = load_data(load_data_set[dataset_index])
 
                 # Split into train and test
-                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=KWS_model.hparams['test_size'], shuffle=False)
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=Confirming_model.hparams['test_size'], shuffle=False)
 
                 # Create train dataset and Dataloader
                 train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
                 train_loader = data.DataLoader(dataset=train_dataset,
-                                            batch_size=KWS_model.hparams["batch_size"],
+                                            batch_size=Confirming_model.hparams["batch_size"],
                                             shuffle=True)
 
                 # Create test dataset and Dataloader
                 test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
                 test_loader = data.DataLoader(dataset=test_dataset,
-                                            batch_size=KWS_model.hparams["batch_size"],
+                                            batch_size=Confirming_model.hparams["batch_size"],
                                             shuffle=False)
             
 

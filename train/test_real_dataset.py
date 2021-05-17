@@ -67,10 +67,27 @@ class Prediction():
 
         predicted = torch.argmax(output, 1).tolist()[0]
 
+        # decode = {
+        #     0: "co",
+        #     1: "khong",
+        #     2: "khong_biet",
+        # }
+
         decode = {
-            0: "co",
-            1: "khong",
-            2: "khong biet",
+            0: "ca_kho",
+            1: "ca_xot",
+            2: "com_ga",
+            3: "com_heo_xi_muoi",
+            4: "com_nieu",
+            5: "com_tam",
+            6: "com_thap_cam",
+            7: "khong_biet",
+            8: "rau_muong_luoc",
+            9: "rau_muong_xao",
+            10: "salad_tron",
+            11: "tra_hoa_cuc",
+            12: "tra_sam_dua",
+            13: "trung_chien",
         }
 
         return decode[predicted]
