@@ -76,9 +76,9 @@ class ConfirmingPrediction():
         predicted = torch.argmax(output, 1).tolist()[0]
 
         decode = {
-            0: "no",
-            1: "yes",
-            2: "unknown",
+            0: "co",
+            1: "khong",
+            2: "khong biet",
         }
 
         print(predicted)

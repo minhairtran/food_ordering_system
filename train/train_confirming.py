@@ -11,15 +11,11 @@ import torch.optim as optim
 import torch.utils.data as data
 import torch.nn as nn
 import torch
-from error_calculating import ErrorCalculating
 from model import KWS_model
-from text_transform import ConfirmTextTransform
 from sklearn.metrics import precision_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
-error_calculating = ErrorCalculating()
-text_transform = ConfirmTextTransform()
 
 class GetOutOfLoop(Exception):
     pass
