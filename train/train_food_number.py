@@ -163,7 +163,7 @@ if __name__ == "__main__":
     try:
         for epoch in range(1, Food_model.hparams["epochs"] + 1):
             epoch_precisions = []
-
+            epoch_loss = []
 
             for data_path in DATA_PATH:
                 filename = data_path.split("/")[-1]
@@ -188,10 +188,11 @@ if __name__ == "__main__":
                 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                precision, epoch_loss = test(model, device, test_loader, criterion,
+                precision, loss = test(model, device, test_loader, criterion,
                     iter_meter, experiment, filename)
 
                 epoch_precisions.append(precision)
+                epoch_loss.append(loss)
 
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
 
@@ -200,7 +201,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions) and epoch_loss < 5:
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions) and all(each_epoch_loss < 5 for each_epoch_loss in epoch_loss):
                 raise TrainingSuccess
 
     except TrainingSuccess:
