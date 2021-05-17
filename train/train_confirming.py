@@ -195,7 +195,8 @@ if __name__ == "__main__":
             
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
 
-            experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
+            with experiment.test():
+                experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
