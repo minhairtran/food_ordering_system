@@ -7,20 +7,38 @@ import librosa
 import os
 import numpy as np
 import json
+import torchaudio
+import augment
+from scipy.io import wavfile
 
-DATASET_PATH = ["../../confirming_dataset/yes", "../../confirming_dataset/no", "../../confirming_dataset/unknown"]
+DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong"]
 SAVED_FILE = "confirming_data/data.json"
 
-def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_length=384, fmax=8000):
+def preprocess_dataset(dataset_path, saved_file_path):
     saved_data = []
     dataset_number = 0
+
+    # mel spectrogram
+    kwargs = {
+        'n_fft': 512,
+        'n_mels': 40,
+    }
+    wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
+
+    # spectrogram augmentation
+    kwargs = {
+        'rect_freq': 7,
+        'rect_masks': 10,
+        'rect_time': 40,
+    }
+    spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
     for data_set in dataset_path:
 
         # dictionary where we'll store mapping, labels, MFCCs and filenames
-        data = {
+        data_temporary = {
             "mel_spectrogram": [],
-            "labels": [],
+            "labels": []
         }
 
         # loop through all sub-dirs
@@ -33,21 +51,21 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_
             for f in filenames:
                 file_path = os.path.join(dirpath, f)
 
-                # load audio file and slice it to ensure length consistency among different files
-                signal, sample_rate = librosa.load(file_path)
+                fs, data = wavfile.read(file_path)
+                data = torch.Tensor(data.copy())
+                data = data / data.abs().max()
 
-                # extract MFCCs (#features, #time binz)
-                mel_spectrogram = librosa.feature.melspectrogram(signal, sample_rate, n_mels=n_mels, n_fft=n_fft,
-                                                hop_length=hop_length, fmax=fmax)
+                x = wav_to_spec(data.clone())
 
-                mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+                for i in range(100):
+                    mel_spectrogram = spec_augment(x.clone().unsqueeze(0)).squeeze(0).permute(0, 1).tolist()
 
-                # store data for analysed track
-                data["mel_spectrogram"].append(mel_spectrogram.T.tolist())
-                data["labels"].append(dataset_number)
-                print("{}: {}".format(file_path, dataset_number))
+                    # store data for analysed track
+                    data_temporary["mel_spectrogram"].append(mel_spectrogram)
+                    data_temporary["labels"].append(dataset_number)
+                    print("{}: {}".format(file_path, dataset_number))
 
-            saved_data.append(data)
+            saved_data.append(data_temporary)
             dataset_number += 1
 
     with open(saved_file_path, 'w') as f:
@@ -56,3 +74,4 @@ def preprocess_dataset(dataset_path, saved_file_path, n_mels=40, n_fft=512, hop_
 
 if __name__ == "__main__":
     preprocess_dataset(DATASET_PATH, SAVED_FILE)
+    
