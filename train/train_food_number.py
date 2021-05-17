@@ -6,11 +6,12 @@ from comet_ml import Experiment
 
 from sklearn.model_selection import train_test_split
 import numpy as np
-import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as data
 import torch.nn as nn
 import torch
+from sklearn.metrics import precision_score
+from model import KWS_model
 
 
 DATA_PATH = ["../data/food_data/data_set_0.pt", "../data/food_data/data_set_1.pt", "../data/food_data/data_set_2.pt",
@@ -25,12 +26,10 @@ class TrainingSuccess(Exception):
 class Dataset(torch.utils.data.Dataset):
     'Characterizes a dataset for PyTorch'
 
-    def __init__(self, mel_spectrogram, labels, input_lengths, label_lengths):
+    def __init__(self, mel_spectrogram, labels):
         'Initialization'
         self.mel_spectrogram = mel_spectrogram
         self.labels = labels
-        self.label_lengths = label_lengths
-        self.input_lengths = input_lengths
 
     def __len__(self):
         'Denotes the total number of samples'
@@ -41,10 +40,8 @@ class Dataset(torch.utils.data.Dataset):
         # Select sample
         mel_spectrogram = self.mel_spectrogram[index]
         labels = self.labels[index]
-        label_length = self.label_lengths[index]
-        input_length = self.input_lengths[index]
 
-        return (mel_spectrogram, labels, input_length, label_length)
+        return (mel_spectrogram, labels)
 
 
 class IterMeter(object):
@@ -59,102 +56,70 @@ class IterMeter(object):
     def get(self):
         return self.val
 
-def GreedyDecoder(output, labels, label_lengths, blank_label=0, collapse_repeated=True):
-    arg_maxes = torch.argmax(output, dim=2)
-    decodes = []
-    targets = []
-
-    for i, args in enumerate(arg_maxes):
-        decode = []
-        targets.append(text_transform.int_to_text(
-            labels[i][:label_lengths[i]].tolist()))
-        for j, index in enumerate(args):
-            if index != blank_label:
-                if collapse_repeated and j != 0 and index == args[j - 1]:
-                    continue
-                decode.append(index.item())
-        decodes.append(text_transform.int_to_text(decode))
-    return decodes, targets
-
 def load_data(data_path):
     data = torch.load(data_path)
     mel_spectrogram = data["mel_spectrogram"]
     labels = data["labels"]
-    label_lengths = list(map(int, data["label_lengths"].tolist()))
-    input_lengths = list(map(int, data["input_lengths"].tolist()))
 
-    return mel_spectrogram, labels, input_lengths, label_lengths
+    return mel_spectrogram, labels
 
-def decoder(output):
-    arg_maxes = torch.argmax(output, dim=1).tolist()
-    return arg_maxes
-
-def train(model, device, train_loader, criterion, optimizer, scheduler, epoch, iter_meter, experiment):
+def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment):
     model.train()
     data_len = len(train_loader.dataset)
+
     with experiment.train():
         for batch_idx, _data in enumerate(train_loader):
-            spectrograms, labels, input_lengths, label_lengths = _data
+            spectrograms, labels = _data
             spectrograms, labels = spectrograms.to(device), labels.to(
                 device)  # spectro (batch, cnn_feature, n_class, time)
 
             optimizer.zero_grad()
 
             output = model(spectrograms)  # (batch, time, n_class)
-            output = F.log_softmax(output, dim=2)
-            output = output.transpose(0, 1)  # (time, batch, n_class)
 
-            loss = criterion(output, labels, input_lengths, label_lengths)
+            loss = criterion(output, labels)
             loss.backward()
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
-            experiment.log_metric(
-                'learning_rate', scheduler.get_lr(), step=iter_meter.get())
 
             optimizer.step()
-            scheduler.step()
             iter_meter.step()
-            if (batch_idx % 2 == 0 and batch_idx != 0) or batch_idx == data_len:
-                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                    epoch, batch_idx * len(spectrograms), data_len,
-                    100. * batch_idx / len(train_loader), loss.item()))
+
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, (batch_idx + 1) * len(spectrograms), data_len,
+                100. * (batch_idx + 1) / len(train_loader), loss.item()))
 
 def test(model, device, test_loader, criterion, iter_meter, experiment, filename):
-    print('\nEvaluating ' + filename + "...")
+    print('\nEvaluating ' + str(filename) + "...")
     model.eval()
-    test_loss = 0
-    # test_cer, test_wer = [], []
-    test_cer = []
+    test_precision_average = []
+
+    epoch_loss = 0
 
     with experiment.test():
         with torch.no_grad():
             for i, _data in enumerate(test_loader):
-                spectrograms, labels, input_lengths, label_lengths = _data
-                spectrograms, labels = spectrograms.to(
-                    device), labels.to(device)
-
+                spectrograms, labels = _data
+                spectrograms, labels = spectrograms.to(device), labels.to(
+                    device)  # spectro (batch, cnn_feature, n_class, time)
                 output = model(spectrograms)  # (batch, time, n_class)
-                output = F.log_softmax(output, dim=2)
-                output = output.transpose(0, 1)  # (time, batch, n_class)
 
-                loss = criterion(output, labels, input_lengths, label_lengths)
-                test_loss += loss.item() / len(test_loader)
+                preds = torch.argmax(output, 1).tolist()
 
-                decoded_preds, decoded_targets = GreedyDecoder(
-                    output.transpose(0, 1), labels, label_lengths)
+                loss = criterion(output, labels)
 
-                for j in range(len(decoded_preds)):
-                    test_cer.append(error_calculating.cer(
-                        decoded_targets[j], decoded_preds[j]))
+                epoch_loss += loss.item() * spectrograms.size(0)
 
-    avg_cer = sum(test_cer)/len(test_cer)
-    experiment.log_metric('test_loss', test_loss, step=iter_meter.get())
-    experiment.log_metric('cer', avg_cer, step=iter_meter.get())
+                test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
+                test_precision_average.append(test_precision)
+                
 
-    print('Test set: Average loss: {:.4f}, Average CER: {:4f}\n'.format(
-        test_loss, avg_cer))
-    
-    return avg_cer
+    experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
+
+    print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
+        epoch_loss, 100*np.mean(test_precision_average)))
+
+    return np.mean(test_precision_average), epoch_loss
 
 
 if __name__ == "__main__":
@@ -162,22 +127,22 @@ if __name__ == "__main__":
     # Create an experiment with your api key
     experiment = Experiment(
         api_key="NXte5ivrmxMfwBeYjvahf97PC",
-        project_name="food-number",
+        project_name="food",
         workspace="hai321",
     )
 
-    experiment.add_tags(["confirm_data", "deep_speech_model"])
+    experiment.add_tags(["food_data", "attention_based_model"])
     experiment.set_name("Test confirm data with deepspeech model")
 
-    experiment.log_parameters(FoodNumberModel.hparams)
+    experiment.log_parameters(KWS_model.hparams)
 
     # Config gpu/cpu
     use_cuda = torch.cuda.is_available()
     torch.manual_seed(7)
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'],
-                                   FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
+        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -190,59 +155,52 @@ if __name__ == "__main__":
     print('Num Model Parameters', sum(
         [param.nelement() for param in model.parameters()]))
 
-    optimizer = optim.AdamW(
-        model.parameters(), FoodNumberModel.hparams["learning_rate"])
-    criterion = nn.CTCLoss(blank=0).to(device)
+    optimizer = optim.Adam(model.parameters(), KWS_model.hparams["learning_rate"])
 
-    scheduler = optim.lr_scheduler.OneCycleLR(optimizer, max_lr=FoodNumberModel.hparams["learning_rate"],
-                                                        steps_per_epoch=65,
-                                                        epochs=FoodNumberModel.hparams["epochs"],
-                                                        anneal_strategy='linear')
+    criterion = nn.NLLLoss().to(device)
 
     iter_meter = IterMeter()
     try:
-        for epoch in range(1, FoodNumberModel.hparams["epochs"] + 1):
-            epoch_cer = []
+        for epoch in range(1, KWS_model.hparams["epochs"] + 1):
+            epoch_precisions = []
+
 
             for data_path in DATA_PATH:
                 filename = data_path.split("/")[-1]
-                mel_spectrogram, labels, input_lengths, label_lengths = load_data(
-                data_path)
+                mel_spectrogram, labels = load_data(data_path)
 
                 # Split into train and test
-                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test, input_lengths_train, \
-                    input_lengths_test, label_lengths_train, label_lengths_test = train_test_split(mel_spectrogram, labels,
-                                                                                               input_lengths, label_lengths, test_size=FoodNumberModel.hparams['test_size'], shuffle=False)
+                mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=KWS_model.hparams['test_size'], shuffle=False)
 
                 # Create train dataset and Dataloader
-                train_dataset = Dataset(mel_spectrogram_train, labels_train, input_lengths_train, label_lengths_train)
+                train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
                 train_loader = data.DataLoader(dataset=train_dataset,
-                                            batch_size=FoodNumberModel.hparams["batch_size"],
+                                            batch_size=KWS_model.hparams["batch_size"],
                                             shuffle=True if epoch>10 else False)
 
                 # Create test dataset and Dataloader
-                test_dataset = Dataset(mel_spectrogram_test, labels_test,
-                                   input_lengths_test, label_lengths_test)
+                test_dataset = Dataset(mel_spectrogram_test, labels_test)
 
                 test_loader = data.DataLoader(dataset=test_dataset,
-                                            batch_size=FoodNumberModel.hparams["batch_size"],
-                                            shuffle=True if epoch>10 else False)
-
-                print(int(len(train_loader)))
+                                            batch_size=KWS_model.hparams["batch_size"],
+                                            shuffle=True)
                 
-                train(model, device, train_loader, criterion, optimizer,
-                    scheduler, epoch, iter_meter, experiment)
+                train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                cer_test = test(model, device, test_loader, criterion,
+                precision, epoch_loss = test(model, device, test_loader, criterion,
                     iter_meter, experiment, filename)
 
-                epoch_cer.append(cer_test)
+                epoch_precisions.append(precision)
 
+            print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
+
+            with experiment.test():
+                experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
-            
-            if all(each_cer < 0.001 for each_cer in epoch_cer):
+
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions) and epoch_loss < 5:
                 raise TrainingSuccess
 
     except TrainingSuccess:

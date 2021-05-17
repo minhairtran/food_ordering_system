@@ -6,7 +6,6 @@ sys.path.append(
 from comet_ml import Experiment
 from sklearn.model_selection import train_test_split
 import numpy as np
-import torch.nn.functional as F
 import torch.optim as optim
 import torch.utils.data as data
 import torch.nn as nn
