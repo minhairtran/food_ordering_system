@@ -11,7 +11,7 @@ import torchaudio
 import augment
 from scipy.io import wavfile
 
-DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong"]
+DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong", "../../confirming_dataset/khong_biet"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
