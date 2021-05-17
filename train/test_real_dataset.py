@@ -15,7 +15,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import librosa.display
 
-DATA_SET = "../predict/test"
+DATA_SET = "../../confirming_dataset/khong"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
 
