@@ -110,9 +110,9 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 # labels[0] = round(labels[0], 0)
 
-                print(np.array(labels.tolist()))
+                print(np.array(labels.tolist()), np.array(preds))
 
-                test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
+                test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='weighted')
                 test_precision_average.append(test_precision)
                 
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=KWS_model.hparams["batch_size"],
-                                            shuffle=True)
+                                            shuffle=False)
             
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
