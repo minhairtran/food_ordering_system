@@ -12,11 +12,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pyaudio
 import noisereduce as nr
-import librosa
 import torch
 import numpy as np
 import time
 from ctypes import *
+from scipy.io import wavfile
+import torchaudio
 
 
 def id_generator():
@@ -28,10 +29,10 @@ def id_generator():
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
-CHUNKSIZE = 22050  # fixed chunk size
-RATE = 22050
+CHUNKSIZE = 16000  # fixed chunk size
+RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
-CHANNELS = 2
+CHANNELS = 1
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -45,23 +46,24 @@ class ConfirmingPrediction():
         super(ConfirmingPrediction, self).__init__()
 
     
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40, fmax=8000):
+    def preprocess(self, data,):
 
-        # extract MFCCs
-        mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
-                                                        hop_length=hop_length, n_mels=n_mels, fmax=fmax)
-        
-        mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+        # mel spectrogram
+        kwargs = {
+            'n_fft': 512,
+            'n_mels': 40
+        }
+        wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
-        mel_spectrogram = mel_spectrogram.T
+        data = torch.Tensor(data.copy())
+        data = data / data.abs().max()
+
+        mel_spectrogram = np.array(wav_to_spec(data.clone()))
 
         mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
         mel_spectrogram = torch.tensor(
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
-
-        mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).transpose(1, 2)
 
         return mel_spectrogram
 
@@ -129,7 +131,7 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.9):
+        if(np.amax(current_window) > 0.2):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):

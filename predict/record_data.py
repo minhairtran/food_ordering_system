@@ -3,8 +3,8 @@ from scipy.io.wavfile import write
 import string
 import random
 
-SAMPLE_RATE = 22050
-CHANNELS = 2
+SAMPLE_RATE = 16000
+CHANNELS = 1
 SECOND = 1
 
 
@@ -20,12 +20,11 @@ if __name__ == "__main__":
         write("/home/minhair/Desktop/food_ordering_system/confirming_dataset/" + str(i) + "/" + id_generator() + ".wav", SAMPLE_RATE, recorded_voice)
     """
 
-    print("recording......")
-
-    for i in range(20):
+    for i in range(20, 22):
+        print("recording......")
         recorded_voice = sounddevice.rec(int(SECOND * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=CHANNELS)
         sounddevice.wait()
-        write("D:/Study/uni/DoAn/food_ordering_system/data/restaurant_noise/" + id_generator(str(i)) +  ".wav", SAMPLE_RATE, recorded_voice)
+        write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/restaurant_noise/" + id_generator(str(i)) +  ".wav", SAMPLE_RATE, recorded_voice)
         sounddevice.sleep(1)
 
     # write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/system_audio/" ".wav", SAMPLE_RATE, recorded_voice)
