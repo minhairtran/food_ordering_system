@@ -52,7 +52,7 @@ if __name__ == "__main__":
             original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set)) + 1
             original_dataset_number = current_dataset_index % len(data_set)
 
-            if (original_dataset_index >= len(data_set[original_dataset_number]["label_lengths"])):
+            if (original_dataset_index >= len(data_set[original_dataset_number]["labels"])):
                 break
             else:
                 saved_dataset["mel_spectrogram"].append(
