@@ -109,6 +109,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 # labels[0] = round(labels[0], 0)
 
+                print(np.array(labels.tolist()))
+
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
                 
@@ -179,7 +181,7 @@ if __name__ == "__main__":
 
                 train_loader = data.DataLoader(dataset=train_dataset,
                                             batch_size=KWS_model.hparams["batch_size"],
-                                            shuffle=True if epoch>10 else False)
+                                            shuffle=True)
 
                 # Create test dataset and Dataloader
                 test_dataset = Dataset(mel_spectrogram_test, labels_test)

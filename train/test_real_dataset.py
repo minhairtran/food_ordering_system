@@ -62,9 +62,9 @@ class Prediction():
         predicted = torch.argmax(output, 1).tolist()[0]
 
         decode = {
-            0: "yes",
-            1: "no",
-            2: "unknown",
+            0: "co",
+            1: "khong",
+            2: "khong biet",
         }
 
         return decode[predicted]
