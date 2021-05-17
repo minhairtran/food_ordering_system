@@ -117,7 +117,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
         epoch_loss, 100*np.mean(test_precision_average)))
 
-    return np.mean(test_precision_average)
+    return np.mean(test_precision_average), epoch_loss
 
 if __name__ == "__main__":
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+                precision, epoch_loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
                 epoch_precisions.append(precision)
             
@@ -200,7 +200,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions):
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions) and epoch_loss < 5:
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
