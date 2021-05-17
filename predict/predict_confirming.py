@@ -3,7 +3,7 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import ConfirmingModel
+from train.model import KWS_model
 
 import datetime
 import random
@@ -17,7 +17,6 @@ import torch
 import numpy as np
 import time
 from ctypes import *
-from train.text_transform import ConfirmTextTransform
 
 
 def id_generator():
@@ -33,7 +32,6 @@ CHUNKSIZE = 22050  # fixed chunk size
 RATE = 22050
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 2
-text_transform = ConfirmTextTransform()
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -47,7 +45,7 @@ class ConfirmingPrediction():
         super(ConfirmingPrediction, self).__init__()
 
     
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20, fmax=8000):
+    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40, fmax=8000):
 
         # extract MFCCs
         mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
@@ -63,23 +61,9 @@ class ConfirmingPrediction():
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
         mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+            mel_spectrogram, batch_first=True).transpose(1, 2)
 
         return mel_spectrogram
-
-    def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
-        arg_maxes = torch.argmax(output, dim=2)
-        decodes = []
-
-        for i, args in enumerate(arg_maxes):
-            decode = []
-            for j, index in enumerate(args):
-                if index != blank_label:
-                    if collapse_repeated and j != 0 and index == args[j - 1]:
-                        continue
-                    decode.append(index.item())
-            decodes.append(text_transform.int_to_text(decode))
-        return decodes
 
 
     def predict(self, model, tested_audio, device=torch.device("cpu")):
@@ -89,18 +73,25 @@ class ConfirmingPrediction():
         # get the predicted label
         output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=2)
+        predicted = torch.argmax(output, 1).tolist()[0]
 
-        predicted = self.GreedyDecoder(output)
-        return predicted
+        decode = {
+            0: "no",
+            1: "yes",
+            2: "unknown",
+        }
+
+        print(predicted)
+
+        return decode[predicted]
 
 
 if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
-        ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
+    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
+        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)

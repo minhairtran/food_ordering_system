@@ -3,8 +3,8 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import FoodNumberModel
-from train.model import ConfirmingModel
+# from train.model import FoodNumberModel
+from train.model import KWS_model
 
 import os
 import librosa
@@ -14,15 +14,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import librosa.display
-from train.text_transform import FoodNumberTextTransform
-from train.text_transform import ConfirmTextTransform
 
 DATA_SET = "../predict/test"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
-
-# text_transform = FoodNumberTextTransform()
-text_transform = ConfirmTextTransform()
 
 # def plot_spectrogram(Y, hop_length, y_axis="linear"):
 #     plt.figure(figsize=(25, 10))
@@ -35,7 +30,7 @@ class Prediction():
         super(Prediction, self).__init__()
 
 
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20,
+    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40,
                 fmax=8000):
 
         # extract MFCCs
@@ -52,25 +47,9 @@ class Prediction():
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
         mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
+            mel_spectrogram, batch_first=True).transpose(1, 2)
 
         return mel_spectrogram
-
-
-    def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
-        arg_maxes = torch.argmax(output, dim=2)
-
-        decodes = []
-
-        for i, args in enumerate(arg_maxes):
-            decode = []
-            for j, index in enumerate(args):
-                if index != blank_label:
-                    if collapse_repeated and j != 0 and index == args[j - 1]:
-                        continue
-                    decode.append(index.item())
-            decodes.append(text_transform.int_to_text(decode))
-        return decodes
 
 
     def predict(self, model, tested_audio):
@@ -80,9 +59,15 @@ class Prediction():
         # get the predicted label
         output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=2)
-        predicted = self.GreedyDecoder(output)
-        return predicted
+        predicted = torch.argmax(output, 1).tolist()[0]
+
+        decode = {
+            0: "yes",
+            1: "no",
+            2: "unknown",
+        }
+
+        return decode[predicted]
 
 
 if __name__ == "__main__":
@@ -93,8 +78,8 @@ if __name__ == "__main__":
 
     # food_number_prediction = Prediction()
 
-    model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
-        ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
+    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
+        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
 
     confirming_prediction = Prediction()
 
