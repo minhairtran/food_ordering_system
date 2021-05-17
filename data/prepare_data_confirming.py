@@ -27,7 +27,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     # spectrogram augmentation
     kwargs = {
-        'rect_freq': 7,
+        'rect_freq': 15,
         'rect_masks': 10,
         'rect_time': 40,
     }
@@ -57,7 +57,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 x = wav_to_spec(data.clone())
 
-                for i in range(100):
+                for i in range(300):
                     mel_spectrogram = np.array(spec_augment(x.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
