@@ -3,7 +3,7 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import KWS_model
+from train.model import Confirming_model
 
 import datetime
 import random
@@ -16,7 +16,6 @@ import torch
 import numpy as np
 import time
 from ctypes import *
-from scipy.io import wavfile
 import torchaudio
 
 
@@ -46,7 +45,7 @@ class ConfirmingPrediction():
         super(ConfirmingPrediction, self).__init__()
 
     
-    def preprocess(self, data,):
+    def preprocess(self, data):
 
         # mel spectrogram
         kwargs = {
@@ -92,8 +91,8 @@ if __name__ == "__main__":
 
     device = torch.device("cpu")
 
-    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
-        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
+    model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
+        Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)

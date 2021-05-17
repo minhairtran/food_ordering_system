@@ -3,7 +3,7 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import FoodNumberModel
+from train.model import Food_model
 
 import datetime
 import random
@@ -17,7 +17,7 @@ import torch
 import numpy as np
 import time
 from ctypes import *
-from train.text_transform import FoodNumberTextTransform
+import torchaudio
 
 
 def id_generator():
@@ -29,11 +29,10 @@ def id_generator():
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
 SAVED_MODEL_PATH = "../train/model_food_number.h5"
-CHUNKSIZE = 22050  # fixed chunk size
-RATE = 22050
+CHUNKSIZE = 16000  # fixed chunk size
+RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
-CHANNELS = 2
-text_transform = FoodNumberTextTransform()
+CHANNELS = 1
 
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
@@ -48,42 +47,26 @@ class FoodNumberPrediction():
         super(FoodNumberPrediction, self).__init__()
 
 
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=20,
-                fmax=8000):
+    def preprocess(self, data):
 
-        # extract MFCCs
-        mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
-                                                        hop_length=hop_length, n_mels=n_mels, fmax=fmax)
-        
-        mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+        # mel spectrogram
+        kwargs = {
+            'n_fft': 512,
+            'n_mels': 40
+        }
+        wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
-        mel_spectrogram = mel_spectrogram.T
+        data = torch.Tensor(data.copy())
+        data = data / data.abs().max()
+
+        mel_spectrogram = np.array(wav_to_spec(data.clone()))
 
         mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
         mel_spectrogram = torch.tensor(
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
-        mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
-
         return mel_spectrogram
-
-
-    def GreedyDecoder(self, output, blank_label=0, collapse_repeated=True):
-        arg_maxes = torch.argmax(output, dim=2)
-        decodes = []
-
-        for i, args in enumerate(arg_maxes):
-            decode = []
-            for j, index in enumerate(args):
-                if index != blank_label:
-                    if collapse_repeated and j != 0 and index == args[j - 1]:
-                        continue
-                    decode.append(index.item())
-            decodes.append(text_transform.int_to_text(decode))
-        return decodes
-
 
     def predict(self, model, tested_audio, device=torch.device("cpu")):
         mel_spectrogram = self.preprocess(tested_audio)
@@ -92,16 +75,35 @@ class FoodNumberPrediction():
         # get the predicted label
         output = model(mel_spectrogram)
 
-        output = F.log_softmax(output, dim=2)
-        predicted = self.GreedyDecoder(output)
-        return predicted
+        predicted = torch.argmax(output, 1).tolist()[0]
+
+        decode = {
+            0: "ca_kho",
+            1: "ca_xot",
+            2: "com_ga",
+            3: "com_heo_xi_muoi",
+            4: "com_nieu",
+            5: "com_tam",
+            6: "com_thap_cam",
+            7: "khong_biet",
+            8: "rau_muong_luoc",
+            9: "rau_muong_xao",
+            10: "salad_tron",
+            11: "tra_hoa_cuc",
+            12: "tra_sam_dua",
+            13: "trung_chien",
+        }
+
+        print(predicted)
+
+        return decode[predicted]
 
 
 if __name__ == "__main__":
     device = torch.device("cpu")
 
-    model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-        FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
+        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -139,7 +141,7 @@ if __name__ == "__main__":
 
         current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-        if(np.amax(current_window) > 0.9):
+        if(np.amax(current_window) > 0.2):
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):

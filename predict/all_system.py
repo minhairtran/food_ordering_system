@@ -3,7 +3,7 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-from train.model import ConfirmingModel, FoodNumberModel
+from train.model import Confirming_model, Food_model
 from predict_confirming import ConfirmingPrediction
 from predict_food_number import FoodNumberPrediction
 
@@ -41,22 +41,26 @@ ORDER_MORE_PATH = "recorded_audios/system_audio/order_more.wav"
 ORDER_SUCCESS_PATH = "recorded_audios/system_audio/order_success.wav"
 NOT_UNDERSTAND_ORDER = "recorded_audios/system_audio/not_understand_order.wav"
 
-CONFIRM_DISH_1ST_PATH = ["recorded_audios/system_audio/confirm_dish_0_1st.wav", "recorded_audios/system_audio/confirm_dish_1_1st.wav", \
-    "recorded_audios/system_audio/confirm_dish_2_1st.wav", "recorded_audios/system_audio/confirm_dish_3_1st.wav", \
-        "recorded_audios/system_audio/confirm_dish_4_1st.wav", "recorded_audios/system_audio/confirm_dish_5_1st.wav", \
-            "recorded_audios/system_audio/confirm_dish_6_1st.wav", "recorded_audios/system_audio/confirm_dish_7_1st.wav",\
-                 "recorded_audios/system_audio/confirm_dish_8_1st.wav", "recorded_audios/system_audio/confirm_dish_9_1st.wav"]
+CONFIRM_DISH_1ST_PATH = ["recorded_audios/system_audio/confirm_order_ca_kho_1st.wav", "recorded_audios/system_audio/confirm_order_ca_xot_1st.wav", \
+    "recorded_audios/system_audio/confirm_order_com_ga_1st.wav", "recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_1st.wav", \
+        "recorded_audios/system_audio/confirm_order_com_nieu_1st.wav", "recorded_audios/system_audio/confirm_order_com_tam_1st.wav", \
+            "recorded_audios/system_audio/confirm_order_com_thap_cam_1st.wav", "recorded_audios/system_audio/confirm_order_rau_muong_luoc_1st.wav",\
+                 "recorded_audios/system_audio/confirm_order_rau_muong_xao_1st.wav", "recorded_audios/system_audio/confirm_order_salad_tron_1st.wav",\
+                     "recorded_audios/system_audio/confirm_order_tra_hoa_cuc_1st.wav", "recorded_audios/system_audio/confirm_order_tra_sam_dua_1st.wav", \
+                         "recorded_audios/system_audio/confirm_order_trung_chien_1st.wav"]
 
-CONFIRM_DISH_NTH_PATH = ["recorded_audios/system_audio/confirm_dish_0_nth.wav", "recorded_audios/system_audio/confirm_dish_1_nth.wav"\
-    , "recorded_audios/system_audio/confirm_dish_2_nth.wav", "recorded_audios/system_audio/confirm_dish_3_nth.wav", \
-        "recorded_audios/system_audio/confirm_dish_4_nth.wav", "recorded_audios/system_audio/confirm_dish_5_nth.wav", \
-            "recorded_audios/system_audio/confirm_dish_6_nth.wav", "recorded_audios/system_audio/confirm_dish_7_nth.wav"\
-                , "recorded_audios/system_audio/confirm_dish_8_nth.wav", "recorded_audios/system_audio/confirm_dish_9_nth.wav"]
+CONFIRM_DISH_NTH_PATH = ["recorded_audios/system_audio/confirm_order_ca_kho_nth.wav", "recorded_audios/system_audio/confirm_order_ca_xot_nth.wav", \
+    "recorded_audios/system_audio/confirm_order_com_ga_nth.wav", "recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_nth.wav", \
+        "recorded_audios/system_audio/confirm_order_com_nieu_nth.wav", "recorded_audios/system_audio/confirm_order_com_tam_nth.wav", \
+            "recorded_audios/system_audio/confirm_order_com_thap_cam_nth.wav", "recorded_audios/system_audio/confirm_order_rau_muong_luoc_nth.wav",\
+                 "recorded_audios/system_audio/confirm_order_rau_muong_xao_nth.wav", "recorded_audios/system_audio/confirm_order_salad_tron_nth.wav",\
+                     "recorded_audios/system_audio/confirm_order_tra_hoa_cuc_nth.wav", "recorded_audios/system_audio/confirm_order_tra_sam_dua_nth.wav", \
+                         "recorded_audios/system_audio/confirm_order_trung_chien_nth.wav"]
 
-CHUNKSIZE = 22050  # fixed chunk size
-RATE = 22050
+CHUNKSIZE = 16000  # fixed chunk size
+RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
-CHANNELS = 2
+CHANNELS = 1
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(
     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -104,7 +108,7 @@ class AllSystem:
 
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-            if(np.amax(current_window) > 0.9):
+            if(np.amax(current_window) > 0.4):
                 predicted_window = np.append(predicted_window, current_window)
             else:
                 if(len(predicted_window) == 0):
@@ -128,8 +132,9 @@ class AllSystem:
                         return user_response_content, noise_sample, frame
 
     def system_understand_f(self, user_response_content, user_response_type):
-        confirming_labels = ["yes", "no"]
-        food_number_labels = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        confirming_labels = ["co", "khong"]
+        food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
+            "com_thap_cam", "khong_biet", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if(user_response_type == "confirming"):
             if(user_response_content in confirming_labels):
@@ -148,7 +153,8 @@ class AllSystem:
             return None
 
     def find_confirmed_dish_number_path(self, user_response, time):
-        food_number_labels = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+        food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
+            "com_thap_cam", "khong_biet", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if time == 1:
             return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
@@ -168,8 +174,8 @@ class AllSystem:
         device = torch.device("cpu")
 
         # Confirming model initialization
-        confirming_model = ConfirmingModel(ConfirmingModel.hparams['n_cnn_layers'], ConfirmingModel.hparams['n_rnn_layers'], ConfirmingModel.hparams['rnn_dim'], \
-            ConfirmingModel.hparams['n_class'], ConfirmingModel.hparams['n_feats'], ConfirmingModel.hparams['stride'], ConfirmingModel.hparams['dropout']).to(device)
+        confirming_model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
+            Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
         confirming_model_checkpoint = torch.load(CONFIRMING_MODEL_PATH, map_location=device)
         confirming_model.load_state_dict(confirming_model_checkpoint)
@@ -178,8 +184,8 @@ class AllSystem:
         confirming_prediction = ConfirmingPrediction()
 
         # Food model initialization 
-        food_number_model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-            FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+        food_number_model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
+            Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
         food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
         food_number_model.load_state_dict(food_number_checkpoint)
@@ -232,13 +238,13 @@ class AllSystem:
 
                     all_frames.append(frame)
 
-                    if (user_response == "no"):
+                    if (user_response == "khong"):
                         all_dishes_ordered.pop()
                         self.SYSTEM_UNDERSTAND = False
                         time_order_fail_successively += 1
                     if (user_response == ""):
                         raise SystemNotUnderstand
-                    if (user_response == "yes"):
+                    if (user_response == "co"):
                         one_order_sucess = True
 
                 if time_order_fail_successively == 3:
@@ -252,7 +258,7 @@ class AllSystem:
                 if (user_response == ""):
                     raise SystemNotUnderstand
 
-                order_more = user_response == "yes"
+                order_more = user_response == "co"
 
                 one_order_sucess = False
             

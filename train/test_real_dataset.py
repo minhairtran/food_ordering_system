@@ -3,24 +3,21 @@ sys.path.append("../")
 sys.path.append(
     "/home/minhair/Desktop/food_ordering_system/test_pytorch_venv/lib/python3.8/site-packages/")
 
-# from train.model import FoodNumberModel
-from train.model import KWS_model
+from train.model import Food_model
+# from train.model import Confirming_model
 
 import os
-import librosa
 import torch
 import numpy as np
 import torch.nn as nn
-import torch.nn.functional as F
 import matplotlib.pyplot as plt
-import librosa.display
 import torchaudio
 from scipy.io import wavfile
 
 
 DATA_SET = "../predict/test"
-# SAVED_MODEL_PATH = "../train/model_food_number.h5"
-SAVED_MODEL_PATH = "../train/model_confirming.h5"
+SAVED_MODEL_PATH = "../train/model_food_number.h5"
+# SAVED_MODEL_PATH = "../train/model_confirming.h5"
 
 # def plot_spectrogram(Y, hop_length, y_axis="linear"):
 #     plt.figure(figsize=(25, 10))
@@ -55,9 +52,7 @@ class Prediction():
 
 
     def predict(self, model, file_path):
-        # fs, data = wavfile.read(file_path)
-
-        data, sr = librosa.load(file_path, sr=16000)
+        fs, data = wavfile.read(file_path)
 
         mel_spectrogram = self.preprocess(data)
         mel_spectrogram = mel_spectrogram.to(device)
@@ -96,15 +91,15 @@ class Prediction():
 if __name__ == "__main__":
     device = torch.device("cpu")
 
-    # model = FoodNumberModel(FoodNumberModel.hparams['n_cnn_layers'], FoodNumberModel.hparams['n_rnn_layers'], FoodNumberModel.hparams['rnn_dim'], FoodNumberModel.hparams['n_class'], FoodNumberModel.hparams['n_feats'], \
-    #     FoodNumberModel.hparams['stride'], FoodNumberModel.hparams['dropout']).to(device)
+    model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
+        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
-    # food_number_prediction = Prediction()
+    food_number_prediction = Prediction()
 
-    model = KWS_model(KWS_model.hparams['n_mels'], KWS_model.hparams['cnn_channels'], KWS_model.hparams['cnn_kernel_size'], \
-        KWS_model.hparams['gru_hidden_size'], KWS_model.hparams['attention_hidden_size'], KWS_model.hparams['n_classes']).to(device)
+    # model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
+    #     Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
-    confirming_prediction = Prediction()
+    # confirming_prediction = Prediction()
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -114,8 +109,8 @@ if __name__ == "__main__":
         for f in filenames:
             file_path = os.path.join(dirpath, f)
 
-            # predicted_audio = food_number_prediction.predict(model, np.array(signal))
-            predicted_audio = confirming_prediction.predict(model, file_path)
+            predicted_audio = food_number_prediction.predict(model, file_path)
+            # predicted_audio = confirming_prediction.predict(model, file_path)
 
             print(f ,predicted_audio)
 
