@@ -20,9 +20,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
         labels.append(torch.tensor(label, dtype=torch.long))
         
     mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True)
-
-    print(mel_spectrogram.shape)
+        mel_spectrogram, batch_first=True).transpose(1, 2)
 
     return mel_spectrogram, labels
 

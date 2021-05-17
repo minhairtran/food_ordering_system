@@ -58,7 +58,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 x = wav_to_spec(data.clone())
 
                 for i in range(100):
-                    mel_spectrogram = spec_augment(x.clone().unsqueeze(0)).squeeze(0).tolist()
+                    mel_spectrogram = np.array(spec_augment(x.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
                     data_temporary["mel_spectrogram"].append(mel_spectrogram)
