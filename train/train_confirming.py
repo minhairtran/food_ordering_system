@@ -112,12 +112,11 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 print(np.array(labels.tolist()), np.array(preds))
 
-                test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='weighted')
+                test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
                 
 
     experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
-    experiment.log_metric('test_precision', np.mean(test_precision_average), step=iter_meter.get())
 
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
         epoch_loss, 100*np.mean(test_precision_average)))
@@ -197,7 +196,10 @@ if __name__ == "__main__":
                 precision = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
                 epoch_precisions.append(precision)
+            
+            print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
 
+            experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 

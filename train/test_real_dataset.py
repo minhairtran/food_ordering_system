@@ -14,8 +14,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import librosa.display
+import torchaudio
+from scipy.io import wavfile
 
-DATA_SET = "../../confirming_dataset/khong"
+
+DATA_SET = "../predict/test"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
 
@@ -30,30 +33,33 @@ class Prediction():
         super(Prediction, self).__init__()
 
 
-    def preprocess(self, signal, n_fft=512, hop_length=384, n_mels=40,
-                fmax=8000):
+    def preprocess(self, data):
+        # mel spectrogram
+        kwargs = {
+            'n_fft': 512,
+            'n_mels': 40
+        }
+        wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
-        # extract MFCCs
-        mel_spectrogram = librosa.feature.melspectrogram(signal, n_fft=n_fft,
-                                                        hop_length=hop_length, n_mels=n_mels, fmax=fmax)
-        
-        mel_spectrogram = librosa.power_to_db(mel_spectrogram)
+        data = torch.Tensor(data.copy())
+        data = data / data.abs().max()
 
-        mel_spectrogram = mel_spectrogram.T
+        mel_spectrogram = np.array(wav_to_spec(data.clone()))
 
         mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
         mel_spectrogram = torch.tensor(
             mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
-        mel_spectrogram = nn.utils.rnn.pad_sequence(
-            mel_spectrogram, batch_first=True).transpose(1, 2)
-
         return mel_spectrogram
 
 
-    def predict(self, model, tested_audio):
-        mel_spectrogram = self.preprocess(tested_audio)
+    def predict(self, model, file_path):
+        # fs, data = wavfile.read(file_path)
+
+        data, sr = librosa.load(file_path, sr=16000)
+
+        mel_spectrogram = self.preprocess(data)
         mel_spectrogram = mel_spectrogram.to(device)
 
         # get the predicted label
@@ -90,10 +96,9 @@ if __name__ == "__main__":
     for i, (dirpath, dirnames, filenames) in enumerate(os.walk(DATA_SET)):
         for f in filenames:
             file_path = os.path.join(dirpath, f)
-            signal, sample_rate = librosa.load(file_path)
 
             # predicted_audio = food_number_prediction.predict(model, np.array(signal))
-            predicted_audio = confirming_prediction.predict(model, np.array(signal))
+            predicted_audio = confirming_prediction.predict(model, file_path)
 
             print(f ,predicted_audio)
 
