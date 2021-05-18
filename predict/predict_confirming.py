@@ -82,7 +82,7 @@ class ConfirmingPrediction():
             2: "khong biet",
         }
 
-        print(predicted)
+        # print(predicted)
 
         return decode[predicted]
 

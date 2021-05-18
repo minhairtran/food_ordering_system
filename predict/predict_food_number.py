@@ -94,7 +94,7 @@ class FoodNumberPrediction():
             13: "trung_chien",
         }
 
-        print(predicted)
+        # print(predicted)
 
         return decode[predicted]
 

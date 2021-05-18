@@ -87,6 +87,7 @@ class AllSystem:
                         rate=RATE, input=True, frames_per_buffer=CHUNKSIZE)
 
     def system_say(self, audio_path):
+        self.stream.stop_stream()
         data, fs = sf.read(audio_path, dtype='float32') 
         sd.play(data, fs)
         sd.wait()
@@ -101,20 +102,21 @@ class AllSystem:
         times_trying_understand = 1
 
         while not system_understand:
-
+            if self.stream.is_stopped:
+                self.stream.start_stream()
             data = self.stream.read(CHUNKSIZE)
-            frame.append(data)
+            frame.extend(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
-            if(np.amax(current_window) > 0.4):
+            if(np.amax(current_window) > 0.9):
                 predicted_window = np.append(predicted_window, current_window)
             else:
                 if(len(predicted_window) == 0):
                     noise_sample = np.frombuffer(data, dtype=np.float32)
                 else:
-                    user_response_content = prediction.predict(model, np.array(current_window))[0]
+                    user_response_content = prediction.predict(model, np.array(current_window))
                     print(user_response_content)
                     predicted_window = np.array([])
 
@@ -134,7 +136,7 @@ class AllSystem:
     def system_understand_f(self, user_response_content, user_response_type):
         confirming_labels = ["co", "khong"]
         food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "khong_biet", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
+            "com_thap_cam", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if(user_response_type == "confirming"):
             if(user_response_content in confirming_labels):
@@ -154,7 +156,7 @@ class AllSystem:
 
     def find_confirmed_dish_number_path(self, user_response, time):
         food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "khong_biet", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
+            "com_thap_cam", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if time == 1:
             return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
@@ -197,9 +199,7 @@ class AllSystem:
         data = self.stream.read(CHUNKSIZE)
         noise_sample = np.frombuffer(data, dtype=np.float32)
         # loud_threshold = np.mean(np.abs(noise_sample)) * 10
-        audio_buffer = []
         all_frames = []
-        predicted_window = np.array([])
 
         try:
             # System welcome customers
@@ -217,33 +217,25 @@ class AllSystem:
                 else:
                     self.system_say(ASK_ORDER_NTH_PATH)
 
-                while(time_order_fail_successively < 3) or not one_order_sucess:
+                while(time_order_fail_successively < 3) and one_order_sucess == False:
                     if (time_order_fail_successively != 0):
                         self.system_say(ORDER_AGAIN_PATH)
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model,"food_number")
                     
                     all_dishes_ordered.append(user_response)
-                    if len(all_frames) == 0:
-                        all_frames = frame
-                    else:
-                        all_frames.append(frame)
-
-                    if user_response == "":
-                        raise SystemNotUnderstand
+                    all_frames.extend(frame)
 
                     self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model,"confirming")
 
-                    all_frames.append(frame)
+                    all_frames.extend(frame)
 
                     if (user_response == "khong"):
                         all_dishes_ordered.pop()
                         self.SYSTEM_UNDERSTAND = False
                         time_order_fail_successively += 1
-                    if (user_response == ""):
-                        raise SystemNotUnderstand
                     if (user_response == "co"):
                         one_order_sucess = True
 
@@ -253,7 +245,7 @@ class AllSystem:
                 self.system_say(ORDER_MORE_PATH)
 
                 user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, "confirming")
-                all_frames.append(frame)
+                all_frames.extend(frame)
 
                 if (user_response == ""):
                     raise SystemNotUnderstand
@@ -268,7 +260,7 @@ class AllSystem:
             order_fail = True
             self.system_say(ORDER_FAILURE_PATH)
             data = self.stream.read(CHUNKSIZE)
-            all_frames.append(data)
+            all_frames.extend(data)
         finally:
             # close self.stream
             self.stream.stop_stream()
