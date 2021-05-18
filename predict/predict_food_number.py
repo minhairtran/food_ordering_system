@@ -139,16 +139,15 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
-
         if(np.amax(current_window) > 0.2):
+            current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:
             if(len(predicted_window) == 0):
                 #Hoi 2 anh
                 noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
-                predicted_audio = food_number_prediction.predict(model, np.array(current_window))
+                predicted_audio = food_number_prediction.predict(model, np.array(predicted_window))
                 print(predicted_audio)
                 predicted_window = np.array([])
 

@@ -80,7 +80,7 @@ while(time.time() - start < 20):
     frames.append(data)
     current_window = np.frombuffer(data, dtype=np.float32)
 
-    current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+    # current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
 
     if len(all_windows) == 0:
         all_windows = current_window
