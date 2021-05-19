@@ -23,9 +23,9 @@ class Attention(nn.Module):
 class Confirming_model(nn.Module):
     hparams = {
         "n_mels": 40,
-        "cnn_channels": 32,
+        "cnn_channels": 16,
         "cnn_kernel_size": 51,
-        "gru_hidden_size": 128,
+        "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
         "batch_size": 512,
@@ -36,11 +36,11 @@ class Confirming_model(nn.Module):
 
     def __init__(self, 
                  n_mels = 40,
-                 cnn_channels = 32, 
+                 cnn_channels = 16, 
                  cnn_kernel_size = 51,
-                 gru_hidden_size = 128, 
+                 gru_hidden_size = 64, 
                  attention_hidden_size = 64,
-                 n_classes = 2):
+                 n_classes = 0):
       
         super().__init__()
         self.cnn = nn.Conv1d(n_mels, cnn_channels, kernel_size=cnn_kernel_size, 
