@@ -128,8 +128,8 @@ if __name__ == "__main__":
     print("Start recording...")
     start = time.time()
 
-    while(time.time() - start < 10):
-    # while(True):
+    # while(time.time() - start < 10):
+    while(True):
         # Read chunk and load it into numpy array.
         data = stream.read(CHUNKSIZE)
         frames.append(data)

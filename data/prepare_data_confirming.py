@@ -10,7 +10,7 @@ import augment
 from scipy.io import wavfile
 
 # DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong", "../../confirming_dataset/khong_biet"]
-DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong", "../../confirming_with_noise_dataset/khong_biet"]
+DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
