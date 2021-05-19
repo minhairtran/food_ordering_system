@@ -23,9 +23,9 @@ class Attention(nn.Module):
 class Confirming_model(nn.Module):
     hparams = {
         "n_mels": 40,
-        "cnn_channels": 16,
+        "cnn_channels": 32,
         "cnn_kernel_size": 51,
-        "gru_hidden_size": 64,
+        "gru_hidden_size": 128,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
         "batch_size": 512,
