@@ -60,7 +60,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 # x = log_mel_spec(a.clone())
 
-                for i in range(250):
+                for i in range(10):
                     mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
