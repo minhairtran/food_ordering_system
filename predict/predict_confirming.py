@@ -149,7 +149,7 @@ if __name__ == "__main__":
                 predicted_window = np.array([])
 
         print((time.time() - start), np.amax(current_window))
-        time.sleep(1)
+        # time.sleep(1)
 
     # close stream
     stream.stop_stream()
