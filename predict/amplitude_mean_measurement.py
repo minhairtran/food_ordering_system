@@ -39,7 +39,7 @@ data = stream.read(CHUNKSIZE)
 noise_sample = np.frombuffer(data, dtype=np.float32)
 
 # book = load_workbook('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/report.xlsx')
-writer = pd.ExcelWriter('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/report.xlsx', engine = 'openpyxl')
+writer = pd.ExcelWriter('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/report.xlsx', engine = 'openpyxl')
 # writer.book = book
 
 # Voice mean amplitude measurement
@@ -71,7 +71,7 @@ print("Start recording...")
 start = time.time()
 all_windows = []
 
-while(time.time() - start < 20):
+while(time.time() - start < 101):
 # while (True):
     frames = []
     data = stream.read(CHUNKSIZE)
@@ -87,7 +87,7 @@ while(time.time() - start < 20):
 
     print((time.time() - start), np.amax(current_window))
 
-    FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/" + id_generator() + ".wav"
+    FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/high_without_subject_noise/" + id_generator() + ".wav"
 
     mean_amplitude['time_(s)'].append(time.time() - start)
     # mean_amplitude['mean_amplitude'].append(np.mean(np.abs(current_window)))
