@@ -27,8 +27,8 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_confirming.h5"
-# SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
+# SAVED_MODEL_PATH = "../train/model_confirming.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -128,14 +128,14 @@ if __name__ == "__main__":
     print("Start recording...")
     start = time.time()
 
-    # while(time.time() - start < 60):
-    while(True):
+    while(time.time() - start < 10):
+    # while(True):
         # Read chunk and load it into numpy array.
         data = stream.read(CHUNKSIZE)
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.5):
+        if(np.amax(current_window) > 0.2):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:

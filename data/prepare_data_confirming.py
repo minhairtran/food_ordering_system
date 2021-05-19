@@ -9,8 +9,8 @@ import torchaudio
 import augment
 from scipy.io import wavfile
 
-DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong", "../../confirming_dataset/khong_biet"]
-# DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong", "../../confirming_with_noise_dataset/khong_biet"]
+# DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong", "../../confirming_dataset/khong_biet"]
+DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong", "../../confirming_with_noise_dataset/khong_biet"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
@@ -28,9 +28,9 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     # spectrogram augmentation
     kwargs = {
-        'rect_freq': 35,
-        'rect_masks': 15,
-        'rect_time': 10,
+        'rect_freq': 2,
+        'rect_masks': 2,
+        'rect_time': 4,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 

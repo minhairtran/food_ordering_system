@@ -15,7 +15,7 @@ import torchaudio
 from scipy.io import wavfile
 
 
-DATA_SET = "../predict/test"
+DATA_SET = "/home/minhair/Desktop/food_ordering_system/confirming_dataset/co/"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
 SAVED_MODEL_PATH = "../train/model_confirming.h5"
