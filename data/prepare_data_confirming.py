@@ -23,6 +23,8 @@ def preprocess_dataset(dataset_path, saved_file_path):
     }
     wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
+    log_mel_spec = torchaudio.transforms.AmplitudeToDB()
+
     # spectrogram augmentation
     kwargs = {
         'rect_freq': 10,
@@ -53,9 +55,11 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 data = torch.Tensor(data.copy())
                 data = data / data.abs().max()
 
-                x = wav_to_spec(data.clone())
+                a = wav_to_spec(data.clone())
 
-                for i in range(250):
+                x = log_mel_spec(a.clone())
+
+                for i in range(10):
                     mel_spectrogram = np.array(spec_augment(x.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
