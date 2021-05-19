@@ -36,11 +36,11 @@ class Confirming_model(nn.Module):
 
     def __init__(self, 
                  n_mels = 40,
-                 cnn_channels = 16, 
+                 cnn_channels = 32, 
                  cnn_kernel_size = 51,
-                 gru_hidden_size = 64, 
+                 gru_hidden_size = 128, 
                  attention_hidden_size = 64,
-                 n_classes = 0):
+                 n_classes = 2):
       
         super().__init__()
         self.cnn = nn.Conv1d(n_mels, cnn_channels, kernel_size=cnn_kernel_size, 
