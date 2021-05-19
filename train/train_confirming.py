@@ -165,6 +165,7 @@ if __name__ == "__main__":
     try:
         for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
             epoch_precisions = []
+            epoch_loss = []
 
             for dataset_index in range(len(load_data_set)):
                 # Load all data
@@ -190,9 +191,10 @@ if __name__ == "__main__":
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                precision, epoch_loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+                precision, each_epoch_loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
                 epoch_precisions.append(precision)
+                epoch_loss.append(each_epoch_loss)
             
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
 
@@ -201,7 +203,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.99 for epoch_precision in epoch_precisions):
+            if all(epoch_precision > 0.99 for epoch_precision in epoch_precisions) and all(one_epoch_precision <5 for one_epoch_precision in epoch_loss):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
