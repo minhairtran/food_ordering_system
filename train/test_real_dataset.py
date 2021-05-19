@@ -67,7 +67,6 @@ class Prediction():
         decode = {
             0: "co",
             1: "khong",
-            2: "khong_biet",
         }
 
         # decode = {
