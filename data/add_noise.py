@@ -8,11 +8,22 @@ import os
 random.seed(0)
 SNR = 5
 
-DATASET_PATH = ["../../confirming_dataset/co/", "../../confirming_dataset/khong/", "../../confirming_dataset/khong_biet/"]
+# DATASET_PATH = ["../../confirming_dataset/co/", "../../confirming_dataset/khong/", "../../confirming_dataset/khong_biet/"]
+
+DATASET_PATH = ["../../food_dataset/ca_kho", "../../food_dataset/ca_xot", "../../food_dataset/com_ga", "../../food_dataset/com_heo_xi_muoi", "../../food_dataset/com_nieu", \
+                    "../../food_dataset/com_tam", "../../food_dataset/com_thap_cam", "../../food_dataset/khong_biet", "../../food_dataset/rau_muong_luoc", \
+                        "../../food_dataset/rau_muong_xao",  "../../food_dataset/salad_tron", "../../food_dataset/tra_hoa_cuc", "../../food_dataset/tra_sam_dua", \
+                            "../../food_dataset/trung_chien"]
+
 NOISE_PATH = ["/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/medium_without_subject_voice", 
         "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/low_without_subject_voice"]
-SAVED_NEW_PATH = ["../../confirming_with_noise_dataset/co/", "../../confirming_with_noise_dataset/khong/", "../../confirming_with_noise_dataset/khong_biet/"]
 
+# SAVED_NEW_PATH = ["../../confirming_with_noise_dataset/co/", "../../confirming_with_noise_dataset/khong/", "../../confirming_with_noise_dataset/khong_biet/"]
+
+SAVED_NEW_PATH = ["../../food_with_noise_dataset/ca_kho/", "../../food_with_noise_dataset/ca_xot/", "../../food_with_noise_dataset/com_ga/", "../../food_with_noise_dataset/com_heo_xi_muoi/", "../../food_with_noise_dataset/com_nieu/", \
+                    "../../food_with_noise_dataset/com_tam/", "../../food_with_noise_dataset/com_thap_cam/", "../../food_with_noise_dataset/khong_biet/", "../../food_with_noise_dataset/rau_muong_luoc/", \
+                        "../../food_with_noise_dataset/rau_muong_xao/",  "../../food_with_noise_dataset/salad_tron/", "../../food_with_noise_dataset/tra_hoa_cuc/", "../../food_with_noise_dataset/tra_sam_dua/", \
+                            "../../food_with_noise_dataset/trung_chien/"]
 
 
 def add_noise(dataset_path, noise_path, saved_file_path):
