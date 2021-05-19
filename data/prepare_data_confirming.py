@@ -28,9 +28,9 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     # spectrogram augmentation
     kwargs = {
-        'rect_freq': 2,
-        'rect_masks': 2,
-        'rect_time': 4,
+        'rect_freq': 5,
+        'rect_masks': 5,
+        'rect_time': 5,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
@@ -62,7 +62,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 data_temporary["mel_spectrogram"].append(a.T.tolist())
 
-                for i in range(9):
+                for i in range(15):
                     mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
