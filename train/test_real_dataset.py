@@ -45,14 +45,12 @@ class Prediction():
 
         mel_spectrogram = wav_to_spec(data.clone())
 
-        log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
+        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
-        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
+        mel_spectrogram = torch.tensor(
+            mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
-        log_mel_spectrogram = torch.tensor(
-            log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
-
-        return log_mel_spectrogram
+        return mel_spectrogram
 
 
     def predict(self, model, file_path):
