@@ -31,7 +31,7 @@ class Confirming_model(nn.Module):
         "batch_size": 512,
         "epochs": 50, 
         "test_size": 0.25,
-        "n_classes": 3
+        "n_classes": 2
     }
 
     def __init__(self, 
