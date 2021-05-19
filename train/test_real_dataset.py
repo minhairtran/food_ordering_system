@@ -16,9 +16,9 @@ from scipy.io import wavfile
 
 
 DATA_SET = "../predict/test"
-SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
+# SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
-# SAVED_MODEL_PATH = "../train/model_confirming.h5"
+SAVED_MODEL_PATH = "../train/model_confirming.h5"
 
 # def plot_spectrogram(Y, hop_length, y_axis="linear"):
 #     plt.figure(figsize=(25, 10))

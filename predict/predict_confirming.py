@@ -27,8 +27,8 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-# SAVED_MODEL_PATH = "../train/model_confirming.h5"
-SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
+SAVED_MODEL_PATH = "../train/model_confirming.h5"
+# SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -56,7 +56,7 @@ class ConfirmingPrediction():
         }
         wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
-        log_mel_spec = torchaudio.transforms.AmplitudeToDB()
+        # log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
 
         data = torch.Tensor(data.copy())
@@ -64,14 +64,14 @@ class ConfirmingPrediction():
 
         mel_spectrogram = wav_to_spec(data.clone())
 
-        log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
+        # log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
+        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
 
-        log_mel_spectrogram = torch.tensor(
-            log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
+        mel_spectrogram = torch.tensor(
+            mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
-        return log_mel_spectrogram
+        return mel_spectrogram
 
 
     def predict(self, model, tested_audio, device=torch.device("cpu")):
