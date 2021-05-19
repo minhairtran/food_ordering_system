@@ -14,7 +14,9 @@ from model import Confirming_model
 from sklearn.metrics import precision_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
-SAVED_MODEL_PATH = "model_confirming_noise.h5"
+# SAVED_MODEL_PATH = "model_confirming_noise.h5"
+SAVED_MODEL_PATH = "model_confirming.h5"
+
 
 class GetOutOfLoop(Exception):
     pass
