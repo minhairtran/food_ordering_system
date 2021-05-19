@@ -28,7 +28,7 @@ def id_generator():
 
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
-SAVE_AUDIO_FILE_PATH = "recorded_audios/further_training" + id_generator() + ".wav"
+SAVE_AUDIO_FILE_PATH = "recorded_audios/further_training/" + id_generator() + ".wav"
 CONFIRMING_MODEL_PATH = "../train/model_confirming.h5"
 FOOD_NUMBER_MODEL_PATH = "../train/model_food_number.h5"
 
@@ -102,13 +102,14 @@ class AllSystem:
         times_trying_understand = 1
 
         while not system_understand:
-            if self.stream.is_stopped:
+            if self.stream.is_stopped():
                 self.stream.start_stream()
+
             data = self.stream.read(CHUNKSIZE)
-            frame.extend(data)
+            frame.append(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
-            if(np.amax(current_window) > 0.9):
+            if(np.amax(current_window) > 0.3):
                 current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
                 predicted_window = np.append(predicted_window, current_window)
             else:
@@ -162,7 +163,7 @@ class AllSystem:
         else:
             return CONFIRM_DISH_NTH_PATH[food_number_labels.index(user_response)]
 
-    def listToString(s): 
+    def listToString(self, s): 
     
         # initialize an empty string
         str1 = ", " 
@@ -204,8 +205,6 @@ class AllSystem:
             # System welcome customers
             start_conversation = True
             order_more = False
-            time_order_fail_successively = 0
-            one_order_sucess = False
             all_dishes_ordered = []
             order_fail = False
 
@@ -216,6 +215,9 @@ class AllSystem:
                 else:
                     self.system_say(ASK_ORDER_NTH_PATH)
 
+                time_order_fail_successively = 0
+                one_order_sucess = False
+                
                 while(time_order_fail_successively < 3) and one_order_sucess == False:
                     if (time_order_fail_successively != 0):
                         self.system_say(ORDER_AGAIN_PATH)
@@ -223,13 +225,16 @@ class AllSystem:
                     user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model,"food_number")
                     
                     all_dishes_ordered.append(user_response)
-                    all_frames.extend(frame)
+
+                    for each_frame in frame:
+                        all_frames.append(each_frame)
 
                     self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model,"confirming")
 
-                    all_frames.extend(frame)
+                    for each_frame in frame:
+                        all_frames.append(each_frame)
 
                     if (user_response == "khong"):
                         all_dishes_ordered.pop()
@@ -243,23 +248,22 @@ class AllSystem:
 
                 self.system_say(ORDER_MORE_PATH)
 
-                user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, "confirming")
-                all_frames.extend(frame)
+                user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model, "confirming")
+                for each_frame in frame:
+                    all_frames.append(each_frame)
 
                 if (user_response == ""):
                     raise SystemNotUnderstand
 
                 order_more = user_response == "co"
-
-                one_order_sucess = False
             
+            print(all_dishes_ordered)
             self.system_say(ORDER_SUCCESS_PATH)
 
         except SystemNotUnderstand:
             order_fail = True
             self.system_say(ORDER_FAILURE_PATH)
             data = self.stream.read(CHUNKSIZE)
-            all_frames.extend(data)
         finally:
             # close self.stream
             self.stream.stop_stream()
@@ -278,7 +282,7 @@ class AllSystem:
             if not order_fail:
                 return self.listToString(all_dishes_ordered)
             else:
-                return None
+                return "Nhan vien order"
 
 if __name__ == "__main__":
     allSystem = AllSystem()

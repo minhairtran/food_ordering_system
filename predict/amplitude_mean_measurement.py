@@ -12,10 +12,10 @@ import random
 import wave
 import time
 
-CHUNKSIZE = 22050  # fixed chunk size
-RATE = 22050
+CHUNKSIZE = 16000  # fixed chunk size
+RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
-CHANNELS = 2
+CHANNELS = 1
 
 
 ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -50,7 +50,6 @@ writer = pd.ExcelWriter('/home/minhair/Desktop/food_ordering_system/food_orderin
 #         file_path = os.path.join(dirpath, f)
 #         signal, sample_rate = librosa.load(file_path)
 #         signal = nr.reduce_noise(audio_clip=signal, noise_clip=noise_sample, verbose=False)
-#         mean_amplitude['mean_amplitude'].append(np.mean(np.abs(signal)))
 #         mean_amplitude['max_local_amplitude'].append(np.amax(signal))
 #         mean_amplitude['file_name'].append(f)
 
@@ -61,11 +60,9 @@ writer = pd.ExcelWriter('/home/minhair/Desktop/food_ordering_system/food_orderin
 # Environment noise mean amplitude measurement
 def id_generator():
     now = datetime.datetime.now()
-    table_number = random.randint(0, 20)
+    random_num = random.randint(0, 20)
 
-    return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
-
-FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/" + id_generator() + ".wav", 'wb'
+    return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(random_num)
 
 mean_amplitude = {'time_(s)': [], 'mean_amplitude': [], 'max_local_amplitude': [], 'file_name': []}
 frames = []
@@ -76,6 +73,7 @@ all_windows = []
 
 while(time.time() - start < 20):
 # while (True):
+    frames = []
     data = stream.read(CHUNKSIZE)
     frames.append(data)
     current_window = np.frombuffer(data, dtype=np.float32)
@@ -89,16 +87,28 @@ while(time.time() - start < 20):
 
     print((time.time() - start), np.amax(current_window))
 
+    FILENAME = "/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/environment_noise/" + id_generator() + ".wav"
+
     mean_amplitude['time_(s)'].append(time.time() - start)
-    mean_amplitude['mean_amplitude'].append(np.mean(np.abs(current_window)))
+    # mean_amplitude['mean_amplitude'].append(np.mean(np.abs(current_window)))
     mean_amplitude['max_local_amplitude'].append(np.amax(current_window))
     mean_amplitude['file_name'].append(FILENAME)
-    
-plt.figure(figsize=(25, 10))
 
-plt.plot(all_windows)
-plt.savefig('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/' + id_generator() + '_plot.png')
-plt.show()
+    # Save the recorded data as a WAV file
+    wf = wave.open(FILENAME, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+    time.sleep(1)
+    
+# plt.figure(figsize=(25, 10))
+
+# plt.plot(all_windows)
+# plt.savefig('/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/report_photos/' + id_generator() + '_plot.png')
+# plt.show()
 
 # close stream
 stream.stop_stream()
@@ -107,17 +117,9 @@ p.terminate()
 
 print('Finished recording')
 
-# Save the recorded data as a WAV file
-wf = wave.open("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/" + id_generator() + ".wav", 'wb')
-wf.setnchannels(CHANNELS)
-wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
-wf.setframerate(RATE)
-wf.writeframes(b''.join(frames))
-wf.close()
+df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'max_local_amplitude', 'file_name'])
 
-df2 = pd.DataFrame(mean_amplitude, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
-
-df2.to_excel (writer, sheet_name='voice_live_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'mean_amplitude', 'max_local_amplitude', 'file_name'])
+df2.to_excel (writer, sheet_name='voice_live_environment', startrow=1, index = False, header=True, columns = ['time_(s)', 'max_local_amplitude', 'file_name'])
 
 writer.save()
 writer.close()
