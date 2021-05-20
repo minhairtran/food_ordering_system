@@ -88,7 +88,7 @@ class Food_model(nn.Module):
         "learning_rate": 0.001,
         "batch_size": 512,
         "epochs": 50, 
-        "test_size": 0.1,
+        "test_size": 0.25,
         "n_classes": 14
     }
 
