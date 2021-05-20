@@ -144,7 +144,7 @@ if __name__ == "__main__":
                 #Hoi 2 anh
                 noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
-                predicted_audio = confirming_prediction.predict(model, np.array(current_window))
+                predicted_audio = confirming_prediction.predict(model, np.array(predicted_window))
                 print(predicted_audio)
                 predicted_window = np.array([])
 
