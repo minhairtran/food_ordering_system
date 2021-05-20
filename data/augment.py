@@ -2,120 +2,47 @@ import torch.nn as nn
 import random
 import torch
 
+#Export
+def freq_mask(spec, F=30, num_masks=1, replace_with_zero=False):
+    cloned = spec.clone()
+    num_mel_channels = cloned.shape[1]
+    
+    for i in range(0, num_masks):        
+        f = random.randrange(0, F)
+        f_zero = random.randrange(0, num_mel_channels - f)
 
-class SpecAugment(nn.Module):
+        # avoids randrange error if values are equal and range is empty
+        if (f_zero == f_zero + f): return cloned
 
-    def __init__(
-        self, freq_masks=0, time_masks=0, freq_width=10, time_width=10, rng=None, mask_value=0.0,
-    ):
-        super(SpecAugment, self).__init__()
+        mask_end = random.randrange(f_zero, f_zero + f) 
+        if (replace_with_zero): cloned[0][f_zero:mask_end] = 0
+        else: cloned[0][f_zero:mask_end] = cloned.mean()
+    
+    return cloned
 
-        self._rng = random.Random() if rng is None else rng
+#Export
+def time_mask(spec, T=40, num_masks=1, replace_with_zero=False):
+    cloned = spec.clone()
+    len_spectro = cloned.shape[2]
+    
+    for i in range(0, num_masks):
+        t = random.randrange(0, T)
+        t_zero = random.randrange(0, len_spectro - t)
 
-        self.freq_masks = freq_masks
-        self.time_masks = time_masks
+        # avoids randrange error if values are equal and range is empty
+        if (t_zero == t_zero + t): return cloned
 
-        self.freq_width = freq_width
-        self.time_width = time_width
-
-        self.mask_value = mask_value
-
-        if isinstance(time_width, int):
-            self.adaptive_temporal_width = False
-        else:
-            if time_width > 1.0 or time_width < 0.0:
-                raise ValueError('If `time_width` is a float value, must be in range [0, 1]')
-
-            self.adaptive_temporal_width = True
-
-    @torch.no_grad()
-    def forward(self, x):
-        sh = x.shape
-
-        if self.adaptive_temporal_width:
-            time_width = max(1, int(sh[2] * self.time_width))
-        else:
-            time_width = self.time_width
-
-        for idx in range(sh[0]):
-            for i in range(self.freq_masks):
-                x_left = self._rng.randint(0, sh[1] - self.freq_width)
-
-                w = self._rng.randint(0, self.freq_width)
-
-                x[idx, x_left : x_left + w, :] = self.mask_value
-
-            for i in range(self.time_masks):
-                y_left = self._rng.randint(0, sh[2] - time_width)
-
-                w = self._rng.randint(0, time_width)
-
-                x[idx, :, y_left : y_left + w] = self.mask_value
-
-        return x
-
-
-class SpecCutout(nn.Module):
-
-    def __init__(self, rect_masks=0, rect_time=5, rect_freq=20, rng=None):
-        super(SpecCutout, self).__init__()
-
-        self._rng = random.Random() if rng is None else rng
-
-        self.rect_masks = rect_masks
-        self.rect_time = rect_time
-        self.rect_freq = rect_freq
-
-    @torch.no_grad()
-    def forward(self, x):
-        sh = x.shape
-
-        for idx in range(sh[0]):
-            for i in range(self.rect_masks):
-                rect_x = self._rng.randint(0, sh[1] - self.rect_freq)
-                rect_y = self._rng.randint(0, sh[2] - self.rect_time)
-
-                w_x = self._rng.randint(0, self.rect_time)
-                w_y = self._rng.randint(0, self.rect_freq)
-
-                x[idx, rect_x : rect_x + w_x, rect_y : rect_y + w_y] = 0.0
-
-        return x
-
+        mask_end = random.randrange(t_zero, t_zero + t)
+        if (replace_with_zero): cloned[0][:,t_zero:mask_end] = 0
+        else: cloned[0][:,t_zero:mask_end] = cloned.mean()
+    return cloned
 
 class SpectrogramAugmentation(nn.Module):
 
     def __init__(self,
-                 freq_masks=0,
-                 time_masks=0,
-                 freq_width=10,
-                 time_width=10,
-                 rect_masks=0,
-                 rect_time=5,
-                 rect_freq=20,
-                 rng=None,
-                 mask_value=0.0,):
+                 freq_mask_param=0,
+                 time_mask_param=0,):
         super(SpectrogramAugmentation, self).__init__()
 
-        if rect_masks > 0:
-            self.spec_cutout = SpecCutout(rect_masks=rect_masks, rect_time=rect_time, rect_freq=rect_freq, rng=rng,)
-        else:
-            self.spec_cutout = lambda x: x
-
-        if freq_masks + time_masks > 0:
-            self.spec_augment = SpecAugment(
-                freq_masks=freq_masks,
-                time_masks=time_masks,
-                freq_width=freq_width,
-                time_width=time_width,
-                rng=rng,
-                mask_value=mask_value,
-            )
-        else:
-            self.spec_augment = lambda x: x
-
-
     def forward(self, input_spec):
-        augmented_spec = self.spec_cutout(input_spec)
-        augmented_spec = self.spec_augment(augmented_spec)
-        return augmented_spec
+        return time_mask(freq_mask(input_spec, F=self.freq_mask_param, num_masks=1), T=self.time_mask_param, num_masks=1)
