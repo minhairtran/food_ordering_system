@@ -201,7 +201,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions):
+            if np.mean(epoch_precisions) > 0.99:
                 raise TrainingSuccess
 
     except TrainingSuccess:
