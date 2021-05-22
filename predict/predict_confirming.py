@@ -15,7 +15,7 @@ import noisereduce as nr
 import torch
 import numpy as np
 import time
-from ctypes import *
+# from ctypes import *
 import torchaudio
 
 
@@ -35,12 +35,12 @@ RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 
-ERROR_HANDLER_FUNC = CFUNCTYPE(
-    None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+# ERROR_HANDLER_FUNC = CFUNCTYPE(
+#     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
 
-def py_error_handler(filename, line, function, err, fmt):
-    pass
+# def py_error_handler(filename, line, function, err, fmt):
+#     pass
 
 class ConfirmingPrediction():
     def __init__(self):
@@ -107,10 +107,10 @@ if __name__ == "__main__":
 
     confirming_prediction = ConfirmingPrediction()
 
-    c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
-    asound = cdll.LoadLibrary('libasound.so')
-    # Set error handler
-    asound.snd_lib_error_set_handler(c_error_handler)
+    # c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+    # asound = cdll.LoadLibrary('libasound.so')
+    # # Set error handler
+    # asound.snd_lib_error_set_handler(c_error_handler)
 
     # initialize portaudio
     p = pyaudio.PyAudio()

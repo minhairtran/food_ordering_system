@@ -17,6 +17,7 @@ class Attention(nn.Module):
         output = self.tanh(output)
         output = self.l2(output)
         output = torch.softmax(output, dim=1)
+        print("x: {}, output: {}".format(x.shape, output.shape))
         output = (x * output).sum(dim=1)
         return output
         
@@ -54,6 +55,7 @@ class Confirming_model(nn.Module):
 
     def forward(self, x):
         output = self.cnn(x)
+        print("CNN output: {}".format(output.shape))
         output = self.relu(output).permute(0, 2, 1)
         output, hidden = self.rnn(output)
         output = self.attention(output)

@@ -18,7 +18,7 @@ import librosa
 import torch
 import numpy as np
 import time
-from ctypes import *
+# from ctypes import *
 import sounddevice as sd
 import soundfile as sf
 
@@ -62,14 +62,14 @@ RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 
-ERROR_HANDLER_FUNC = CFUNCTYPE(
-    None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+# ERROR_HANDLER_FUNC = CFUNCTYPE(
+#     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
 class SystemNotUnderstand(Exception):
     pass
 
-def py_error_handler(filename, line, function, err, fmt):
-    pass
+# def py_error_handler(filename, line, function, err, fmt):
+#     pass
 
 class AllSystem:
     def __init__(self):
@@ -77,9 +77,9 @@ class AllSystem:
         self.SYSTEM_UNDERSTAND = True
 
         # Handle self.streaming error
-        c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
-        asound = cdll.LoadLibrary('libasound.so')
-        asound.snd_lib_error_set_handler(c_error_handler)
+        # c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+        # asound = cdll.LoadLibrary('libasound.so')
+        # asound.snd_lib_error_set_handler(c_error_handler)
 
         # initialize portaudio
         self.p = pyaudio.PyAudio()

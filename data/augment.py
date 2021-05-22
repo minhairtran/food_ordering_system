@@ -44,5 +44,8 @@ class SpectrogramAugmentation(nn.Module):
                  time_mask_param=0,):
         super(SpectrogramAugmentation, self).__init__()
 
+        self.freq_mask_param = freq_mask_param
+        self.time_mask_param = time_mask_param
+
     def forward(self, input_spec):
         return time_mask(freq_mask(input_spec, F=self.freq_mask_param, num_masks=1), T=self.time_mask_param, num_masks=1)
