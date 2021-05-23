@@ -62,6 +62,6 @@ if __name__ == "__main__":
 
         saved_dataset.append(saved_dataset_temp)
 
-        print("Padding set success", set_number)
+        print("Padding set success {set_number}, length {}".format(set_number, len(saved_dataset_temp["labels"])))
 
     torch.save(saved_dataset, SAVED_FILE)

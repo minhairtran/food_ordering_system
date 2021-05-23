@@ -56,7 +56,7 @@ class ConfirmingPrediction():
         }
         wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
-        # log_mel_spec = torchaudio.transforms.AmplitudeToDB()
+        log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
 
         data = torch.Tensor(data.copy())
@@ -64,22 +64,22 @@ class ConfirmingPrediction():
 
         mel_spectrogram = wav_to_spec(data.clone())
 
-        # log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
+        log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
+        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
 
-        mel_spectrogram = torch.tensor(
-            mel_spectrogram, dtype=torch.float).detach().requires_grad_()
+        log_mel_spectrogram = torch.tensor(
+            log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
 
-        return mel_spectrogram
+        return log_mel_spectrogram
 
 
     def predict(self, model, tested_audio, device=torch.device("cpu")):
-        mel_spectrogram = self.preprocess(tested_audio)
-        mel_spectrogram = mel_spectrogram.to(device)
+        log_mel_spectrogram = self.preprocess(tested_audio)
+        log_mel_spectrogram = log_mel_spectrogram.to(device)
 
         # get the predicted label
-        output = model(mel_spectrogram)
+        output = model(log_mel_spectrogram)
 
         predicted = torch.argmax(output, 1).tolist()[0]
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.2):
+        if(np.amax(current_window) > 0.5):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:
