@@ -26,7 +26,7 @@ class Confirming_model(nn.Module):
         "n_mels": 40,
         "cnn_channels": 16,
         "cnn_kernel_size": (20, 5),
-        "stride": 1,
+        "stride": (8, 2),
         "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
@@ -40,7 +40,7 @@ class Confirming_model(nn.Module):
                  n_mels = 40,
                  cnn_channels = 16, 
                  cnn_kernel_size = (20, 5),
-                 stride = 1,
+                 stride = (8, 2),
                  gru_hidden_size = 64, 
                  attention_hidden_size = 64,
                  n_classes = 0):
@@ -48,7 +48,7 @@ class Confirming_model(nn.Module):
         super().__init__()
         self.cnn = nn.Conv1d(1, cnn_channels, kernel_size=cnn_kernel_size, stride = stride,
                              padding=(cnn_kernel_size[0]//2, cnn_kernel_size[1]//2))
-        self.fully_connected = nn.Linear(n_mels*cnn_channels, gru_hidden_size)
+        self.fully_connected = nn.Linear(n_mels*cnn_channels//stride[0] + 1, gru_hidden_size)
         self.rnn = nn.GRU(input_size=gru_hidden_size, hidden_size=gru_hidden_size, 
                           bidirectional=True, batch_first=True)
         self.attention = Attention(gru_hidden_size * 2, attention_hidden_size)
