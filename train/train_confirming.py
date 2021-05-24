@@ -203,7 +203,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.99 for epoch_precision in epoch_precisions):
+            if all(epoch_precision > 0.95 for epoch_precision in epoch_precisions):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
