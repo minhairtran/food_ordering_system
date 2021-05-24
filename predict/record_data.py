@@ -25,7 +25,7 @@ if __name__ == "__main__":
     recorded_voice = sounddevice.rec(int(SECOND * SAMPLE_RATE), samplerate=SAMPLE_RATE, channels=CHANNELS)
     sounddevice.wait()
     # write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/restaurant_noise/" + id_generator(str(i)) +  ".wav", SAMPLE_RATE, recorded_voice)
-    write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/data/restaurant_noise/confirm_order_ca_kho_nth.wav", SAMPLE_RATE, recorded_voice)
+    write("C:/Users/minHair/OneDriveHanoiUniversityofScienceandTechnology/Desktop/confirm_order_khoai_tay_chien_nth.wav", SAMPLE_RATE, recorded_voice)
     sounddevice.sleep(1)
 
     # write("/home/minhair/Desktop/food_ordering_system/food_ordering_system/predict/recorded_audios/system_audio/" ".wav", SAMPLE_RATE, recorded_voice)
