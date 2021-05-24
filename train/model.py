@@ -63,7 +63,7 @@ class Confirming_model(nn.Module):
         output = output.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
         output = output.transpose(1, 2) # (batch, time, feature)
         print("Transpose {}".format(output.shape))
-        x = self.fully_connected(x)
+        output = self.fully_connected(output)
         output, hidden = self.rnn(output)
         output = self.attention(output)
         output = self.linear(output)
