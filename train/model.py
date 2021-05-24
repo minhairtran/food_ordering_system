@@ -30,7 +30,7 @@ class Confirming_model(nn.Module):
         "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
-        "batch_size": 8,
+        "batch_size": 512,
         "epochs": 50, 
         "test_size": 0.25,
         "n_classes": 3
