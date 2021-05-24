@@ -17,7 +17,7 @@ class Attention(nn.Module):
         output = self.tanh(output)
         output = self.l2(output)
         output = torch.softmax(output, dim=1)
-        print("x: {}, output: {}".format(x.shape, output.shape))
+        # print("x: {}, output: {}".format(x.shape, output.shape))
         output = (x * output).sum(dim=1)
         return output
         
