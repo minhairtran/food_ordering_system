@@ -25,8 +25,8 @@ class Confirming_model(nn.Module):
     hparams = {
         "n_mels": 40,
         "cnn_channels": 16,
-        "cnn_kernel_size": (20, 5),
-        "stride": (8, 2),
+        "cnn_kernel_size": 3,
+        "stride": 1,
         "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
