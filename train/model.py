@@ -56,10 +56,13 @@ class Confirming_model(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
+        print("Input {}".format(x))
         output = self.cnn(x)
-        sizes = x.size()
-        x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
-        x = x.transpose(1, 2) # (batch, time, feature)
+        print("CNN {}".format(output))
+        sizes = output.size()
+        output = output.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
+        output = output.transpose(1, 2) # (batch, time, feature)
+        print("Transpose {}".format(x))
         x = self.fully_connected(x)
         output, hidden = self.rnn(output)
         output = self.attention(output)
