@@ -45,7 +45,7 @@ class Confirming_model(nn.Module):
                  n_classes = 0):
       
         super().__init__()
-        self.cnn = nn.Conv2d(1, cnn_channels, kernel_size=cnn_kernel_size, 
+        self.cnn = nn.Conv2d(1, cnn_channels, kernel_size=cnn_kernel_size, stride=stride,
                              padding=(cnn_kernel_size[0]//2, cnn_kernel_size[1]//2))
         self.fully_connected = nn.Linear((n_mels//stride[0] + 1)*cnn_channels, cnn_channels)
         self.rnn = nn.GRU(input_size=cnn_channels, hidden_size=gru_hidden_size, 
