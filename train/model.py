@@ -63,23 +63,6 @@ class Confirming_model(nn.Module):
         output = self.linear(output)
         output = self.softmax(output)
         return output
-    
-
-    def inference(self, x, window_size = 100):
-        if window_size > x.shape[2]:
-            window_size = x.shape[2]
-        probabilities = []
-        for i in range(window_size, x.shape[2] + 1, 40):
-            win = x[:, :, i - window_size:i]
-            win = self.cnn(win)
-            win = self.relu(win)
-            win = win.permute(0, 2, 1)
-            win, _ = self.rnn(win)
-            win = self.attention(win)
-            win = self.linear(win)
-            pr = torch.softmax(win, dim=1)
-            probabilities.append(pr[0][1].item())
-        return probabilities
 
 class Food_model(nn.Module):
     hparams = {
