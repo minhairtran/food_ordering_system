@@ -25,7 +25,8 @@ class Confirming_model(nn.Module):
     hparams = {
         "n_mels": 40,
         "cnn_channels": 16,
-        "cnn_kernel_size": 51,
+        "cnn_kernel_size": (20, 5),
+        "stride": (8, 2),
         "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
@@ -38,16 +39,17 @@ class Confirming_model(nn.Module):
     def __init__(self, 
                  n_mels = 40,
                  cnn_channels = 16, 
-                 cnn_kernel_size = 51,
+                 cnn_kernel_size = (20, 5),
                  gru_hidden_size = 64, 
                  attention_hidden_size = 64,
+                 stride = (8, 2),
                  n_classes = 0):
       
         super().__init__()
-        self.cnn = nn.Conv1d(n_mels, cnn_channels, kernel_size=cnn_kernel_size, 
+        self.cnn = nn.Conv1d(1, cnn_channels, kernel_size=cnn_kernel_size, stride = stride,
                              padding=cnn_kernel_size // 2)
-        self.relu = nn.ReLU()
-        self.rnn = nn.GRU(input_size=cnn_channels, hidden_size=gru_hidden_size, 
+        self.fully_connected = nn.Linear(cnn_channels*n_mels, gru_hidden_size)
+        self.rnn = nn.GRU(input_size=gru_hidden_size, hidden_size=gru_hidden_size, 
                           bidirectional=True, batch_first=True)
         self.attention = Attention(gru_hidden_size * 2, attention_hidden_size)
         self.linear = nn.Linear(gru_hidden_size * 2, n_classes, bias=False)
@@ -55,30 +57,15 @@ class Confirming_model(nn.Module):
 
     def forward(self, x):
         output = self.cnn(x)
-        print("CNN output: {}".format(output.shape))
-        output = self.relu(output).permute(0, 2, 1)
+        sizes = x.size()
+        x = x.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
+        x = x.transpose(1, 2) # (batch, time, feature)
+        x = self.fully_connected(x)
         output, hidden = self.rnn(output)
         output = self.attention(output)
         output = self.linear(output)
         output = self.softmax(output)
         return output
-    
-
-    def inference(self, x, window_size = 100):
-        if window_size > x.shape[2]:
-            window_size = x.shape[2]
-        probabilities = []
-        for i in range(window_size, x.shape[2] + 1, 40):
-            win = x[:, :, i - window_size:i]
-            win = self.cnn(win)
-            win = self.relu(win)
-            win = win.permute(0, 2, 1)
-            win, _ = self.rnn(win)
-            win = self.attention(win)
-            win = self.linear(win)
-            pr = torch.softmax(win, dim=1)
-            probabilities.append(pr[0][1].item())
-        return probabilities
 
 class Food_model(nn.Module):
     hparams = {
