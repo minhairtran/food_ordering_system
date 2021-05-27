@@ -132,7 +132,7 @@ if __name__ == "__main__":
     )
 
     experiment.add_tags(["food_data", "attiontion-based"])
-    experiment.set_name("(Freq_mask; Time_mask) = (13;5)")
+    experiment.set_name("(Freq_mask; Time_mask) = (14;5)")
 
     experiment.log_parameters(Food_model.hparams)
 
