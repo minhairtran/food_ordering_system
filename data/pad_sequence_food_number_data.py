@@ -24,7 +24,7 @@ def tensorize(mel_spectrogram_not_tensorized, labels_not_tensorized):
         labels.append(torch.tensor(label, dtype=torch.long))
 
     mel_spectrogram = nn.utils.rnn.pad_sequence(
-        mel_spectrogram, batch_first=True).transpose(1, 2)
+        mel_spectrogram, batch_first=True).unsqueeze(1).transpose(2, 3)
 
     return mel_spectrogram, labels
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
             "labels": []
         }
         for current_dataset_index in range(average_dataset_length):
-            original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set)) + 1
+            original_dataset_index = int(current_dataset_index/len(data_set)) + int(average_dataset_length*set_number/len(data_set))
             original_dataset_number = current_dataset_index % len(data_set)
 
             if (original_dataset_index >= len(data_set[original_dataset_number]["labels"])):
@@ -66,3 +66,4 @@ if __name__ == "__main__":
         torch.save(saved_dataset, current_saved_file)
 
         print("Padding set success", set_number)
+        print("Padding set success {}, length {}".format(set_number, len(saved_dataset["labels"])))

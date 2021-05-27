@@ -35,7 +35,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
     # spectrogram augmentation
     kwargs = {
         'freq_mask_param': 13,
-        'time_mask_param': 10,
+        'time_mask_param': 5,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
@@ -68,6 +68,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 x = log_mel_spec(a.clone())
 
                 data_temporary["mel_spectrogram"].append(x.T.tolist())
+                data_temporary["labels"].append(dataset_number)
 
                 for i in range(24):
                     mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
