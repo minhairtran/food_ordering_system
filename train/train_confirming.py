@@ -211,8 +211,9 @@ if __name__ == "__main__":
                 model_saved_message = "Model saved at test_precision: " + str(max_precision)
 
             if np.mean(epoch_precisions) > 0.976:
-                print(model_saved_message)
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
         pass
+    finally:
+        print(model_saved_message)
