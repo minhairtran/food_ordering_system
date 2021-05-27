@@ -1,5 +1,11 @@
-import soundfile as sf
-import sounddevice as sd
-# https://catalog.ldc.upenn.edu/desc/addenda/LDC93S1.wav
-data, fs = sf.read('D:/Study/uni/DoAn/food_ordering_system/train/1409_leminh_nam_bac.wav')
-print(data.shape,fs)
+import torch
+
+a = torch.rand(2, 3, 4, 5)
+
+print(a)
+
+sizes = a.size()
+
+a = a.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
+
+print(a)

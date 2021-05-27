@@ -211,7 +211,6 @@ class AllSystem:
             while order_more or start_conversation:
                 if start_conversation:
                     self.system_say(WELCOME_PATH)
-                    start_conversation = False
                 else:
                     self.system_say(ASK_ORDER_NTH_PATH)
 
@@ -228,8 +227,12 @@ class AllSystem:
 
                     for each_frame in frame:
                         all_frames.append(each_frame)
-
-                    self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
+                    
+                    if start_conversation:
+                        self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
+                        start_conversation = False
+                    else:
+                        self.system_say(self.find_confirmed_dish_number_path(user_response, 2))
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model,"confirming")
 

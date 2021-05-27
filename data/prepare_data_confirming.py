@@ -70,6 +70,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
                     print("{}: {}".format(file_path, dataset_number))
 
             saved_data.append(data_temporary)
+            print(len(data_temporary["mel_spectrogram"]))
             dataset_number += 1
 
     with open(saved_file_path, 'w') as f:
