@@ -39,6 +39,8 @@ if __name__ == "__main__":
 
     average_dataset_length = int(all_data_length/len(data_set))
 
+    print(average_dataset_length)
+
     for set_number in range(len(data_set)):
         saved_dataset_temp = {
             "mel_spectrogram": [],
