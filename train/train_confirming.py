@@ -162,6 +162,7 @@ if __name__ == "__main__":
 
     precision = 0
     max_precision = 0
+    model_saved_message = ''
 
     try:
         for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
@@ -207,8 +208,10 @@ if __name__ == "__main__":
             if np.mean(epoch_precisions) > max_precision:
                 max_precision = np.mean(epoch_precisions)
                 torch.save(model.state_dict(), SAVED_MODEL_PATH)
+                model_saved_message = "Model saved at test_precision: " + str(max_precision)
 
             if np.mean(epoch_precisions) > 0.976:
+                print(model_saved_message)
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
