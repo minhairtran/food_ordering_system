@@ -131,8 +131,8 @@ if __name__ == "__main__":
         workspace="hai321",
     )
 
-    experiment.add_tags(["food_data", "attention_based_model"])
-    experiment.set_name("Test confirm data with deepspeech model")
+    experiment.add_tags(["food_data", "attiontion-based"])
+    experiment.set_name("(Freq_mask; Time_mask) = (13;5)")
 
     experiment.log_parameters(Food_model.hparams)
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if use_cuda else "cpu")
 
     model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
-        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
+        Food_model.hparams['stride'], Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -160,6 +160,10 @@ if __name__ == "__main__":
     criterion = nn.NLLLoss().to(device)
 
     iter_meter = IterMeter()
+    precision = 0
+    max_precision = 0
+    model_saved_message = ''
+    
     try:
         for epoch in range(1, Food_model.hparams["epochs"] + 1):
             epoch_precisions = []
@@ -177,7 +181,7 @@ if __name__ == "__main__":
 
                 train_loader = data.DataLoader(dataset=train_dataset,
                                             batch_size=Food_model.hparams["batch_size"],
-                                            shuffle=True if epoch>10 else False)
+                                            shuffle=True)
 
                 # Create test dataset and Dataloader
                 test_dataset = Dataset(mel_spectrogram_test, labels_test)
@@ -199,10 +203,15 @@ if __name__ == "__main__":
             with experiment.test():
                 experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
-            torch.save(model.state_dict(), SAVED_MODEL_PATH)
+            if np.mean(epoch_precisions) > max_precision:
+                max_precision = np.mean(epoch_precisions)
+                torch.save(model.state_dict(), SAVED_MODEL_PATH)
+                model_saved_message = "Model saved at test_precision: " + str(max_precision)
 
             if np.mean(epoch_precisions) > 0.99:
                 raise TrainingSuccess
 
     except TrainingSuccess:
         pass
+    finally:
+        print(model_saved_message)

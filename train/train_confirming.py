@@ -201,7 +201,6 @@ if __name__ == "__main__":
                 epoch_loss.append(each_epoch_loss)
             
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
-            experiment.log_metric("epoch", epoch)
             
             with experiment.test():
                 experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())

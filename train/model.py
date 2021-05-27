@@ -70,8 +70,9 @@ class Food_model(nn.Module):
     hparams = {
         "n_mels": 40,
         "cnn_channels": 16,
-        "cnn_kernel_size": 51,
-        "gru_hidden_size": 128,
+        "cnn_kernel_size": (20, 5),
+        "stride": (8, 2),
+        "gru_hidden_size": 64,
         "attention_hidden_size": 64,
         "learning_rate": 0.001,
         "batch_size": 512,
@@ -83,15 +84,16 @@ class Food_model(nn.Module):
     def __init__(self, 
                  n_mels = 40,
                  cnn_channels = 16, 
-                 cnn_kernel_size = 51,
+                 cnn_kernel_size = (20, 5),
+                 stride = (8, 2),
                  gru_hidden_size = 64, 
                  attention_hidden_size = 64,
                  n_classes = 0):
       
         super().__init__()
-        self.cnn = nn.Conv1d(n_mels, cnn_channels, kernel_size=cnn_kernel_size, 
-                             padding=cnn_kernel_size // 2)
-        self.relu = nn.ReLU()
+        self.cnn = nn.Conv2d(1, cnn_channels, kernel_size=cnn_kernel_size, stride=stride,
+                             padding=(cnn_kernel_size[0]//2, cnn_kernel_size[1]//2))
+        self.fully_connected = nn.Linear((n_mels//stride[0] + 1)*cnn_channels, cnn_channels)
         self.rnn = nn.GRU(input_size=cnn_channels, hidden_size=gru_hidden_size, 
                           bidirectional=True, batch_first=True)
         self.attention = Attention(gru_hidden_size * 2, attention_hidden_size)
@@ -100,7 +102,10 @@ class Food_model(nn.Module):
 
     def forward(self, x):
         output = self.cnn(x)
-        output = self.relu(output).permute(0, 2, 1)
+        sizes = output.size()
+        output = output.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
+        output = output.transpose(1, 2) # (batch, time, feature)
+        output = self.fully_connected(output)
         output, hidden = self.rnn(output)
         output = self.attention(output)
         output = self.linear(output)
