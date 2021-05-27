@@ -78,7 +78,6 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
             loss.backward()
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
-            experiment.log_metric('epoch', epoch, step=iter_meter.get())
 
             optimizer.step()
             iter_meter.step()
@@ -202,8 +201,9 @@ if __name__ == "__main__":
                 epoch_loss.append(each_epoch_loss)
             
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
-
+            
             with experiment.test():
+                experiment.log_metric("epoch", epoch)
                 experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
             if np.mean(epoch_precisions) > max_precision:
