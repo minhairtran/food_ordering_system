@@ -78,6 +78,7 @@ def train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, 
             loss.backward()
 
             experiment.log_metric('loss', loss.item(), step=iter_meter.get())
+            experiment.log_metric('epoch', epoch, step=iter_meter.get())
 
             optimizer.step()
             iter_meter.step()
@@ -111,8 +112,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
-                
-
+    
+    
     experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
 
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
@@ -210,7 +211,7 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), SAVED_MODEL_PATH)
                 model_saved_message = "Model saved at test_precision: " + str(max_precision)
 
-            if np.mean(epoch_precisions) > 0.976:
+            if np.mean(epoch_precisions) > 0.98:
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
