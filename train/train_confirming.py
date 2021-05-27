@@ -129,8 +129,8 @@ if __name__ == "__main__":
         workspace="hai321",
     )
 
-    experiment.add_tags(["food_confirming_data", "deep_speech_model"])
-    experiment.set_name("Test confirming data with attention-based model")
+    experiment.add_tags(["food_confirming_data", "attiontion-based"])
+    experiment.set_name("(Freq_mask; Time_mask) = (13;5)")
 
     experiment.log_parameters(Confirming_model.hparams)
 
@@ -161,6 +161,7 @@ if __name__ == "__main__":
     load_data_set = torch.load(DATA_PATH)
 
     precision = 0
+    max_precision = 0
 
     try:
         for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
@@ -203,9 +204,11 @@ if __name__ == "__main__":
             with experiment.test():
                 experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
-            torch.save(model.state_dict(), SAVED_MODEL_PATH)
+            if np.mean(epoch_precisions) > max_precision:
+                max_precision = np.mean(epoch_precisions)
+                torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if np.mean(epoch_precisions)>0.976:
+            if np.mean(epoch_precisions) > 0.976:
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
