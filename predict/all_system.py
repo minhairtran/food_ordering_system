@@ -28,34 +28,34 @@ def id_generator():
 
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
-SAVE_AUDIO_FILE_PATH = "recorded_audios/further_training/" + id_generator() + ".wav"
+SAVE_AUDIO_FILE_PATH = "../../recorded_audios/further_training/" + id_generator() + ".wav"
 CONFIRMING_MODEL_PATH = "../train/model_confirming.h5"
 FOOD_NUMBER_MODEL_PATH = "../train/model_food_number.h5"
 
 # System audio path 
-WELCOME_PATH = "recorded_audios/system_audio/welcome.wav"
-ASK_ORDER_NTH_PATH = "recorded_audios/system_audio/ask_order_nth.wav"
-ORDER_AGAIN_PATH = "recorded_audios/system_audio/order_again.wav"
-ORDER_FAILURE_PATH = "recorded_audios/system_audio/order_failure.wav"
-ORDER_MORE_PATH = "recorded_audios/system_audio/order_more.wav"
-ORDER_SUCCESS_PATH = "recorded_audios/system_audio/order_success.wav"
-NOT_UNDERSTAND_ORDER = "recorded_audios/system_audio/not_understand_order.wav"
+WELCOME_PATH = "../../recorded_audios/system_audio/welcome.wav"
+ASK_ORDER_NTH_PATH = "../../recorded_audios/system_audio/ask_order_nth.wav"
+ORDER_AGAIN_PATH = "../../recorded_audios/system_audio/order_again.wav"
+ORDER_FAILURE_PATH = "../../recorded_audios/system_audio/order_failure.wav"
+ORDER_MORE_PATH = "../../recorded_audios/system_audio/order_more.wav"
+ORDER_SUCCESS_PATH = "../../recorded_audios/system_audio/order_success.wav"
+NOT_UNDERSTAND_ORDER = "../../recorded_audios/system_audio/not_understand_order.wav"
 
-CONFIRM_DISH_1ST_PATH = ["recorded_audios/system_audio/confirm_order_ca_kho_1st.wav", "recorded_audios/system_audio/confirm_order_ca_xot_1st.wav", \
-    "recorded_audios/system_audio/confirm_order_com_ga_1st.wav", "recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_1st.wav", \
-        "recorded_audios/system_audio/confirm_order_com_nieu_1st.wav", "recorded_audios/system_audio/confirm_order_com_tam_1st.wav", \
-            "recorded_audios/system_audio/confirm_order_com_thap_cam_1st.wav", "recorded_audios/system_audio/confirm_order_rau_muong_luoc_1st.wav",\
-                 "recorded_audios/system_audio/confirm_order_rau_muong_xao_1st.wav", "recorded_audios/system_audio/confirm_order_salad_tron_1st.wav",\
-                     "recorded_audios/system_audio/confirm_order_tra_hoa_cuc_1st.wav", "recorded_audios/system_audio/confirm_order_tra_sam_dua_1st.wav", \
-                         "recorded_audios/system_audio/confirm_order_trung_chien_1st.wav"]
+CONFIRM_DISH_1ST_PATH = ["../../recorded_audios/system_audio/confirm_order_ca_kho_1st.wav", "../../recorded_audios/system_audio/confirm_order_ca_xot_1st.wav", \
+    "../../recorded_audios/system_audio/confirm_order_khoai_tay_chien_1st.wav", "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_1st.wav", \
+        "../../recorded_audios/system_audio/confirm_order_com_nieu_1st.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_1st.wav", \
+            "../../recorded_audios/system_audio/confirm_order_com_thap_cam_1st.wav", "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_1st.wav",\
+                 "../../recorded_audios/system_audio/confirm_order_rau_cai_xao_1st.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_1st.wav",\
+                     "../../recorded_audios/system_audio/confirm_order_tra_hoa_cuc_1st.wav", "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_1st.wav", \
+                         "../../recorded_audios/system_audio/confirm_order_trung_chien_1st.wav"]
 
-CONFIRM_DISH_NTH_PATH = ["recorded_audios/system_audio/confirm_order_ca_kho_nth.wav", "recorded_audios/system_audio/confirm_order_ca_xot_nth.wav", \
-    "recorded_audios/system_audio/confirm_order_com_ga_nth.wav", "recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_nth.wav", \
-        "recorded_audios/system_audio/confirm_order_com_nieu_nth.wav", "recorded_audios/system_audio/confirm_order_com_tam_nth.wav", \
-            "recorded_audios/system_audio/confirm_order_com_thap_cam_nth.wav", "recorded_audios/system_audio/confirm_order_rau_muong_luoc_nth.wav",\
-                 "recorded_audios/system_audio/confirm_order_rau_muong_xao_nth.wav", "recorded_audios/system_audio/confirm_order_salad_tron_nth.wav",\
-                     "recorded_audios/system_audio/confirm_order_tra_hoa_cuc_nth.wav", "recorded_audios/system_audio/confirm_order_tra_sam_dua_nth.wav", \
-                         "recorded_audios/system_audio/confirm_order_trung_chien_nth.wav"]
+CONFIRM_DISH_NTH_PATH = ["../../recorded_audios/system_audio/confirm_order_ca_kho_nth.wav", "../../recorded_audios/system_audio/confirm_order_ca_xot_nth.wav", \
+    "../../recorded_audios/system_audio/confirm_order_khoai_tay_chien_nth.wav", "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_nth.wav", \
+        "../../recorded_audios/system_audio/confirm_order_com_nieu_nth.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_nth.wav", \
+            "../../recorded_audios/system_audio/confirm_order_com_thap_cam_nth.wav", "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_nth.wav",\
+                 "../../recorded_audios/system_audio/confirm_order_rau_cai_xao_nth.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_nth.wav",\
+                     "../../recorded_audios/system_audio/confirm_order_tra_hoa_cuc_nth.wav", "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_nth.wav", \
+                         "../../recorded_audios/system_audio/confirm_order_trung_chien_nth.wav"]
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -135,8 +135,8 @@ class AllSystem:
 
     def system_understand_f(self, user_response_content, user_response_type):
         confirming_labels = ["co", "khong"]
-        food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
+        food_number_labels = ["ca_kho", "ca_xot", "khoai_tay_chien", "com_heo_xi_muoi", "com_nieu", "com_tam", \
+            "com_thap_cam", "rau_cai_luoc", "rau_cai_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if(user_response_type == "confirming"):
             if(user_response_content in confirming_labels):
@@ -155,8 +155,8 @@ class AllSystem:
             return None
 
     def find_confirmed_dish_number_path(self, user_response, time):
-        food_number_labels = ["ca_kho", "ca_xot", "com_ga", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "rau_muong_luoc", "rau_muong_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
+        food_number_labels = ["ca_kho", "ca_xot", "khoai_tay_chien", "com_heo_xi_muoi", "com_nieu", "com_tam", \
+            "com_thap_cam", "rau_cai_luoc", "rau_cai_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
 
         if time == 1:
             return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
