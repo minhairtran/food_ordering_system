@@ -174,6 +174,8 @@ if __name__ == "__main__":
                 # Split into train and test
                 mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=Confirming_model.hparams['test_size'], shuffle=False)
 
+                print("Dataset train length: {}, test length: {}".format(len(labels_train), len(labels_test)))
+                
                 # Create train dataset and Dataloader
                 train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
@@ -203,7 +205,7 @@ if __name__ == "__main__":
             # Save model
             torch.save(model.state_dict(), SAVED_MODEL_PATH)
 
-            if all(epoch_precision > 0.95 for epoch_precision in epoch_precisions):
+            if all(epoch_precision > 0.97 for epoch_precision in epoch_precisions):
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
