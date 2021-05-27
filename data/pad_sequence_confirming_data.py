@@ -36,10 +36,9 @@ if __name__ == "__main__":
     for i in range(len(temp_data_set)):
         data_set.append(temp_data_set[i])
         all_data_length += len(temp_data_set[i]['labels'])
+        print(temp_data_set[i]['labels'])
 
     average_dataset_length = int(all_data_length/len(data_set))
-
-    print(average_dataset_length)
 
     for set_number in range(len(data_set)):
         saved_dataset_temp = {
