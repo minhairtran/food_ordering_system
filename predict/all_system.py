@@ -10,15 +10,10 @@ from predict_food_number import FoodNumberPrediction
 import datetime
 import random
 import wave
-import torch.nn as nn
-import torch.nn.functional as F
 import pyaudio
 import noisereduce as nr
-import librosa
 import torch
 import numpy as np
-import time
-# from ctypes import *
 import sounddevice as sd
 import soundfile as sf
 
@@ -109,7 +104,7 @@ class AllSystem:
             frame.append(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
-            if(np.amax(current_window) > 0.3):
+            if(np.amax(current_window) > 0.49):
                 current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
                 predicted_window = np.append(predicted_window, current_window)
             else:
@@ -177,7 +172,7 @@ class AllSystem:
 
         # Confirming model initialization
         confirming_model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
-            Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
+            Confirming_model.hparams['stride'], Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
         confirming_model_checkpoint = torch.load(CONFIRMING_MODEL_PATH, map_location=device)
         confirming_model.load_state_dict(confirming_model_checkpoint)
@@ -187,7 +182,7 @@ class AllSystem:
 
         # Food model initialization 
         food_number_model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
-            Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
+            Food_model.hparams['stride'], Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
         food_number_checkpoint = torch.load(FOOD_NUMBER_MODEL_PATH, map_location=device)
         food_number_model.load_state_dict(food_number_checkpoint)
