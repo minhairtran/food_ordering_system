@@ -27,7 +27,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_confirming_14_5.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_13_5.h5"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
@@ -135,7 +135,7 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.49):
+        if(np.amax(current_window) > 0.2):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:

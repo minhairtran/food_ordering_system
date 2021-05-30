@@ -203,14 +203,14 @@ if __name__ == "__main__":
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
             
             with experiment.test():
-                experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
+                experiment.log_metric('precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
             if np.mean(epoch_precisions) > max_precision:
                 max_precision = np.mean(epoch_precisions)
                 torch.save(model.state_dict(), SAVED_MODEL_PATH)
                 model_saved_message = "Model saved at test_precision: " + str(max_precision)
 
-            if np.mean(epoch_precisions) > 0.99:
+            if np.mean(epoch_precisions) > 0.999:
                 raise GetOutOfLoop
 
     except GetOutOfLoop:
