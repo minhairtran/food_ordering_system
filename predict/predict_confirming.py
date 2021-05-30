@@ -135,7 +135,7 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.2):
+        if(np.amax(current_window) > 0.49):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:
