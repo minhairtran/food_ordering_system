@@ -27,7 +27,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_confirming_14_5.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_14_5_1.h5"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
@@ -85,8 +85,7 @@ class ConfirmingPrediction():
 
         decode = {
             0: "co",
-            1: "khong",
-            2: "khong biet",
+            1: "khong"
         }
 
         # print(predicted)
