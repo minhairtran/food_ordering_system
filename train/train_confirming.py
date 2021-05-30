@@ -109,8 +109,6 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 epoch_loss += loss.item() * spectrograms.size(0)
 
-                print(np.array(preds))
-
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
     
@@ -192,7 +190,7 @@ if __name__ == "__main__":
 
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=Confirming_model.hparams["batch_size"],
-                                            shuffle=False)
+                                            shuffle=True)
             
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
