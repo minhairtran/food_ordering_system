@@ -22,9 +22,9 @@ def id_generator(gender, region, masking):
     now = datetime.datetime.now()
     return str(gender) + "_" + str(region) + "_" + str(masking) + "_" + now.strftime("%Y") + now.strftime("%m") + now.strftime("%d")
 
-SAVE_AUDIO_FILE_PATH = "../../recorded_audios/final_experiment/" + id_generator() + ".wav"
-CONFIRMING_MODEL_PATH = "../train/model_confirming"
-FOOD_NUMBER_MODEL_PATH = "../train/model_food_number"
+SAVE_AUDIO_FILE_PATH = "../../recorded_audios/final_experiment/"
+CONFIRMING_MODEL_PATH = "../train/model_confirming_"
+FOOD_NUMBER_MODEL_PATH = "../train/model_food_number_"
 
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
@@ -54,7 +54,7 @@ def keyword_said(keyword_number):
 
     return all_keyword[keyword_number]
 
-def main(masking):
+def main(masking, save_audio_file_path):
     device = torch.device("cpu")
     confirming_model_path = CONFIRMING_MODEL_PATH + str(masking) + ".h5"
 
@@ -121,7 +121,8 @@ def main(masking):
                 if (predicted_audio == keyword_said(keyword_number)):
                     result['result'].append(1)
                 else:
-                    result['result'].append(0)
+                    result['result'].append(0)     
+                print(predicted_audio)
                 predicted_window = np.array([])
                 keyword_number += 1
 
@@ -133,7 +134,7 @@ def main(masking):
     print('Finished recording')
 
     # save record
-    wf = wave.open(SAVE_AUDIO_FILE_PATH, 'wb')
+    wf = wave.open(save_audio_file_path, 'wb')
     wf.setnchannels(CHANNELS)
     wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
     wf.setframerate(RATE)
@@ -141,7 +142,7 @@ def main(masking):
     wf.close()
 
     #save result in excel
-    result['file_recorded_name'] = SAVE_AUDIO_FILE_PATH
+    result['file_recorded_name'] = save_audio_file_path
     df2 = pd.DataFrame(result, columns = ['keyword_said', 'result', 'file_recorded_name'])
     df2.to_excel (writer, sheet_name='voice_live_environment', startrow=0, index = False, header=True, columns = ['keyword_said', 'result', 'file_recorded_name'])
     writer.save()
@@ -149,5 +150,6 @@ def main(masking):
 
 if __name__ == "__main__":
     frequency_time_masking = "13_5"
-    main(frequency_time_masking)
+    save_audio_file_path = SAVE_AUDIO_FILE_PATH + id_generator("nam", "bac", frequency_time_masking) + ".wav"
+    main(frequency_time_masking, save_audio_file_path)
 

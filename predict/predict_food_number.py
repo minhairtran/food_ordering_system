@@ -28,7 +28,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_food_number.h5"
+SAVED_MODEL_PATH = "../train/model_food_number_13_5.h5"
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
@@ -65,7 +65,7 @@ class FoodNumberPrediction():
 
         log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
+        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, np.newaxis, ...])
 
         log_mel_spectrogram = torch.tensor(
             log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     device = torch.device("cpu")
 
     model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
-        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
+        Food_model.hparams['stride'], Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -143,7 +143,7 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.2):
+        if(np.amax(current_window) > 0.49):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:

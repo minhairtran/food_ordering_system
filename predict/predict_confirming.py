@@ -27,7 +27,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_confirming.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_14_5.h5"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
@@ -66,7 +66,7 @@ class ConfirmingPrediction():
 
         log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
+        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, np.newaxis, ...])
 
         log_mel_spectrogram = torch.tensor(
             log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()

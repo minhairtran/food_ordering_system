@@ -24,8 +24,8 @@ def id_generator():
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
 SAVE_AUDIO_FILE_PATH = "../../recorded_audios/further_training/" + id_generator() + ".wav"
-CONFIRMING_MODEL_PATH = "../train/model_confirming.h5"
-FOOD_NUMBER_MODEL_PATH = "../train/model_food_number.h5"
+CONFIRMING_MODEL_PATH = "../train/model_confirming_13_5.h5"
+FOOD_NUMBER_MODEL_PATH = "../train/model_food_number_13_5.h5"
 
 # System audio path 
 WELCOME_PATH = "../../recorded_audios/system_audio/welcome.wav"

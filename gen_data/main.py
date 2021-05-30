@@ -7,6 +7,9 @@ import argparse
 import torch
 import json
 import os
+import tqdm
+import util
+
 
 import augment
 
@@ -17,6 +20,28 @@ def get_args():
     parser.add_argument('--plot', action='store_true')
     args = parser.parse_args()
     return args
+
+# def generate_script(args):
+    script_txt = os.path.join(args.data_dir, 'script.txt')
+    script_json = os.path.join(args.data_dir, 'script.json')
+
+    scripts = open(script_txt).read().strip().split('\n')
+    i = 1404
+    with open(script_json, 'w', encoding='utf-8') as fp:
+        for s in tqdm.tqdm(scripts):
+            for name, gender, region, speed in util.get_voices(args):
+                meta = {
+                    'name': name,
+                    'gender': gender,
+                    'region': region,
+                    'speed': speed,
+                    'filename': f'{i}_{name}_{gender}_{region}',
+                    'text': s.split('|')[1],
+                    'folder': s.split('|')[0],
+                }
+                json.dump(meta, fp, ensure_ascii=False)
+                fp.write('\n')
+                i += 1
 
 def load_script(args):
     script_json = os.path.join(args.data_dir, 'script.json')
@@ -36,8 +61,8 @@ def main():
 
     # spectrogram augmentation
     kwargs = {
-        'freq_mask_param': 14,
-        'time_mask_param': 20,
+        'freq_mask_param': 13,
+        'time_mask_param': 5,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
@@ -54,6 +79,10 @@ def main():
     }
     spec_to_wav = torchaudio.transforms.GriffinLim(**kwargs)
 
+    # print('[+] Generating scripts')
+    # generate_script(args)
+
+    print('[+] Loading scripts')
     scripts = load_script(args)
 
     for meta in scripts:
@@ -91,8 +120,8 @@ def main():
         t = spec_to_wav(z.clone())
         print('t', t.shape)
 
-        out_path = os.path.join(args.data_dir, 'test.wav')
-        # wavfile.write(out_path, fs, t.detach().numpy())
+        out_path = os.path.join(args.data_dir, 'test' + meta['filename'] + '.wav')
+        wavfile.write(out_path, fs, t.detach().numpy())
         print('playing')
         playsound(out_path)
 

@@ -15,10 +15,10 @@ import torchaudio
 from scipy.io import wavfile
 
 
-DATA_SET = "/home/minhair/Desktop/food_ordering_system/confirming_dataset/co"
+DATA_SET = "D:/Study/uni/DoAn/data/confirming_dataset/co"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 # SAVED_MODEL_PATH = "../train/model_food_number.h5"
-SAVED_MODEL_PATH = "../train/model_confirming.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_13_5.h5"
 
 # def plot_spectrogram(Y, hop_length, y_axis="linear"):
 #     plt.figure(figsize=(25, 10))
@@ -38,6 +38,7 @@ class Prediction():
             'n_mels': 40
         }
         wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
+
         log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
         data = torch.Tensor(data.copy())
@@ -45,12 +46,14 @@ class Prediction():
 
         mel_spectrogram = wav_to_spec(data.clone())
 
-        mel_spectrogram = np.array(mel_spectrogram[np.newaxis, ...])
+        log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        mel_spectrogram = torch.tensor(
-            mel_spectrogram, dtype=torch.float).detach().requires_grad_()
+        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, np.newaxis, ...])
 
-        return mel_spectrogram
+        log_mel_spectrogram = torch.tensor(
+            log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
+
+        return log_mel_spectrogram
 
 
     def predict(self, model, file_path):
@@ -67,6 +70,7 @@ class Prediction():
         decode = {
             0: "co",
             1: "khong",
+            2: "khong_biet"
         }
 
         # decode = {
@@ -98,7 +102,7 @@ if __name__ == "__main__":
     # food_number_prediction = Prediction()
 
     model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
-        Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
+        Confirming_model.hparams['stride'], Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
     confirming_prediction = Prediction()
 
