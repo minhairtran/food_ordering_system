@@ -5,6 +5,19 @@ sys.path.append(
 import torch
 import torch.nn as nn
 
+class CNNLayerNorm(nn.Module):
+    """Layer normalization built for cnns input"""
+    def __init__(self, n_feats):
+        super(CNNLayerNorm, self).__init__()
+        self.layer_norm = nn.LayerNorm(n_feats)
+
+    def forward(self, x):
+        # x (batch, channel, feature, time)
+        x = x.transpose(2, 3).contiguous() # (batch, channel, time, feature)
+        x = self.layer_norm(x)
+        return x.transpose(2, 3).contiguous() # (batch, channel, feature, time) 
+
+
 class Attention(nn.Module):
     def __init__(self, input_size, hidden_size):
         super().__init__()
@@ -91,6 +104,7 @@ class Food_model(nn.Module):
                  n_classes = 0):
       
         super().__init__()
+        self.normalized_data = CNNLayerNorm(n_mels)
         self.cnn = nn.Conv2d(1, cnn_channels, kernel_size=cnn_kernel_size, stride=stride,
                              padding=(cnn_kernel_size[0]//2, cnn_kernel_size[1]//2))
         self.fully_connected = nn.Linear((n_mels//stride[0] + 1)*cnn_channels, cnn_channels)
@@ -101,6 +115,7 @@ class Food_model(nn.Module):
         self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, x):
+        x = self.normalized_data(x)
         output = self.cnn(x)
         sizes = output.size()
         output = output.view(sizes[0], sizes[1] * sizes[2], sizes[3])  # (batch, feature, time)
