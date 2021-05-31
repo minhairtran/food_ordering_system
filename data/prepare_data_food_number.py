@@ -63,17 +63,17 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 data = torch.Tensor(data.copy())
                 data = data / data.abs().max()
 
-                a = wav_to_spec(data.clone())
+                mel_spectrogram = wav_to_spec(data.clone())
 
-                x = log_mel_spec(a.clone())
+                log_mel_spectrogram = log_mel_spec(mel_spectrogram.clone())
 
-                data_temporary["mel_spectrogram"].append(x.T.tolist())
+                data_temporary["mel_spectrogram"].append(log_mel_spectrogram.T.tolist())
                 data_temporary["labels"].append(dataset_number)
 
                 for i in range(99):
-                    mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
+                    log_mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
                     # store data for analysed track
-                    data_temporary["mel_spectrogram"].append(mel_spectrogram)
+                    data_temporary["mel_spectrogram"].append(log_mel_spectrogram)
                     data_temporary["labels"].append(dataset_number)
                     print("{}: {}".format(file_path, dataset_number))
             
