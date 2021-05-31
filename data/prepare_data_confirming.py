@@ -14,8 +14,8 @@ DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
-    torch.set_printoptions(edgeitems=3)
-    
+    torch.set_printoptions(edgeitems=1000)
+
     saved_data = []
     dataset_number = 0
 
