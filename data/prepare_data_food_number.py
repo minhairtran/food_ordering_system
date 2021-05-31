@@ -71,9 +71,9 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 data_temporary["labels"].append(dataset_number)
 
                 for i in range(99):
-                    log_mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
+                    final_log_mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
                     # store data for analysed track
-                    data_temporary["mel_spectrogram"].append(log_mel_spectrogram)
+                    data_temporary["mel_spectrogram"].append(final_log_mel_spectrogram)
                     data_temporary["labels"].append(dataset_number)
                     print("{}: {}".format(file_path, dataset_number))
             
