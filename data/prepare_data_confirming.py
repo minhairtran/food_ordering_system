@@ -8,15 +8,14 @@ import json
 import torchaudio
 import augment
 from scipy.io import wavfile
-import numpy as np
 
 DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong"]
 # DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
-    np.set_printoptions(threshold=sys.maxsize)
-
+    torch.set_printoptions(edgeitems=3)
+    
     saved_data = []
     dataset_number = 0
 
