@@ -58,6 +58,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
                 a = wav_to_spec(data.clone())
 
                 x = log_mel_spec(a.clone())
+                print(x)
 
                 data_temporary["mel_spectrogram"].append(x.T.tolist())
                 data_temporary["labels"].append(dataset_number)

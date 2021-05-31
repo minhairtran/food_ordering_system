@@ -9,14 +9,11 @@ from predict_food_number import FoodNumberPrediction
 
 import datetime
 import pandas as pd
-import random
 import wave
 import pyaudio
-import noisereduce as nr
 import torch
 import numpy as np
-import sounddevice as sd
-import soundfile as sf
+import noisereduce as nr
 
 def id_generator(gender, region, masking):
     now = datetime.datetime.now()
@@ -35,21 +32,20 @@ def keyword_said(keyword_number):
     all_keyword = {
         0: "co",
         1: "khong",
-        2: "khong biet",
-        3: "com_tam",
-        4: "com_nieu",
-        5: "khoai_tay_chien",
-        6: "com_thap_cam",
-        7: "com_heo_xi_muoi",
-        8: "ca_kho",
-        9: "ca_xot",
-        10: "trung_chien",
-        11: "rau_cai_luoc",
-        12: "rau_cai_xao",
-        13: "salad_tron",
-        14: "tra_sam_dua",
-        15: "tra_hoa_cuc",
-        16: "khong_biet",
+        2: "com_tam",
+        3: "com_nieu",
+        4: "khoai_tay_chien",
+        5: "com_thap_cam",
+        6: "com_heo_xi_muoi",
+        7: "ca_kho",
+        8: "ca_xot",
+        9: "trung_chien",
+        10: "rau_cai_luoc",
+        11: "rau_cai_xao",
+        12: "salad_tron",
+        13: "tra_sam_dua",
+        14: "tra_hoa_cuc",
+        15: "khong_biet",
     }
 
     return all_keyword[keyword_number]
@@ -98,23 +94,23 @@ def main(masking, save_audio_file_path):
 
     keyword_number = 0
 
-    while(keyword_number < 17):
+    while(keyword_number < 16):
         # Read chunk and load it into numpy array.
         data = stream.read(CHUNKSIZE)
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
         if(np.amax(current_window) > 0.49):
-            current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+            
             predicted_window = np.append(predicted_window, current_window)
         else:
-            current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             if(len(predicted_window) == 0):
-                noise_sample = np.frombuffer(data, dtype=np.float32)
+                current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
+                # noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
                 result['keyword_said'].append(keyword_said(keyword_number))
 
-                if (keyword_number < 3):
+                if (keyword_number < 2):
                     predicted_audio = confirming_prediction.predict(confirming_model, np.array(predicted_window))
                 else:
                     predicted_audio = food_number_prediction.predict(food_number_model, np.array(predicted_window))
@@ -144,7 +140,7 @@ def main(masking, save_audio_file_path):
     #save result in excel
     result['file_recorded_name'] = save_audio_file_path
     df2 = pd.DataFrame(result, columns = ['keyword_said', 'result', 'file_recorded_name'])
-    df2.to_excel (writer, sheet_name='voice_live_environment', startrow=0, index = False, header=True, columns = ['keyword_said', 'result', 'file_recorded_name'])
+    df2.to_excel (writer, sheet_name='result', startrow=0, index = False, header=True, columns = ['keyword_said', 'result', 'file_recorded_name'])
     writer.save()
     writer.close()
 

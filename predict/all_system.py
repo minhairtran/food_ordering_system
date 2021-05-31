@@ -105,17 +105,13 @@ class AllSystem:
             current_window = np.frombuffer(data, dtype=np.float32)
 
             if(np.amax(current_window) > 0.49):
-                current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
                 predicted_window = np.append(predicted_window, current_window)
             else:
-                if(len(predicted_window) == 0):
-                    noise_sample = np.frombuffer(data, dtype=np.float32)
-                else:
+                if(len(predicted_window) != 0):
                     user_response_content = prediction.predict(model, np.array(predicted_window))
                     print(user_response_content)
                     predicted_window = np.array([])
-
-
+                    
                     # Not understand solution
                     system_understand = self.system_understand_f(user_response_content, user_response_type)
 
