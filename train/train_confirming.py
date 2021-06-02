@@ -208,7 +208,7 @@ if __name__ == "__main__":
             if np.mean(epoch_precisions) > max_precision:
                 max_precision = np.mean(epoch_precisions)
                 torch.save(model.state_dict(), SAVED_MODEL_PATH)
-                model_saved_message = "Model saved at test_precision: " + str(max_precision)
+                model_saved_message = "Model saved at test_precision: " + str(max_precision) + "\tEpoch " + str(epoch)
 
             if np.mean(epoch_precisions) > 0.999:
                 raise GetOutOfLoop
