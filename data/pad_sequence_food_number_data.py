@@ -6,7 +6,7 @@ import numpy as np
 import json
 import torch.nn as nn
 
-SAVED_FILE = ["food_data/data_ca_kho.json", 
+DATA_FILE = ["food_data/data_ca_kho.json", 
                 "food_data/data_ca_xot.json", 
                 "food_data/data_com_heo_xi_muoi.json",
                 "food_data/data_com_tam.json", 
