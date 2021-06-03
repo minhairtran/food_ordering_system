@@ -6,10 +6,14 @@ import numpy as np
 import json
 import torch.nn as nn
 
-DATA_FILE = ["food_data/data_ca_kho.json", "food_data/data_ca_xot.json", "food_data/data_khoai_tay_chien.json", "food_data/data_com_heo_xi_muoi.json", "food_data/data_com_nieu.json", \
-                "food_data/data_com_tam.json", "food_data/data_com_thap_cam.json", "food_data/data_khong_biet.json", "food_data/data_rau_cai_luoc.json",\
-                    "food_data/data_rau_cai_xao.json", "food_data/data_salad_tron.json", "food_data/data_tra_hoa_cuc.json", "food_data/data_tra_sam_dua.json", \
-                        "food_data/data_trung_chien.json"]
+SAVED_FILE = ["food_data/data_ca_kho.json", 
+                "food_data/data_ca_xot.json", 
+                "food_data/data_com_heo_xi_muoi.json",
+                "food_data/data_com_tam.json", 
+                "food_data/data_rau_cai_luoc.json",
+                "food_data/data_salad_tron.json", 
+                "food_data/data_tra_sam_dua.json",
+                "food_data/data_trung_chien.json"]
 
 SAVED_FILE = "food_data/data_set_"
 

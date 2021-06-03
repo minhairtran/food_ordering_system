@@ -91,7 +91,7 @@ class Food_model(nn.Module):
         "batch_size": 512,
         "epochs": 50, 
         "test_size": 0.25,
-        "n_classes": 14
+        "n_classes": 8
     }
 
     def __init__(self, 

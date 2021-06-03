@@ -134,10 +134,13 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.49):
+        if(np.amax(current_window) > 0.049):
             predicted_window = np.append(predicted_window, current_window)
         else:
-            if(len(predicted_window) != 0):
+            if(len(predicted_window) == 0):
+                #Hoi 2 anh
+                noise_sample = np.frombuffer(data, dtype=np.float32)
+            else:
                 predicted_audio = confirming_prediction.predict(model, np.array(predicted_window))
                 print(predicted_audio)
                 predicted_window = np.array([])

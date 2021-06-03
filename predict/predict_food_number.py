@@ -81,18 +81,12 @@ class FoodNumberPrediction():
         decode = {
             0: "ca_kho",
             1: "ca_xot",
-            2: "khoai_tay_chien",
-            3: "com_heo_xi_muoi",
-            4: "com_nieu",
-            5: "com_tam",
-            6: "com_thap_cam",
-            7: "khong_biet",
-            8: "rau_cai_luoc",
-            9: "rau_cai_xao",
-            10: "salad_tron",
-            11: "tra_hoa_cuc",
-            12: "tra_sam_dua",
-            13: "trung_chien",
+            2: "com_heo_xi_muoi",
+            3: "com_tam",
+            4: "rau_cai_luoc",
+            5: "salad_tron",
+            6: "tra_sam_dua",
+            7: "trung_chien",
         }
 
         # print(predicted)
@@ -140,7 +134,7 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.01):
+        if(np.amax(current_window) > 0.049):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:

@@ -12,14 +12,22 @@ import augment
 from scipy.io import wavfile
 
 
-DATASET_PATH = ["../../food_dataset/ca_kho", "../../food_dataset/ca_xot", "../../food_dataset/khoai_tay_chien", "../../food_dataset/com_heo_xi_muoi", "../../food_dataset/com_nieu", \
-                    "../../food_dataset/com_tam", "../../food_dataset/com_thap_cam", "../../food_dataset/khong_biet", "../../food_dataset/rau_cai_luoc", \
-                        "../../food_dataset/rau_cai_xao",  "../../food_dataset/salad_tron", "../../food_dataset/tra_hoa_cuc", "../../food_dataset/tra_sam_dua", \
-                            "../../food_dataset/trung_chien"]
-SAVED_FILE = ["food_data/data_ca_kho.json", "food_data/data_ca_xot.json", "food_data/data_khoai_tay_chien.json", "food_data/data_com_heo_xi_muoi.json", "food_data/data_com_nieu.json", \
-                "food_data/data_com_tam.json", "food_data/data_com_thap_cam.json", "food_data/data_khong_biet.json", "food_data/data_rau_cai_luoc.json",\
-                    "food_data/data_rau_cai_xao.json", "food_data/data_salad_tron.json", "food_data/data_tra_hoa_cuc.json", "food_data/data_tra_sam_dua.json", \
-                        "food_data/data_trung_chien.json"]
+DATASET_PATH = ["../../food_dataset/ca_kho", 
+                "../../food_dataset/ca_xot", 
+                "../../food_dataset/com_heo_xi_muoi",
+                "../../food_dataset/com_tam", 
+                "../../food_dataset/rau_cai_luoc", 
+                "../../food_dataset/salad_tron", 
+                "../../food_dataset/tra_sam_dua",
+                "../../food_dataset/trung_chien"]
+SAVED_FILE = ["food_data/data_ca_kho.json", 
+                "food_data/data_ca_xot.json", 
+                "food_data/data_com_heo_xi_muoi.json",
+                "food_data/data_com_tam.json", 
+                "food_data/data_rau_cai_luoc.json",
+                "food_data/data_salad_tron.json", 
+                "food_data/data_tra_sam_dua.json",
+                "food_data/data_trung_chien.json"]
 
 
 def preprocess_dataset(dataset_path, saved_file_path):

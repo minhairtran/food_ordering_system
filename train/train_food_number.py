@@ -16,9 +16,7 @@ from model import Food_model
 
 DATA_PATH = ["../data/food_data/data_set_0.pt", "../data/food_data/data_set_1.pt", "../data/food_data/data_set_2.pt",
              "../data/food_data/data_set_3.pt", "../data/food_data/data_set_4.pt", "../data/food_data/data_set_5.pt",
-             "../data/food_data/data_set_6.pt", "../data/food_data/data_set_7.pt", "../data/food_data/data_set_8.pt",
-             "../data/food_data/data_set_9.pt", "../data/food_data/data_set_10.pt", "../data/food_data/data_set_11.pt",
-             "../data/food_data/data_set_12.pt", "../data/food_data/data_set_13.pt"]
+             "../data/food_data/data_set_6.pt", "../data/food_data/data_set_7.pt"]
 SAVED_MODEL_PATH = "model_food_number.h5"
 class TrainingSuccess(Exception):
     pass
