@@ -17,7 +17,7 @@ import noisereduce as nr
 
 def id_generator(gender, region, masking):
     now = datetime.datetime.now()
-    return str(gender) + "_" + str(region) + "_" + str(masking) + "_" + now.strftime("%Y") + now.strftime("%m") + now.strftime("%d")
+    return str(gender) + "_" + str(region) + "_" + str(masking) + "_" + now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M")
 
 SAVE_AUDIO_FILE_PATH = "../../recorded_audios/final_experiment/"
 CONFIRMING_MODEL_PATH = "../train/model_confirming_"
@@ -33,19 +33,13 @@ def keyword_said(keyword_number):
         0: "co",
         1: "khong",
         2: "com_tam",
-        3: "com_nieu",
-        4: "khoai_tay_chien",
-        5: "com_thap_cam",
-        6: "com_heo_xi_muoi",
-        7: "ca_kho",
-        8: "ca_xot",
-        9: "trung_chien",
-        10: "rau_cai_luoc",
-        11: "rau_cai_xao",
-        12: "salad_tron",
-        13: "tra_sam_dua",
-        14: "tra_hoa_cuc",
-        15: "khong_biet",
+        3: "com_heo_xi_muoi",
+        4: "ca_kho",
+        5: "ca_xot",
+        6: "trung_chien",
+        7: "rau_cai_luoc",
+        8: "salad_tron",
+        9: "tra_sam_dua",
     }
 
     return all_keyword[keyword_number]
@@ -94,7 +88,7 @@ def main(masking, save_audio_file_path):
 
     keyword_number = 0
 
-    while(keyword_number < 16):
+    while(keyword_number < 10):
         # Read chunk and load it into numpy array.
         data = stream.read(CHUNKSIZE)
         frames.append(data)
@@ -146,6 +140,9 @@ def main(masking, save_audio_file_path):
 
 if __name__ == "__main__":
     frequency_time_masking = "13_5"
-    save_audio_file_path = SAVE_AUDIO_FILE_PATH + id_generator("nam", "bac", frequency_time_masking) + ".wav"
+    # frequency_time_masking = "14_10"
+    gender = ["nam", "nu"]
+    region = ["bac", "trung", "nam"]
+    save_audio_file_path = SAVE_AUDIO_FILE_PATH + id_generator(gender[1], region[2], frequency_time_masking) + ".wav"
     main(frequency_time_masking, save_audio_file_path)
 

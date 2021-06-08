@@ -25,7 +25,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_food_number.h5"
+SAVED_MODEL_PATH = "../train/model_food_number_13_5.h5"
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
