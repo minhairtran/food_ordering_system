@@ -85,7 +85,7 @@ class AllSystem:
             frame.append(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
-            if(np.amax(current_window) > 0.079):
+            if(np.amax(current_window) > 0.049):
                 predicted_window = np.append(predicted_window, current_window)
             else:
                 if(len(predicted_window) != 0):
