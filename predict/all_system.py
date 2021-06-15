@@ -24,8 +24,8 @@ def id_generator():
     return now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M") + now.strftime("%S") + str(table_number)
 
 SAVE_AUDIO_FILE_PATH = "../../recorded_audios/further_training/" + id_generator() + ".wav"
-CONFIRMING_MODEL_PATH = "../train/model_confirming_13_5.h5"
-FOOD_NUMBER_MODEL_PATH = "../train/model_food_number_13_5.h5"
+CONFIRMING_MODEL_PATH = "../train/model_confirming_14_10.h5"
+FOOD_NUMBER_MODEL_PATH = "../train/model_food_number_14_10.h5"
 
 # System audio path 
 WELCOME_PATH = "../../recorded_audios/system_audio/welcome.wav"
@@ -34,22 +34,17 @@ ORDER_AGAIN_PATH = "../../recorded_audios/system_audio/order_again.wav"
 ORDER_FAILURE_PATH = "../../recorded_audios/system_audio/order_failure.wav"
 ORDER_MORE_PATH = "../../recorded_audios/system_audio/order_more.wav"
 ORDER_SUCCESS_PATH = "../../recorded_audios/system_audio/order_success.wav"
-NOT_UNDERSTAND_ORDER = "../../recorded_audios/system_audio/not_understand_order.wav"
 
 CONFIRM_DISH_1ST_PATH = ["../../recorded_audios/system_audio/confirm_order_ca_kho_1st.wav", "../../recorded_audios/system_audio/confirm_order_ca_xot_1st.wav", \
-    "../../recorded_audios/system_audio/confirm_order_khoai_tay_chien_1st.wav", "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_1st.wav", \
-        "../../recorded_audios/system_audio/confirm_order_com_nieu_1st.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_1st.wav", \
-            "../../recorded_audios/system_audio/confirm_order_com_thap_cam_1st.wav", "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_1st.wav",\
-                 "../../recorded_audios/system_audio/confirm_order_rau_cai_xao_1st.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_1st.wav",\
-                     "../../recorded_audios/system_audio/confirm_order_tra_hoa_cuc_1st.wav", "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_1st.wav", \
+    "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_1st.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_1st.wav", \
+        "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_1st.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_1st.wav", \
+            "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_1st.wav", \
                          "../../recorded_audios/system_audio/confirm_order_trung_chien_1st.wav"]
 
 CONFIRM_DISH_NTH_PATH = ["../../recorded_audios/system_audio/confirm_order_ca_kho_nth.wav", "../../recorded_audios/system_audio/confirm_order_ca_xot_nth.wav", \
-    "../../recorded_audios/system_audio/confirm_order_khoai_tay_chien_nth.wav", "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_nth.wav", \
-        "../../recorded_audios/system_audio/confirm_order_com_nieu_nth.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_nth.wav", \
-            "../../recorded_audios/system_audio/confirm_order_com_thap_cam_nth.wav", "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_nth.wav",\
-                 "../../recorded_audios/system_audio/confirm_order_rau_cai_xao_nth.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_nth.wav",\
-                     "../../recorded_audios/system_audio/confirm_order_tra_hoa_cuc_nth.wav", "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_nth.wav", \
+    "../../recorded_audios/system_audio/confirm_order_com_heo_xi_muoi_nth.wav", "../../recorded_audios/system_audio/confirm_order_com_tam_nth.wav", \
+        "../../recorded_audios/system_audio/confirm_order_rau_cai_luoc_nth.wav", "../../recorded_audios/system_audio/confirm_order_salad_tron_nth.wav", \
+            "../../recorded_audios/system_audio/confirm_order_tra_sam_dua_nth.wav", \
                          "../../recorded_audios/system_audio/confirm_order_trung_chien_nth.wav"]
 
 CHUNKSIZE = 16000  # fixed chunk size
@@ -57,24 +52,13 @@ RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 
-# ERROR_HANDLER_FUNC = CFUNCTYPE(
-#     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
-
 class SystemNotUnderstand(Exception):
     pass
-
-# def py_error_handler(filename, line, function, err, fmt):
-#     pass
 
 class AllSystem:
     def __init__(self):
         super(AllSystem, self).__init__()
         self.SYSTEM_UNDERSTAND = True
-
-        # Handle self.streaming error
-        # c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
-        # asound = cdll.LoadLibrary('libasound.so')
-        # asound.snd_lib_error_set_handler(c_error_handler)
 
         # initialize portaudio
         self.p = pyaudio.PyAudio()
@@ -87,16 +71,13 @@ class AllSystem:
         sd.play(data, fs)
         sd.wait()
 
-    def user_reply(self, noise_sample, prediction, model,user_response_type):
+    def user_reply(self, noise_sample, prediction, model):
         user_response_content = ""
-        system_understand = False
         frame = []
 
         predicted_window = np.array([])
 
-        times_trying_understand = 1
-
-        while not system_understand:
+        while len(user_response_content) == 0:
             if self.stream.is_stopped():
                 self.stream.start_stream()
 
@@ -104,50 +85,19 @@ class AllSystem:
             frame.append(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
-            if(np.amax(current_window) > 0.49):
+            if(np.amax(current_window) > 0.079):
                 predicted_window = np.append(predicted_window, current_window)
             else:
                 if(len(predicted_window) != 0):
                     user_response_content = prediction.predict(model, np.array(predicted_window))
                     print(user_response_content)
                     predicted_window = np.array([])
-                    
-                    # Not understand solution
-                    system_understand = self.system_understand_f(user_response_content, user_response_type)
 
-                    if not system_understand:
-                        if times_trying_understand < 3:
-                            self.system_say(NOT_UNDERSTAND_ORDER)
-                            times_trying_understand += 1
-                        else:
-                            return "", noise_sample, frame
-                    else:
-                        return user_response_content, noise_sample, frame
-
-    def system_understand_f(self, user_response_content, user_response_type):
-        confirming_labels = ["co", "khong"]
-        food_number_labels = ["ca_kho", "ca_xot", "khoai_tay_chien", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "rau_cai_luoc", "rau_cai_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
-
-        if(user_response_type == "confirming"):
-            if(user_response_content in confirming_labels):
-                return True
-            else:
-                self.SYSTEM_UNDERSTAND = False
-                return False
-
-        if(user_response_type == "food_number"):
-            if(user_response_content in food_number_labels):
-                return True
-            else:
-                self.SYSTEM_UNDERSTAND = False
-                return False
-        else:
-            return None
+                    return user_response_content, noise_sample, frame
 
     def find_confirmed_dish_number_path(self, user_response, time):
-        food_number_labels = ["ca_kho", "ca_xot", "khoai_tay_chien", "com_heo_xi_muoi", "com_nieu", "com_tam", \
-            "com_thap_cam", "rau_cai_luoc", "rau_cai_xao", "salad_tron", "tra_hoa_cuc", "tra_sam_dua", "trung_chien"]
+        food_number_labels = ["ca_kho", "ca_xot", "com_heo_xi_muoi", "com_tam", \
+            "rau_cai_luoc", "salad_tron", "tra_sam_dua", "trung_chien"]
 
         if time == 1:
             return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
@@ -212,7 +162,7 @@ class AllSystem:
                     if (time_order_fail_successively != 0):
                         self.system_say(ORDER_AGAIN_PATH)
 
-                    user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model,"food_number")
+                    user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model)
                     
                     all_dishes_ordered.append(user_response)
 
@@ -225,7 +175,7 @@ class AllSystem:
                     else:
                         self.system_say(self.find_confirmed_dish_number_path(user_response, 2))
 
-                    user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model,"confirming")
+                    user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model)
 
                     for each_frame in frame:
                         all_frames.append(each_frame)
@@ -242,12 +192,9 @@ class AllSystem:
 
                 self.system_say(ORDER_MORE_PATH)
 
-                user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model, "confirming")
+                user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model)
                 for each_frame in frame:
                     all_frames.append(each_frame)
-
-                if (user_response == ""):
-                    raise SystemNotUnderstand
 
                 order_more = user_response == "co"
             

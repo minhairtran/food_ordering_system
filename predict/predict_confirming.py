@@ -27,7 +27,7 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_confirming_14_10.h5"
+SAVED_MODEL_PATH = "../train/model_confirming_13_5.h5"
 # SAVED_MODEL_PATH = "../train/model_confirming_noise.h5"
 
 CHUNKSIZE = 16000  # fixed chunk size
