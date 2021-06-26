@@ -1,8 +1,8 @@
 # Contents
 - [Introduction](#introduction)
+- [Constructing application of KWS in food ording in restaurants](#constructing-application-of-kws-in-food-ording-in-restaurants)
 - [Constructing KWS models](#constructing-kws-models)
 - [Contructing system detecting keyword directly](#contructing-system-detecting-keyword-directly)
-- [Constructing application of KWS in food ording in restaurants](#constructing-application-of-kws-in-food-ording-in-restaurants)
 - [Instruction guides](#instruction-guides)
 - [Summary and future development](#summary-and-future-development)
 
@@ -14,6 +14,9 @@ In this application, I solved the following problems:
 - Building models detecting keywords based on [attention-based method](https://arxiv.org/pdf/1803.10916.pdf). In general, the precision in test dataset reaches more than 99%
 - Building a cheap method to differentiate human voice from restaurant environment noise and therefore, building a system for detecting keyword from human voice directly with precision of 81.25% and 91.67% for the 2 models built.
 - Bulding a simple user interface for serveurs in restaurants to manage the application.
+
+
+# Constructing application of KWS in food ording in restaurants
 
 # Constructing KWS models
 In this module, I explain in detail about how the model was built, how the dataset was generated and related results.
@@ -32,11 +35,25 @@ The dataset was built in 2 steps:
 
 There're about 2700 audio files for each keyword, which is acceptable because the data is various and is larger than [Google Command Dataset](https://ai.googleblog.com/2017/08/launching-speech-commands-dataset.html) which has about 2300 audio files for each keyword
 
-
+There's 2 models in the system:
+- One for detecting "co" and "khong", which are "yes" and "no" in English. Detail about the precision of the confirming model can be found in [Comet](https://www.comet.ml/hai321/confirming/view/new). Model having training dataset masked with 14 parameters in frequency domain and 10 parameter in time domain reached  
+- One for detecting the dishes name. Detail about the precision of the food model can be found in [Comet](https://www.comet.ml/hai321/food/view/new)
 
 # Contructing system detecting keyword directly
+In this module, I explain how the system detecting keyword directly was built and related results.
 
-# Constructing application of KWS in food ording in restaurants
+The diagram below describes the system in general:
+![image](https://user-images.githubusercontent.com/49912069/123517901-c6fc5f00-d6cd-11eb-8b05-308b78524b23.png)
+
+The streaming audio from customers is cut into segments for easily detecting. The segments in which there's no voice found will be skipped. If the following segment has voice in it, it'll be merged with the previous one. This process keeps running until there's no voice in the next segment. The merged segments or segment will be then put into the keyword spotting for detecting which keyword trained was said.
+
+So the problem was to built a voice detecting activity or VAD. In the project, I suggested using max local amplitude in a segment for the VAD. In theory, the background noise has the amplitude lower than the human voice and closer the noise to the microphone, the larger the amplitude. Based on this, I suggested having the max amplitude in a segment compare with a thread *a*. If the max amplitude is larger than *a*, it should contain voice. After experiments measuring in 4 restaurant, I found that the thread *a* could be 0.049 for the [Samson pro microphone](http://www.samsontech.com/samson/products/microphones/usb-microphones/c01upro/). Details about the experiments can be found at [this link](https://drive.google.com/drive/folders/1GteIwc3bIkq8h88DhhsCSCLqArAHHO0u?usp=sharing)
+
+The test with the system detecting keyword directly was conducted with 6 people from diffent region in Vietnam. From each region, there're 2 people, different in gender. The model having training dataset masked with 14 parameters in frequency domain and 10 parameter in time domain reached:
+- 91.67% in precision for confirming model
+- 81.25% in precision for the food model
+
+The detail of the test can be found [here](https://drive.google.com/drive/folders/1hL3m-5ZzbRo8DsBMiFZY9JESI0Buz3uI?usp=sharing)
 
 # Instruction guides
 The models are small foot-print so it can be trained in a your PC using CPU, with 8gb RAM. But it's trained faster with GPU of 4gb.   
