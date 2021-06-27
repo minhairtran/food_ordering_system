@@ -1,22 +1,48 @@
 # Contents
 - [Introduction](#introduction)
-- [Constructing application of KWS in food ording in restaurants](#constructing-application-of-kws-in-food-ording-in-restaurants)
+- [Constructing application of KWS in food ording in restaurants and instructions](#constructing-application-of-kws-in-food-ording-in-restaurants-and-instructions)
 - [Constructing KWS models](#constructing-kws-models)
 - [Contructing system detecting keyword directly](#contructing-system-detecting-keyword-directly)
 - [Instruction guides](#instruction-guides)
 - [Summary and future development](#summary-and-future-development)
 
 # Introduction
-Application of keyword spotting system in food ordering in restaurants is an open source, aiming at  reducing the interaction between serveurs and customers. Restaurants also have number of serveurs in restaurants reduce when using the application, which reduces the operation budgets. On creating this application, I hope to help restaurants in Vietnam overcome the difficult time in COVID period.
+Application of keyword spotting system in food ordering in restaurants is an open source, aiming at  reducing the interaction between staffs and customers. Restaurants also have number of staffs in restaurants reduce when using the application, which reduces the operation budgets. On creating this application, I hope to help restaurants in Vietnam overcome the difficult time in COVID period.
 
 In this application, I solved the following problems:
 - Building Vietnamese dataset based on text to speech of [FPT.AI](https://fpt.ai/) and [SpecAugment method](https://arxiv.org/abs/1904.08779). The dataset in other languages can also be generated with the same approach by using text to speech from [Google Cloud](https://cloud.google.com/text-to-speech) or other providers.
 - Building models detecting keywords based on [attention-based method](https://arxiv.org/pdf/1803.10916.pdf). In general, the precision in test dataset reaches more than 99%
 - Building a cheap method to differentiate human voice from restaurant environment noise and therefore, building a system for detecting keyword from human voice directly with precision of 81.25% and 91.67% for the 2 models built.
-- Bulding a simple user interface for serveurs in restaurants to manage the application.
+- Bulding a simple user interface for staffs to manage the application.
 
+# Constructing application of KWS in food ording in restaurants and instructions
+In this module, I describe business specifications of the application and the UI designs.
 
-# Constructing application of KWS in food ording in restaurants
+There are 3 actors: Customer, robot and staff:
+- Customer is the actor coming to restaurant and order food with robot.
+- Robot is the actor chatting with customer and send order requests to staff.
+- Staff is the actor managing the operation of the application and managing the order requests.
+
+Business specifications:
+- *Starting the conversation*
+  - Objective: for customer to start ordering with robot.
+  - Primary actor: Staff
+  - Other participating actor: Customer
+  - Trigger: Staff clicks checkbox or presses shortcut Ctrl + x, of which value is equal to the table value at which the customer is sitting
+  - Preconditions: The application is running and there's a new customer coming to a seat (Staff may notice this by watching camera in the restaurants)
+  - Primary screen:
+    - Staff clicks checkbox or presses shortcut Ctrl + x
+    - System starts the conversation for the new customer
+
+- *Starting the conversation*
+  - Objective: for customer to start ordering with robot.
+  - Primary actor: Staff
+  - Other participating actor: Customer
+  - Trigger: Staff clicks checkbox or presses shortcut Ctrl + x, of which value is equal to the table value at which the customer is sitting
+  - Preconditions: The application is running and there's a new customer coming to a seat (Staff may notice this by watching camera in the restaurants)
+  - Primary screen:
+    - Staff clicks checkbox or presses shortcut Ctrl + x
+    - System starts the conversation for the new customer
 
 # Constructing KWS models
 In this module, I explain in detail about how the model was built, how the dataset was generated and related results.
