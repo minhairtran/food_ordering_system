@@ -27,6 +27,8 @@ The image below is the general use case model. The details of business specifica
 
 ![Phân tích hệ thống-tổng quan](https://user-images.githubusercontent.com/49912069/123767691-dd830000-d8f1-11eb-9b30-a7cacdf4ff94.png)
 
+Demo: https://drive.google.com/file/d/1rS6ad_Y9ZFBSeHZLb0eJsTRaSp9GdYY0/view?usp=sharing
+
 # Constructing KWS models
 In this module, I explain in detail about how the model was built, how the dataset was generated and related results.
 
