@@ -23,7 +23,9 @@ There are 3 actors: Customer, robot and staff:
 - Robot is the actor chatting with customer and send order requests to staff.
 - Staff is the actor managing the operation of the application and managing the order requests.
 
-The image below is the general use case model. The details of business specifications can be found [here]().
+The image below is the general use case model. The details of business specifications can be found [here](https://github.com/minhairtran/food_ordering_system/blob/main/doc/Business%20specifications.md).
+
+![Phân tích hệ thống-tổng quan](https://user-images.githubusercontent.com/49912069/123767691-dd830000-d8f1-11eb-9b30-a7cacdf4ff94.png)
 
 # Constructing KWS models
 In this module, I explain in detail about how the model was built, how the dataset was generated and related results.
