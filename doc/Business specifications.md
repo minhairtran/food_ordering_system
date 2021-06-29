@@ -26,6 +26,7 @@ Business specifications:
   - Preconditions: Conversation has been started
   - Primary screen:
     - Robot talks by means of the speaker and the customer talks by means of the microphone, all placed at the table, with the following screens:
+![Phân tích hệ thống-User experience](https://user-images.githubusercontent.com/49912069/123767201-80874a00-d8f1-11eb-8b21-2f2aa7161672.png)
 
 - *Save customer record*
   - Objective: Save customer record is for further training
@@ -54,3 +55,5 @@ Business specifications:
     - In case robot fails to help customer order, the table number followed by "nhân viên" (staff) is added on top of order list
 
 UI design
+
+![image](https://user-images.githubusercontent.com/49912069/123766982-56358c80-d8f1-11eb-9e77-21468a4a4858.png)
