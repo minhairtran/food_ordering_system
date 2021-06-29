@@ -1,3 +1,5 @@
+# This file is for food ordering system
+
 import sys
 sys.path.append("../")
 sys.path.append(
@@ -11,12 +13,12 @@ import datetime
 import random
 import wave
 import pyaudio
-import noisereduce as nr
 import torch
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
+# Generate saved audio file name if it needs saving for further checking
 def id_generator():
     now = datetime.datetime.now()
     table_number = random.randint(0, 20)
@@ -65,26 +67,35 @@ class AllSystem:
         self.stream = self.p.open(format=SAMPLE_FORMAT, channels=CHANNELS,
                         rate=RATE, input=True, frames_per_buffer=CHUNKSIZE)
 
+    # Playing script of robot
     def system_say(self, audio_path):
+        # Stop streaming is because robot may confuse what it said with user's saying
         self.stream.stop_stream()
         data, fs = sf.read(audio_path, dtype='float32') 
         sd.play(data, fs)
         sd.wait()
 
+    # Handle user response
     def user_reply(self, noise_sample, prediction, model):
         user_response_content = ""
+        # Frame is for recording customer
         frame = []
 
         predicted_window = np.array([])
+        
+        # Starting streaming if this is the first cut segment when it's turn of user saying
+        if self.stream.is_stopped():
+            self.stream.start_stream()
 
+        # Stop when user says something and robot predicts
         while len(user_response_content) == 0:
-            if self.stream.is_stopped():
-                self.stream.start_stream()
-
             data = self.stream.read(CHUNKSIZE)
             frame.append(data)
             current_window = np.frombuffer(data, dtype=np.float32)
 
+            # If current window has max local amplitude larger than 0.049, 
+            # its noise will be reduced and added to previous predicted 
+            # window if there's any
             if(np.amax(current_window) > 0.049):
                 predicted_window = np.append(predicted_window, current_window)
             else:
@@ -95,10 +106,13 @@ class AllSystem:
 
                     return user_response_content, noise_sample, frame
 
+    # find script for robot to say
     def find_confirmed_dish_number_path(self, user_response, time):
         food_number_labels = ["ca_kho", "ca_xot", "com_heo_xi_muoi", "com_tam", \
             "rau_cai_luoc", "salad_tron", "tra_sam_dua", "trung_chien"]
 
+        # If it's the first time customer orders in the conversation, 
+        # robot tells him what say to confirm his food
         if time == 1:
             return CONFIRM_DISH_1ST_PATH[food_number_labels.index(user_response)]
         else:
@@ -136,7 +150,10 @@ class AllSystem:
 
         food_number_prediction = FoodNumberPrediction()
 
-        # noise window
+        # noise window. In the test case, if I reduce noise, 
+        # the result will be worse so I turn it off. But there
+        # should be some ways to reduce noise so that robot 
+        # can predict more precisely
         data = self.stream.read(CHUNKSIZE)
         noise_sample = np.frombuffer(data, dtype=np.float32)
         # loud_threshold = np.mean(np.abs(noise_sample)) * 10
@@ -149,6 +166,8 @@ class AllSystem:
             all_dishes_ordered = []
             order_fail = False
 
+            # Conversation stops when customer doesn't want to order 
+            # more food or conversation has not started
             while order_more or start_conversation:
                 if start_conversation:
                     self.system_say(WELCOME_PATH)
@@ -158,21 +177,29 @@ class AllSystem:
                 time_order_fail_successively = 0
                 one_order_sucess = False
                 
+                # In 1 food order, if there's 3 times customer says "khong" 
+                # (no) or customer says "co" (yes) for confirming, the order 
+                # should stop for the next order turn from the same customer
                 while(time_order_fail_successively < 3) and one_order_sucess == False:
+                    # If this loop runs because order failed, robot 
+                    # should ask customer to say it the food ordered again
                     if (time_order_fail_successively != 0):
                         self.system_say(ORDER_AGAIN_PATH)
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, food_number_prediction, food_number_model)
                     
+                    # Append predicted food order to list
                     all_dishes_ordered.append(user_response)
 
                     for each_frame in frame:
                         all_frames.append(each_frame)
                     
+                    # Set start conversation to false so the loop won't return for this reason. 
                     if start_conversation:
                         self.system_say(self.find_confirmed_dish_number_path(user_response, 1))
                         start_conversation = False
                     else:
+                        # Robot asks customer to confirm the dish without telling him what say to confirm his food
                         self.system_say(self.find_confirmed_dish_number_path(user_response, 2))
 
                     user_response, noise_sample, frame = self.user_reply(noise_sample, confirming_prediction, confirming_model)
@@ -180,6 +207,7 @@ class AllSystem:
                     for each_frame in frame:
                         all_frames.append(each_frame)
 
+                    # If customer confirms "khong", all dishes order should pop the most recent one  
                     if (user_response == "khong"):
                         all_dishes_ordered.pop()
                         self.SYSTEM_UNDERSTAND = False
@@ -220,6 +248,7 @@ class AllSystem:
                 wf.writeframes(b''.join(all_frames))
                 wf.close()
 
+            # Print all the dishes or ask staff to help to customer to order if robot fails
             if not order_fail:
                 return self.listToString(all_dishes_ordered)
             else:

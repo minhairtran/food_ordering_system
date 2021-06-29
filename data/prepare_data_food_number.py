@@ -1,3 +1,5 @@
+#Preprocess food dataset 
+
 import sys
 sys.path.append("../")
 
@@ -31,7 +33,7 @@ SAVED_FILE = ["food_data/data_ca_kho.json",
 
 
 def preprocess_dataset(dataset_path, saved_file_path):
-    # mel spectrogram
+    # Log Mel Spec params
     kwargs = {
         'n_fft': 512,
         'n_mels': 40,
@@ -40,7 +42,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
-    # spectrogram augmentation
+    # SpecAugment param
     kwargs = {
         'freq_mask_param': 14,
         'time_mask_param': 10,
@@ -51,7 +53,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
-        # dictionary where we'll store mapping, labels, MFCCs and filenames
+        # dictionary where we'll store log mel and labels
         data_temporary = {
             "mel_spectrogram": [],
             "labels": []
@@ -69,15 +71,18 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 fs, data = wavfile.read(file_path)
                 data = torch.Tensor(data.copy())
+                # Normalized raw data
                 data = data / data.abs().max()
 
                 mel_spectrogram = wav_to_spec(data.clone())
 
                 log_mel_spectrogram = log_mel_spec(mel_spectrogram.clone())
 
+                # Adding original log mel spec to list
                 data_temporary["mel_spectrogram"].append(log_mel_spectrogram.T.tolist())
                 data_temporary["labels"].append(dataset_number)
 
+                # Adding generated log mel spec by SpecAugment to list
                 for i in range(99):
                     final_log_mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
                     # store data for analysed track

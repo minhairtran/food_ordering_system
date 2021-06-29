@@ -1,3 +1,6 @@
+# This is for testing model in real time. Each word is said once 
+# with the order in keyword_said()
+
 import sys
 sys.path.append("../")
 sys.path.append(
@@ -15,6 +18,7 @@ import torch
 import numpy as np
 import noisereduce as nr
 
+# Generate saved audio file name if it needs saving for further checking
 def id_generator(gender, region, masking):
     now = datetime.datetime.now()
     return str(gender) + "_" + str(region) + "_" + str(masking) + "_" + now.strftime("%Y") + now.strftime("%m") + now.strftime("%d") + now.strftime("%H") + now.strftime("%M")
@@ -70,7 +74,7 @@ def main(masking, save_audio_file_path):
 
     food_number_prediction = FoodNumberPrediction()
 
-    # excel
+    # Result file
     writer = pd.ExcelWriter('result.xlsx', engine = 'openpyxl')
 
     result = {'keyword_said': [], 'result': [], 'file_recorded_name': ''}
@@ -94,16 +98,22 @@ def main(masking, save_audio_file_path):
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
+        # If current window has max local amplitude larger than 0.049, 
+        # its noise will be reduced and added to previous predicted 
+        # window if there's any
         if(np.amax(current_window) > 0.049):
-            
+            current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:
+            # If there's no predicted window, noise sample'll be updated
             if(len(predicted_window) == 0):
-                current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
-                # noise_sample = np.frombuffer(data, dtype=np.float32)
+                noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
+                # When there's no following sound having max local 
+                # amplitude larger than 0.049, predicted window is predicted
                 result['keyword_said'].append(keyword_said(keyword_number))
 
+                # Chaning model if checking confirming is done
                 if (keyword_number < 2):
                     predicted_audio = confirming_prediction.predict(confirming_model, np.array(predicted_window))
                 else:

@@ -1,3 +1,6 @@
+# This file allows you to hear your audio adjusted with the SpecAugment 
+# params. Therefore, you can decide whether the chosen values are reasonable
+
 from playsound import playsound
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -20,28 +23,6 @@ def get_args():
     parser.add_argument('--plot', action='store_true')
     args = parser.parse_args()
     return args
-
-# def generate_script(args):
-    script_txt = os.path.join(args.data_dir, 'script.txt')
-    script_json = os.path.join(args.data_dir, 'script.json')
-
-    scripts = open(script_txt).read().strip().split('\n')
-    i = 1404
-    with open(script_json, 'w', encoding='utf-8') as fp:
-        for s in tqdm.tqdm(scripts):
-            for name, gender, region, speed in util.get_voices(args):
-                meta = {
-                    'name': name,
-                    'gender': gender,
-                    'region': region,
-                    'speed': speed,
-                    'filename': f'{i}_{name}_{gender}_{region}',
-                    'text': s.split('|')[1],
-                    'folder': s.split('|')[0],
-                }
-                json.dump(meta, fp, ensure_ascii=False)
-                fp.write('\n')
-                i += 1
 
 def load_script(args):
     script_json = os.path.join(args.data_dir, 'script.json')

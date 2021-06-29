@@ -1,9 +1,9 @@
 # Contents
 - [Introduction](#introduction)
-- [Constructing application of KWS in food ording in restaurants and instructions](#constructing-application-of-kws-in-food-ording-in-restaurants-and-instructions)
+- [Constructing application of KWS in food ording in restaurants and using instructions](#constructing-application-of-kws-in-food-ording-in-restaurants-and-using-instructions)
 - [Constructing KWS models](#constructing-kws-models)
 - [Contructing system detecting keyword directly](#contructing-system-detecting-keyword-directly)
-- [Instruction guides](#instruction-guides)
+- [Training instruction guides](#training-instruction-guides)
 - [Summary and future development](#summary-and-future-development)
 
 # Introduction
@@ -15,34 +15,15 @@ In this application, I solved the following problems:
 - Building a cheap method to differentiate human voice from restaurant environment noise and therefore, building a system for detecting keyword from human voice directly with precision of 81.25% and 91.67% for the 2 models built.
 - Bulding a simple user interface for staffs to manage the application.
 
-# Constructing application of KWS in food ording in restaurants and instructions
-In this module, I describe business specifications of the application and the UI designs.
+# Constructing application of KWS in food ording in restaurants and using instructions
+In this module, I describe business specifications of the application and the UI designs. Instructions for using the application can be found in business specifications.
 
 There are 3 actors: Customer, robot and staff:
 - Customer is the actor coming to restaurant and order food with robot.
 - Robot is the actor chatting with customer and send order requests to staff.
 - Staff is the actor managing the operation of the application and managing the order requests.
 
-Business specifications:
-- *Starting the conversation*
-  - Objective: for customer to start ordering with robot.
-  - Primary actor: Staff
-  - Other participating actor: Customer
-  - Trigger: Staff clicks checkbox or presses shortcut Ctrl + x, of which value is equal to the table value at which the customer is sitting
-  - Preconditions: The application is running and there's a new customer coming to a seat (Staff may notice this by watching camera in the restaurants)
-  - Primary screen:
-    - Staff clicks checkbox or presses shortcut Ctrl + x
-    - System starts the conversation for the new customer
-
-- *Starting the conversation*
-  - Objective: for customer to start ordering with robot.
-  - Primary actor: Staff
-  - Other participating actor: Customer
-  - Trigger: Staff clicks checkbox or presses shortcut Ctrl + x, of which value is equal to the table value at which the customer is sitting
-  - Preconditions: The application is running and there's a new customer coming to a seat (Staff may notice this by watching camera in the restaurants)
-  - Primary screen:
-    - Staff clicks checkbox or presses shortcut Ctrl + x
-    - System starts the conversation for the new customer
+The image below is the general use case model. The details of business specifications can be found [here]().
 
 # Constructing KWS models
 In this module, I explain in detail about how the model was built, how the dataset was generated and related results.
@@ -81,14 +62,17 @@ The test with the system detecting keyword directly was conducted with 6 people 
 
 The detail of the test can be found [here](https://drive.google.com/drive/folders/1hL3m-5ZzbRo8DsBMiFZY9JESI0Buz3uI?usp=sharing)
 
-# Instruction guides
-The models are small foot-print so it can be trained in a your PC using CPU, with 8gb RAM. But it's trained faster with GPU of 4gb.   
+# Training instruction guides
+- The models are small foot-print so it can be trained in a your PC using CPU, with 8gb RAM. But it's trained faster with GPU of 4gb. 
+- All libraries in [requirements.txt](https://github.com/minhairtran/food_ordering_system/blob/main/requirements) and [python](https://www.python.org/downloads/) should be installed.
+- You should first go to the crawl.py for getting the desired data. Then go to prepare data (ex: prepare_data_confirming.py) for preprocesing your data. Then go train for training the model (ex: training_confirming.py) and test in real time in predict folder (ex: predict_confirming.py).
+
 # Summary and future development
-Unfortunately, this application can't be used in restaurants because of following problems:
-- Precision of the system detecting directly drops when added more dishes
-- The proposed method for detecting human voice from noise environment is not stable
-- The system can't handle multiple directly detecting requests at the same time
+This application can't be used in restaurants because of existing problems:
+- Precision of the system detecting directly drops when added more dishes. This can be handled by adding more data variant in tone with the help of [data augmentation from Pytorch](https://pytorch.org/tutorials/beginner/audio_preprocessing_tutorial.html#data-augmentation).
+- The proposed method for detecting human voice from noise environment is not stable. This can be handled by building VAD with KWS. Dataset includes the noise and the person close to the microphone sound. 
+- The system can't handle multiple directly detecting requests at the same time. This can be handled by letting the client solve the audio streaming. This means you can install the application in a microcontroller such as Arduino or in a smart, small device such as a tablet. If tablet is chosen, you can build a web application so that the customer can also order by torching the screen. This is even better for the user experience in a long term. 
+- Staff starts the conversation for customer and robot is not a good user experience. It's better if a KWS for triggering the conversation based on the same method is built. Dataset can be achieved by looking at the [attention-based article](https://arxiv.org/pdf/1803.10916.pdf) or other articles in the feild such as [KWS by CRNN](https://arxiv.org/abs/1703.05390)
+- Robot detect falsely when customer says a word/term that's not trained. The solution for this is to add a keyword "Unknown" in the dataset. This dataset should include a large amount of word that's not food in the menu or confirming word so that it is "abtract" enough to fulfil the requirement of "unknown keyword".  
 
-
-
-
+If you're interested in the project and develop it, you can send me request to review your code. 

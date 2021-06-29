@@ -1,3 +1,9 @@
+# This function is for adding noise to original dataset. 
+# How much SNR to set can be found in this article 
+# https://arxiv.org/abs/1703.05390. However, in the 
+# project, I've not used this method for generating 
+# data as it lower the precision when tested in real time
+
 from scipy.io import wavfile
 from scipy.io.wavfile import write
 import numpy as np
@@ -30,21 +36,25 @@ def add_noise(dataset_path, noise_path, saved_file_path):
     for index, (data_set, saved_set) in enumerate(zip(dataset_path, saved_file_path)):
         for i, (dirpath, dirnames, filenames) in enumerate(os.walk(data_set)):
             for file_name_original in filenames:
+            # Load the original file
                 file_path = os.path.join(dirpath, file_name_original)
                 fs, data = wavfile.read(file_path)
                 data = data.astype(np.float32)
 
                 for noise_set in noise_path:
+                    #There's low noise and medium noise added. The ratio of low noise and medium noise is taking is 2/3
                     if "medium_without_subject_voice" in noise_set:
                         for k, (dirpath_noise, dirnames_noise, filenames_noise) in enumerate(os.walk(noise_set)):
                             for j in range(1, 16):
-                                # print(j)
+                                # randomly get the noise file
                                 file_name_noise = random.choice(filenames_noise)
                                 example_noise_file_path = os.path.join(dirpath_noise, file_name_noise)
 
+                                # Loading noise file
                                 _, noise = wavfile.read(example_noise_file_path)
                                 noise = noise.astype(np.float32)
 
+                                #Adding noise
                                 while noise.shape[0] < data.shape[0]:
                                     noise = np.concatenate((noise, noise), axis=0)
                                 offset = random.randint(0, noise.shape[0]-data.shape[0])

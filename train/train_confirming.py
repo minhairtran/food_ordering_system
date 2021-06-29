@@ -18,7 +18,7 @@ DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 
 
-class GetOutOfLoop(Exception):
+class TrainSuccessully(Exception):
     pass
 
 class Dataset(torch.utils.data.Dataset):
@@ -211,9 +211,9 @@ if __name__ == "__main__":
                 model_saved_message = "Model saved at test_precision: " + str(max_precision) + "\tEpoch " + str(epoch)
 
             if np.mean(epoch_precisions) > 0.999:
-                raise GetOutOfLoop
+                raise TrainSuccessully
 
-    except GetOutOfLoop:
+    except TrainSuccessully:
         pass
     finally:
         print(model_saved_message)
