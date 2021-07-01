@@ -3,6 +3,8 @@ There are 3 actors: Customer, robot and staff:
 - Robot is the actor chatting with customer and send order requests to staff.
 - Staff is the actor managing the operation of the application and managing the order requests.
 
+![Phân tích hệ thống-tổng quan](https://user-images.githubusercontent.com/49912069/123767691-dd830000-d8f1-11eb-9b30-a7cacdf4ff94.png)
+
 Business specifications:
 - *Start the system*
   - Objective: For starting the application.
