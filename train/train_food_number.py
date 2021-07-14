@@ -199,8 +199,7 @@ if __name__ == "__main__":
                 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                precision, loss, recall, f1 = test(model, device, test_loader, criterion,
-                    iter_meter, experiment, filename)
+                precision, loss, recall, f1 = test(model, device, test_loader, criterion, iter_meter, experiment, filename)
 
                 epoch_recall.append(recall)
                 epoch_f1.append(f1)
