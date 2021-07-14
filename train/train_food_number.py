@@ -119,8 +119,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 test_f1 = f1_score(np.array(labels.tolist()), np.array(preds), average='macro')
                 
                 test_precision_average.append(test_precision)
-                test_recall_average = append(test_recall)
-                test_f1_average = append(test_f1)
+                test_recall_average.append(test_recall)
+                test_f1_average.append(test_f1)
                 
 
     experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
