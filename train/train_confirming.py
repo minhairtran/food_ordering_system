@@ -137,7 +137,7 @@ if __name__ == "__main__":
     )
 
     experiment.add_tags(["food_confirming_data", "attiontion-based"])
-    experiment.set_name("(Freq_mask; Time_mask) = (13;5)")
+    experiment.set_name("(Freq_mask; Time_mask) = (14;10)")
 
     experiment.log_parameters(Confirming_model.hparams)
 
