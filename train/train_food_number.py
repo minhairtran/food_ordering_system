@@ -217,7 +217,7 @@ if __name__ == "__main__":
                 experiment.log_metric('test_recall', np.mean(epoch_recall), step=iter_meter.get())
                 experiment.log_metric('test_f1', np.mean(epoch_f1), step=iter_meter.get())
             # Save model
-            if np.mean(epoch_precisions) > max_precision and np.mean(epoch_recall) > max_recall and np.mean(epoch_f1) > epoch_f1:
+            if np.mean(epoch_precisions) > max_precision and np.mean(epoch_recall) > max_recall and np.mean(epoch_f1) > max_f1:
                 max_precision = np.mean(epoch_precisions)
                 max_recall = np.mean(epoch_recall)
                 max_f1 = np.mean(epoch_f1)
