@@ -44,8 +44,8 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     # SpecAugment param
     kwargs = {
-        'freq_mask_param': 14,
-        'time_mask_param': 10,
+        'freq_mask_param': 13,
+        'time_mask_param': 5,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
