@@ -1,3 +1,5 @@
+# This is for testing food model in real time
+
 import sys
 sys.path.append("../")
 sys.path.append(
@@ -8,18 +10,15 @@ from train.model import Food_model
 import datetime
 import random
 import wave
-import torch.nn as nn
-import torch.nn.functional as F
 import pyaudio
 import noisereduce as nr
-import librosa
 import torch
 import numpy as np
 import time
 # import ctypes_callable
 import torchaudio
 
-
+# Generate saved audio file name if it needs saving for further checking
 def id_generator():
     now = datetime.datetime.now()
     table_number = random.randint(0, 20)
@@ -28,13 +27,13 @@ def id_generator():
 
 
 FILENAME = "recorded_audios/" + id_generator() + ".wav"
-SAVED_MODEL_PATH = "../train/model_food_number.h5"
+SAVED_MODEL_PATH = "../train/model_food_number_13_5.h5"
 CHUNKSIZE = 16000  # fixed chunk size
 RATE = 16000
 SAMPLE_FORMAT = pyaudio.paFloat32
 CHANNELS = 1
 
-
+# Should have this configuration in case code is run on Ubuntu
 # ERROR_HANDLER_FUNC = CFUNCTYPE(
 #     None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
@@ -49,7 +48,7 @@ class FoodNumberPrediction():
 
     def preprocess(self, data):
 
-        # mel spectrogram
+        # Log mel spectrogram preprocessing
         kwargs = {
             'n_fft': 512,
             'n_mels': 40
@@ -57,7 +56,7 @@ class FoodNumberPrediction():
         wav_to_spec = torchaudio.transforms.MelSpectrogram(**kwargs)
 
         log_mel_spec = torchaudio.transforms.AmplitudeToDB()
-
+        # Normalized raw data
         data = torch.Tensor(data.copy())
         data = data / data.abs().max()
 
@@ -65,7 +64,8 @@ class FoodNumberPrediction():
 
         log_mel_spectrogram = np.array(log_mel_spec(mel_spectrogram.clone()))
 
-        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, ...])
+        # Adding 1 layer for CNN and 1 layer for batch size
+        log_mel_spectrogram = np.array(log_mel_spectrogram[np.newaxis, np.newaxis, ...])
 
         log_mel_spectrogram = torch.tensor(
             log_mel_spectrogram, dtype=torch.float).detach().requires_grad_()
@@ -84,30 +84,24 @@ class FoodNumberPrediction():
         decode = {
             0: "ca_kho",
             1: "ca_xot",
-            2: "khoai_tay_chien",
-            3: "com_heo_xi_muoi",
-            4: "com_nieu",
-            5: "com_tam",
-            6: "com_thap_cam",
-            7: "khong_biet",
-            8: "rau_cai_luoc",
-            9: "rau_cai_xao",
-            10: "salad_tron",
-            11: "tra_hoa_cuc",
-            12: "tra_sam_dua",
-            13: "trung_chien",
+            2: "com_heo_xi_muoi",
+            3: "com_tam",
+            4: "rau_cai_luoc",
+            5: "salad_tron",
+            6: "tra_sam_dua",
+            7: "trung_chien",
         }
-
-        # print(predicted)
 
         return decode[predicted]
 
 
 if __name__ == "__main__":
+    # Using CPU for predicting
     device = torch.device("cpu")
 
+    # Load model
     model = Food_model(Food_model.hparams['n_mels'], Food_model.hparams['cnn_channels'], Food_model.hparams['cnn_kernel_size'], \
-        Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
+        Food_model.hparams['stride'], Food_model.hparams['gru_hidden_size'], Food_model.hparams['attention_hidden_size'], Food_model.hparams['n_classes']).to(device)
 
     checkpoint = torch.load(SAVED_MODEL_PATH, map_location=device)
     model.load_state_dict(checkpoint)
@@ -136,6 +130,7 @@ if __name__ == "__main__":
     print("Start recording...")
     start = time.time()
 
+    # Set time if test audio should be recorded
     # while(time.time() - start < 10):
     while(True):
         # Read chunk and load it into numpy array.
@@ -143,18 +138,24 @@ if __name__ == "__main__":
         frames.append(data)
         current_window = np.frombuffer(data, dtype=np.float32)
 
-        if(np.amax(current_window) > 0.2):
+        # If current window has max local amplitude larger than 0.049, 
+        # its noise will be reduced and added to previous predicted 
+        # window if there's any
+        if(np.amax(current_window) > 0.049):
             current_window = nr.reduce_noise(audio_clip=current_window, noise_clip=noise_sample, verbose=False)
             predicted_window = np.append(predicted_window, current_window)
         else:
+            # If there's no predicted window, noise sample'll be updated
             if(len(predicted_window) == 0):
-                #Hoi 2 anh
                 noise_sample = np.frombuffer(data, dtype=np.float32)
             else:
+                # When there's no following sound having max local 
+                # amplitude larger than 0.049, predicted window is predicted
                 predicted_audio = food_number_prediction.predict(model, np.array(predicted_window))
                 print(predicted_audio)
                 predicted_window = np.array([])
 
+        # Printing time running and max local amplitude in a window 
         print((time.time() - start), np.amax(current_window))
 
     # close stream

@@ -1,3 +1,5 @@
+# This file allows you to crawl data from FPT.AI. You should configure your account and your own scripts
+
 import argparse
 import requests
 import json
@@ -23,7 +25,9 @@ def get_args():
 
 
 def generate_script(args):
+    # Define the keyword you want to generate in script.txt first: Folder|Keyword
     script_txt = os.path.join(args.data_dir, 'script.txt')
+
     script_json = os.path.join(args.data_dir, 'script.json')
 
     scripts = open(script_txt).read().strip().split('\n')
@@ -50,6 +54,7 @@ def generate_token(args):
     token_json = os.path.join(args.data_dir, f'{args.token_name}.json')
     tokens = [l.split(',') for l in open(token_csv).read().strip().split('\n')]
     
+    # Configure your account here
     if not os.path.exists(token_json):
         meta = {}
         for token in tokens:

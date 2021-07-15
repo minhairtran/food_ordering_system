@@ -1,3 +1,6 @@
+# This file allows you to hear your audio adjusted with the SpecAugment 
+# params. Therefore, you can decide whether the chosen values are reasonable
+
 from playsound import playsound
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
@@ -7,6 +10,9 @@ import argparse
 import torch
 import json
 import os
+import tqdm
+import util
+
 
 import augment
 
@@ -36,8 +42,8 @@ def main():
 
     # spectrogram augmentation
     kwargs = {
-        'freq_mask_param': 14,
-        'time_mask_param': 20,
+        'freq_mask_param': 13,
+        'time_mask_param': 5,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
@@ -54,6 +60,10 @@ def main():
     }
     spec_to_wav = torchaudio.transforms.GriffinLim(**kwargs)
 
+    # print('[+] Generating scripts')
+    # generate_script(args)
+
+    print('[+] Loading scripts')
     scripts = load_script(args)
 
     for meta in scripts:
@@ -91,8 +101,8 @@ def main():
         t = spec_to_wav(z.clone())
         print('t', t.shape)
 
-        out_path = os.path.join(args.data_dir, 'test.wav')
-        # wavfile.write(out_path, fs, t.detach().numpy())
+        out_path = os.path.join(args.data_dir, 'test' + meta['filename'] + '.wav')
+        wavfile.write(out_path, fs, t.detach().numpy())
         print('playing')
         playsound(out_path)
 

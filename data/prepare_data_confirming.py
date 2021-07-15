@@ -1,3 +1,5 @@
+#Preprocess confirming dataset 
+
 import sys
 sys.path.append("../")
 
@@ -9,15 +11,16 @@ import torchaudio
 import augment
 from scipy.io import wavfile
 
-DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong", "../../confirming_dataset/khong_biet"]
-# DATASET_PATH = ["../../confirming_with_noise_dataset/co", "../../confirming_with_noise_dataset/khong"]
+DATASET_PATH = ["../../confirming_dataset/co", "../../confirming_dataset/khong"]
 SAVED_FILE = "confirming_data/data.json"
 
 def preprocess_dataset(dataset_path, saved_file_path):
+    torch.set_printoptions(edgeitems=1000)
+
     saved_data = []
     dataset_number = 0
 
-    # mel spectrogram
+    # Log Mel Spec params
     kwargs = {
         'n_fft': 512,
         'n_mels': 40,
@@ -26,16 +29,16 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
-    # spectrogram augmentation
+    # SpecAugment param
     kwargs = {
-        'freq_mask_param': 13,
+        'freq_mask_param': 14,
         'time_mask_param': 10,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
 
     for data_set in dataset_path:
 
-        # dictionary where we'll store mapping, labels, MFCCs and filenames
+        # dictionary where we'll store log mel and labels
         data_temporary = {
             "mel_spectrogram": [],
             "labels": []
@@ -53,16 +56,20 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 fs, data = wavfile.read(file_path)
                 data = torch.Tensor(data.copy())
+                # Normalized raw data
                 data = data / data.abs().max()
 
-                a = wav_to_spec(data.clone())
+                mel_spectrogram = wav_to_spec(data.clone())
 
-                x = log_mel_spec(a.clone())
+                log_mel_spectrogram = log_mel_spec(mel_spectrogram.clone())
 
-                data_temporary["mel_spectrogram"].append(x.T.tolist())
+                # Adding original log mel spec to list
+                data_temporary["mel_spectrogram"].append(log_mel_spectrogram.T.tolist())
+                data_temporary["labels"].append(dataset_number)
 
-                for i in range(24):
-                    mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
+                # Adding generated log mel spec by SpecAugment to list
+                for i in range(99):
+                    mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
 
                     # store data for analysed track
                     data_temporary["mel_spectrogram"].append(mel_spectrogram)

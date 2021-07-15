@@ -1,3 +1,5 @@
+#Preprocess food dataset 
+
 import sys
 sys.path.append("../")
 
@@ -12,18 +14,26 @@ import augment
 from scipy.io import wavfile
 
 
-DATASET_PATH = ["../../food_dataset/ca_kho", "../../food_dataset/ca_xot", "../../food_dataset/khoai_tay_chien", "../../food_dataset/com_heo_xi_muoi", "../../food_dataset/com_nieu", \
-                    "../../food_dataset/com_tam", "../../food_dataset/com_thap_cam", "../../food_dataset/khong_biet", "../../food_dataset/rau_cai_luoc", \
-                        "../../food_dataset/rau_cai_xao",  "../../food_dataset/salad_tron", "../../food_dataset/tra_hoa_cuc", "../../food_dataset/tra_sam_dua", \
-                            "../../food_dataset/trung_chien"]
-SAVED_FILE = ["food_data/data_ca_kho.json", "food_data/data_ca_xot.json", "food_data/data_khoai_tay_chien.json", "food_data/data_com_heo_xi_muoi.json", "food_data/data_com_nieu.json", \
-                "food_data/data_com_tam.json", "food_data/data_com_thap_cam.json", "food_data/data_khong_biet.json", "food_data/data_rau_cai_luoc.json",\
-                    "food_data/data_rau_cai_xao.json", "food_data/data_salad_tron.json", "food_data/data_tra_hoa_cuc.json", "food_data/data_tra_sam_dua.json", \
-                        "food_data/data_trung_chien.json"]
+DATASET_PATH = ["../../food_dataset/ca_kho", 
+                "../../food_dataset/ca_xot", 
+                "../../food_dataset/com_heo_xi_muoi",
+                "../../food_dataset/com_tam", 
+                "../../food_dataset/rau_cai_luoc", 
+                "../../food_dataset/salad_tron", 
+                "../../food_dataset/tra_sam_dua",
+                "../../food_dataset/trung_chien"]
+SAVED_FILE = ["food_data/data_ca_kho.json", 
+                "food_data/data_ca_xot.json", 
+                "food_data/data_com_heo_xi_muoi.json",
+                "food_data/data_com_tam.json", 
+                "food_data/data_rau_cai_luoc.json",
+                "food_data/data_salad_tron.json", 
+                "food_data/data_tra_sam_dua.json",
+                "food_data/data_trung_chien.json"]
 
 
 def preprocess_dataset(dataset_path, saved_file_path):
-    # mel spectrogram
+    # Log Mel Spec params
     kwargs = {
         'n_fft': 512,
         'n_mels': 40,
@@ -32,9 +42,9 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     log_mel_spec = torchaudio.transforms.AmplitudeToDB()
 
-    # spectrogram augmentation
+    # SpecAugment param
     kwargs = {
-        'freq_mask_param': 13,
+        'freq_mask_param': 14,
         'time_mask_param': 10,
     }
     spec_augment = augment.SpectrogramAugmentation(**kwargs)
@@ -43,7 +53,7 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
     for index, (data_set, save_file) in enumerate(zip(dataset_path, saved_file_path)):
 
-        # dictionary where we'll store mapping, labels, MFCCs and filenames
+        # dictionary where we'll store log mel and labels
         data_temporary = {
             "mel_spectrogram": [],
             "labels": []
@@ -61,18 +71,22 @@ def preprocess_dataset(dataset_path, saved_file_path):
 
                 fs, data = wavfile.read(file_path)
                 data = torch.Tensor(data.copy())
+                # Normalized raw data
                 data = data / data.abs().max()
 
-                a = wav_to_spec(data.clone())
+                mel_spectrogram = wav_to_spec(data.clone())
 
-                x = log_mel_spec(a.clone())
+                log_mel_spectrogram = log_mel_spec(mel_spectrogram.clone())
 
-                data_temporary["mel_spectrogram"].append(x.T.tolist())
+                # Adding original log mel spec to list
+                data_temporary["mel_spectrogram"].append(log_mel_spectrogram.T.tolist())
+                data_temporary["labels"].append(dataset_number)
 
-                for i in range(24):
-                    mel_spectrogram = np.array(spec_augment(a.clone().unsqueeze(0)).squeeze(0)).T.tolist()
+                # Adding generated log mel spec by SpecAugment to list
+                for i in range(99):
+                    final_log_mel_spectrogram = np.array(spec_augment(log_mel_spectrogram.clone().unsqueeze(0)).squeeze(0)).T.tolist()
                     # store data for analysed track
-                    data_temporary["mel_spectrogram"].append(mel_spectrogram)
+                    data_temporary["mel_spectrogram"].append(final_log_mel_spectrogram)
                     data_temporary["labels"].append(dataset_number)
                     print("{}: {}".format(file_path, dataset_number))
             

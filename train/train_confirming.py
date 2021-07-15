@@ -18,7 +18,7 @@ DATA_PATH = "../data/confirming_data/data.pt"
 SAVED_MODEL_PATH = "model_confirming.h5"
 
 
-class GetOutOfLoop(Exception):
+class TrainSuccessully(Exception):
     pass
 
 class Dataset(torch.utils.data.Dataset):
@@ -111,8 +111,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
 
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
                 test_precision_average.append(test_precision)
-                
-
+    
+    
     experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
 
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
@@ -129,8 +129,8 @@ if __name__ == "__main__":
         workspace="hai321",
     )
 
-    experiment.add_tags(["food_confirming_data", "deep_speech_model"])
-    experiment.set_name("Test confirming data with attention-based model")
+    experiment.add_tags(["food_confirming_data", "attiontion-based"])
+    experiment.set_name("(Freq_mask; Time_mask) = (14;10)")
 
     experiment.log_parameters(Confirming_model.hparams)
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if use_cuda else "cpu")
 
     model = Confirming_model(Confirming_model.hparams['n_mels'], Confirming_model.hparams['cnn_channels'], Confirming_model.hparams['cnn_kernel_size'], \
-        Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
+        Confirming_model.hparams['stride'], Confirming_model.hparams['gru_hidden_size'], Confirming_model.hparams['attention_hidden_size'], Confirming_model.hparams['n_classes']).to(device)
 
     try:
         checkpoint = torch.load(SAVED_MODEL_PATH)
@@ -161,6 +161,8 @@ if __name__ == "__main__":
     load_data_set = torch.load(DATA_PATH)
 
     precision = 0
+    max_precision = 0
+    model_saved_message = ''
 
     try:
         for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
@@ -174,6 +176,8 @@ if __name__ == "__main__":
                 # Split into train and test
                 mel_spectrogram_train, mel_spectrogram_test, labels_train, labels_test = train_test_split(mel_spectrogram, labels, test_size=Confirming_model.hparams['test_size'], shuffle=False)
 
+                # print("Dataset train length: {}, test length: {}".format(len(labels_train), len(labels_test)))
+
                 # Create train dataset and Dataloader
                 train_dataset = Dataset(mel_spectrogram_train, labels_train)
 
@@ -186,7 +190,7 @@ if __name__ == "__main__":
 
                 test_loader = data.DataLoader(dataset=test_dataset,
                                             batch_size=Confirming_model.hparams["batch_size"],
-                                            shuffle=False)
+                                            shuffle=True)
             
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
@@ -197,14 +201,19 @@ if __name__ == "__main__":
                 epoch_loss.append(each_epoch_loss)
             
             print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
-
+            
             with experiment.test():
-                experiment.log_metric('test_precision', np.mean(epoch_precisions), step=iter_meter.get())
+                experiment.log_metric('precision', np.mean(epoch_precisions), step=iter_meter.get())
             # Save model
-            torch.save(model.state_dict(), SAVED_MODEL_PATH)
+            if np.mean(epoch_precisions) > max_precision:
+                max_precision = np.mean(epoch_precisions)
+                torch.save(model.state_dict(), SAVED_MODEL_PATH)
+                model_saved_message = "Model saved at test_precision: " + str(max_precision) + "\tEpoch " + str(epoch)
 
-            if all(epoch_precision > 0.99 for epoch_precision in epoch_precisions):
-                raise GetOutOfLoop
+            if np.mean(epoch_precisions) > 0.999:
+                raise TrainSuccessully
 
-    except GetOutOfLoop:
+    except TrainSuccessully:
         pass
+    finally:
+        print(model_saved_message)

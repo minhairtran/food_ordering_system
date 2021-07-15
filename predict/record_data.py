@@ -1,3 +1,5 @@
+# This is for recording audio (noise or keyword)
+
 import sounddevice
 from scipy.io.wavfile import write
 import string
@@ -5,6 +7,7 @@ import random
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
+#Second recorded
 SECOND = 3
 
 
