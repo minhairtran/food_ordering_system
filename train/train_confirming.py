@@ -11,7 +11,7 @@ import torch.utils.data as data
 import torch.nn as nn
 import torch
 from model import Confirming_model
-from sklearn.metrics import precision_score
+from sklearn.metrics import precision_score, f1_score, recall_score
 
 DATA_PATH = "../data/confirming_data/data.pt"
 # SAVED_MODEL_PATH = "model_confirming_noise.h5"
@@ -92,6 +92,8 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('\nEvaluating ' + str(filename) + "...")
     model.eval()
     test_precision_average = []
+    test_recall_average = []
+    test_f1_average = []
 
     epoch_loss = 0
 
@@ -110,7 +112,12 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
                 epoch_loss += loss.item() * spectrograms.size(0)
 
                 test_precision = precision_score(np.array(labels.tolist()), np.array(preds), average='micro')
+                test_recall = recall_score(np.array(labels.tolist()), np.array(preds), average='macro')
+                test_f1 = f1_score(np.array(labels.tolist()), np.array(preds), average='macro')
+
                 test_precision_average.append(test_precision)
+                test_recall_average.append(test_recall)
+                test_f1_average.append(test_f1)
     
     
     experiment.log_metric('test_loss', epoch_loss, step=iter_meter.get())
@@ -118,7 +125,7 @@ def test(model, device, test_loader, criterion, iter_meter, experiment, filename
     print('Test set: Average loss: {:.4f}\tTest precision: {:.2f}%\n'.format(
         epoch_loss, 100*np.mean(test_precision_average)))
 
-    return np.mean(test_precision_average), epoch_loss
+    return np.mean(test_precision_average), epoch_loss, np.mean(test_recall_average), np.mean(test_f1_average)
 
 if __name__ == "__main__":
 
@@ -162,11 +169,15 @@ if __name__ == "__main__":
 
     precision = 0
     max_precision = 0
+    max_recall = 0
+    max_f1 = 0
     model_saved_message = ''
 
     try:
         for epoch in range(1, Confirming_model.hparams["epochs"] + 1):
             epoch_precisions = []
+            epoch_recall = []
+            epoch_f1 = []
             epoch_loss = []
 
             for dataset_index in range(len(load_data_set)):
@@ -195,22 +206,31 @@ if __name__ == "__main__":
 
                 train(model, device, train_loader, criterion, optimizer, epoch, iter_meter, experiment)
 
-                precision, each_epoch_loss = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
+                precision, loss, recall, f1 = test(model, device, test_loader, criterion, iter_meter, experiment, dataset_index)
 
+                epoch_recall.append(recall)
+                epoch_f1.append(f1)
                 epoch_precisions.append(precision)
-                epoch_loss.append(each_epoch_loss)
+                epoch_loss.append(loss)
             
-            print('Test set: Test precision: {:.2f}%\n'.format(100*np.mean(epoch_precisions)))
+            print('Test set: Test precision: {:.2f}, Recall: {:.2f}, f1 score: {:.2f}%\n'.format(100*np.mean(epoch_precisions), 100*np.mean(epoch_recall), 100*np.mean(epoch_f1)))
+
             
             with experiment.test():
                 experiment.log_metric('precision', np.mean(epoch_precisions), step=iter_meter.get())
+                experiment.log_metric('test_recall', np.mean(epoch_recall), step=iter_meter.get())
+                experiment.log_metric('test_f1', np.mean(epoch_f1), step=iter_meter.get())
             # Save model
-            if np.mean(epoch_precisions) > max_precision:
+            if np.mean(epoch_precisions) > max_precision and np.mean(epoch_recall) > max_recall and np.mean(epoch_f1) > max_f1:
                 max_precision = np.mean(epoch_precisions)
+                max_recall = np.mean(epoch_recall)
+                max_f1 = np.mean(epoch_f1)
                 torch.save(model.state_dict(), SAVED_MODEL_PATH)
-                model_saved_message = "Model saved at test_precision: " + str(max_precision) + "\tEpoch " + str(epoch)
+                model_saved_message = "Model saved at test_precision: " + str(max_precision) + ", recall: "\
+                    + str(max_recall) + ", f1: " + str(max_f1) + "\tEpoch " + str(epoch)
 
-            if np.mean(epoch_precisions) > 0.999:
+
+            if np.mean(epoch_precisions) > 0.999 and np.mean(epoch_recall) > 0.999 and np.mean(epoch_f1) > 0.999:
                 raise TrainSuccessully
 
     except TrainSuccessully:
